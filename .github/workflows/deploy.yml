@@ -45,7 +45,8 @@ jobs:
           EOF
           )
 
-          sed -i "s#</head>#$(printf "%s" "$GA_TAG")</head>#" dist/index.html
+          echo "${GA_TAG}"
+          sed -i "/<\/head>/i ${GA_TAG}" dist/index.html
 
       - name: Upload production build
         uses: actions/upload-pages-artifact@v3
