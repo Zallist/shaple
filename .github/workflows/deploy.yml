@@ -44,9 +44,8 @@ jobs:
           </script>
           EOF
           )
-
-          echo "${GA_TAG}"
-          sed -i "/<\/head>/i ${GA_TAG}" dist/index.html
+          
+          awk -v tag="$GA_TAG" '/<\/head>/{print tag}1' dist/index.html > dist/index.tmp && mv dist/index.tmp dist/index.html
 
       - name: Upload production build
         uses: actions/upload-pages-artifact@v3
