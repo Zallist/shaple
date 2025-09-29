@@ -38,7 +38,7 @@ function getCurrentSeed(): number {
   const hash = window?.location?.hash;
 
   if (hash) {
-    const params = hash.split('&');
+    const params = hash.substring(1).split('&');
     for (let i = 0; i < params.length; i++) {
       const param = params[i].split('=', 2);
       if (param[0] === 'seed' && param.length === 2) {
@@ -184,7 +184,7 @@ export default function App() {
           </div>
 
           <Show when={isDone()}>
-            <div class="mt-8 rounded">
+            <div class="mt-2">
               <div class="mb-2 text-sm text-slate-400 font-semibold">
                 Solution
               </div>
@@ -200,7 +200,7 @@ export default function App() {
           </Show>
 
           <Show when={!isDone()}>
-            <div class="mt-8 grid grid-cols-5 gap-2">
+            <div class="mt-2 grid grid-cols-5 gap-2">
               <For each={generator.AllShapes}>{(s)=> (
                 <button class="flex-1 min-w-10 h-10 rounded-md border flex items-center justify-center font-semibold border-slate-600 bg-slate-700 hover:bg-slate-600 active:bg-slate-500"
                         onClick={() => pickShape(s)}>
@@ -210,7 +210,7 @@ export default function App() {
             </div>
           </Show>
           
-          <div class="flex gap-2 mt-4">
+          <div class="flex gap-2 mt-2">
             <Show when={!isDone()}>
               <button class="flex-1 min-w-10 h-10 rounded-md border flex items-center justify-center font-semibold border-slate-600 bg-slate-700 hover:bg-slate-600 active:bg-slate-500 disabled:bg-neutral-900" 
                       onClick={removeLast}
@@ -223,7 +223,7 @@ export default function App() {
             <button class="flex-1 min-w-10 h-10 rounded-md border flex items-center justify-center font-semibold border-slate-600 bg-gray-600 hover:bg-gray-500 active:bg-gray-400 disabled:bg-neutral-900" 
                     onClick={toggleDailySeed}>{isDailySeed() ? 'RANDOM' : 'DAILY'}</button>
           </div>
-          <div class="mt-8">
+          <div class="mt-2">
             <RulesSection />
           </div>
         </div>
@@ -257,7 +257,7 @@ function RulesSection() {
       <button class="w-full min-w-10 h-10 rounded-md border justify-center font-semibold border-slate-600 bg-gray-600 hover:bg-gray-500 active:bg-gray-400 disabled:bg-neutral-900" 
               onClick={() => setRulesAreVisible(!areRulesVisible())}>{areRulesVisible() ? 'HIDE' : 'SHOW'} RULES</button>
       <Show when={areRulesVisible()}>
-        <p class="font-semibold text-lg mt-4">Pattern Generator Rules</p>
+        <p class="font-semibold text-lg mt-2">Pattern Generator Rules</p>
         <ul class="list-disc list-outside">
           <For each={Object.values(generator.ShapeDefinitions)}>{shape => (
             <For each={shape.rules}>{rule => (

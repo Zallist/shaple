@@ -1,6 +1,5 @@
 /* @refresh reload */
 import "./tailwind.css";
-import './index.scss';
 import { render } from 'solid-js/web';
 
 import Shaple from './Shaple';
