@@ -33,17 +33,19 @@ jobs:
       - name: Inject Google Analytics
         if: env.GA_ID != ''
         run: |
-          GA_TAG="
+          GA_TAG=$(cat << 'EOF'
           <!-- Google tag (gtag.js) -->
-          <script async src=\"https://www.googletagmanager.com/gtag/js?id=${GA_ID}\"></script>
+          <script async src="https://www.googletagmanager.com/gtag/js?id='"${GA_ID}"'"></script>
           <script>
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', '${GA_ID}');
+            gtag('config', '"${GA_ID}"');
           </script>
-          "
-          sed -i "s#<\/head>#$GA_TAG<\/head>#" dist/index.html
+          EOF
+          )
+
+          sed -i "s#</head>#${GA_TAG}</head>#" dist/index.html
 
       - name: Upload production build
         uses: actions/upload-pages-artifact@v3
