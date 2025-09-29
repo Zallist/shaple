@@ -45,6 +45,7 @@ jobs:
           EOF
           )
 
+          echo "${GA_TAG}"
           sed -i "s#</head>#${GA_TAG}</head>#" dist/index.html
 
       - name: Upload production build
