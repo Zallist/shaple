@@ -33,7 +33,7 @@ jobs:
       - name: Inject Google Analytics
         if: env.GA_ID != ''
         run: |
-          GA_TAG=$(cat << 'EOF'
+          GA_TAG=$(cat <<EOF
           <!-- Google tag (gtag.js) -->
           <script async src='https://www.googletagmanager.com/gtag/js?id=${GA_ID}'></script>
           <script>
@@ -45,8 +45,7 @@ jobs:
           EOF
           )
 
-          echo "${GA_TAG}"
-          sed -i "s#</head>#${GA_TAG}</head>#" dist/index.html
+          sed -i "s#</head>#$(printf "%s" "$GA_TAG")</head>#" dist/index.html
 
       - name: Upload production build
         uses: actions/upload-pages-artifact@v3
