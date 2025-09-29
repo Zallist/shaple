@@ -113,16 +113,6 @@ export default function App(){
           </div> */}
 
           <div class="space-y-2">
-            <Show when={!isDone()}>
-              <div class="flex gap-2">
-                <For each={Array.from({length:LENGTH})}>{(_, j)=>(
-                  <div class={`flex-1 min-w-14 h-14 rounded-md border flex items-center justify-center font-semibold`}>
-                    { (current()[j()] ? shapeKey(current()[j()]) : '') }
-                  </div>
-                )}</For>
-              </div>
-            </Show>
-
             <For each={attempts()}>
               {(guess, idx) => {
                 const fb = feedbacks()[idx()] || []
@@ -137,6 +127,16 @@ export default function App(){
                 )
               }}
             </For>
+            
+            <Show when={!isDone()}>
+              <div class="flex gap-2">
+                <For each={Array.from({length:LENGTH})}>{(_, j)=>(
+                  <div class={`flex-1 min-w-14 h-14 rounded-md border flex items-center justify-center font-semibold`}>
+                    { (current()[j()] ? shapeKey(current()[j()]) : '') }
+                  </div>
+                )}</For>
+              </div>
+            </Show>
           </div>
 
           <div class="mt-8">
