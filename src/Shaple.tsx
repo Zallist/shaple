@@ -12,9 +12,10 @@ function shapeKey(s: generator.ShapeCode) {
   return <span class="material-symbols-outlined">{shapeDefinition.icon_name}</span>;
 }
 
-export type Feedback = 'exact' | 'present' | 'absent'
+type Feedback = 'exact' | 'present' | 'absent'
 
-export function seedForDate(d = new Date()): number {
+function seedForDate(d = new Date()): number {
+  // Normalize to UTC midnight so all users get the same daily puzzle regardless of timezone.
   const utc = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
   const s = `${utc.getUTCFullYear()}${String(utc.getUTCMonth()+1).padStart(2,'0')}${String(utc.getUTCDate()).padStart(2,'0')}`;
   // simple numeric hash
@@ -25,7 +26,14 @@ export function seedForDate(d = new Date()): number {
   return h >>> 0;
 }
 
+function getRandomSeed(): number {
+  const rng = prand.xorshift128plus(Date.now() ^ (Math.random() * 0x100000000));
+  let seed = prand.unsafeUniformIntDistribution((2**31 - 1) * -1, 2**31 - 1, rng);
+  return seed;
+}
+
 function getStoredAttempts(seed: number): generator.ShapeCode[][] {
+  // Store attempts per-seed, so switching between daily/random retains distinct histories.
   const stored = localStorage.getItem(`shaple_attempts_${seed}`);
   return stored ? JSON.parse(stored) : [];
 }
@@ -50,13 +58,8 @@ function getCurrentSeed(): number {
     }
   }
 
+  // Fallback to the deterministic daily seed if no usable seed is present in the URL.
   return seedForDate();
-}
-
-function getRandomSeed(): number {
-  const rng = prand.xorshift128plus(Date.now() ^ (Math.random() * 0x100000000));
-  let seed = prand.unsafeUniformIntDistribution((2**31 - 1) * -1, 2**31 - 1, rng);
-  return seed;
 }
 
 export default function App() {
@@ -72,12 +75,12 @@ export default function App() {
       const sol = solution();
       const solCounts: Record<generator.ShapeCode, number> = {} as any;
       
-      // Count occurrences of each shape in solution
+      // Count occurrences of each shape in solution to correctly handle duplicates.
       sol.forEach(shape => {
         solCounts[shape] = (solCounts[shape] || 0) + 1;
       });
 
-      // First pass: mark exact matches
+      // First pass: mark exact matches and consume from counts.
       for (let i = 0; i < LENGTH; i++) {
         if (attempt[i] === sol[i]) {
           fb[i] = 'exact';
@@ -85,7 +88,7 @@ export default function App() {
         }
       }
 
-      // Second pass: mark present (correct but wrong position)
+      // Second pass: mark present (correct but wrong position) only if remaining count > 0.
       for (let i = 0; i < LENGTH; i++) {
         if (fb[i] !== 'exact' && solCounts[attempt[i]] > 0) {
           fb[i] = 'present';
@@ -98,9 +101,11 @@ export default function App() {
   });
 
   const isDailySeed = createMemo(() => seed() === seedForDate());
+  // Game ends either when max attempts are used or the latest attempt is all 'exact'.
   const isDone = createMemo(() => attempts().length >= MAX_ATTEMPTS || feedbacks().at(-1)?.every(f => f === 'exact'));
 
   createEffect(() => {
+    // Persist attempts for the current seed whenever attempts change.
     setStoredAttempts(seed(), attempts());
   });
 
@@ -126,9 +131,6 @@ export default function App() {
   function submit() {
     if (currentGuess().length !== LENGTH) return;
     const g = currentGuess();
-    //if (!generator.isShapleValid(g)) {
-    //  alert('This guess violates relational rules; it is allowed but may be inconsistent with solutions.');
-    //}
     setAttempts([...attempts(), g]);
     setCurrentGuess([]);
   }
@@ -137,9 +139,11 @@ export default function App() {
     let seed;
 
     if (isDailySeed()) {
+      // Switch to a random seed and encode it in the URL so puzzles are shareable/bookmarkable.
       seed = getRandomSeed();
       window.location.hash = `#seed=${seed}`;
     } else {
+      // Return to the deterministic daily seed and clear the hash.
       seed = seedForDate();
       window.location.hash = '';
     }
@@ -236,6 +240,7 @@ function RulesSection() {
   const [areRulesVisible, setRulesAreVisible] = createSignal(false);
 
   function parseDescription(desc: string) {
+    // Replace tokens like <circle> with the corresponding icon and tooltip.
     const parts = desc.split(/(<[a-z]+>)/gi);
   
     return parts.map(part => {

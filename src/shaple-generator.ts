@@ -30,6 +30,8 @@ export class Rule {
 }
 
 const RuleFunctions = {
+    // Returns the shapes at exactly `distance` away from `index` (both sides if within bounds).
+    // Example: distance=1 means immediate neighbors; out-of-range neighbors are ignored.
     Neighbours: (shapes: Array<ShapeCode>, index: number, distance: number): Array<ShapeCode> => {
         let result = Array<ShapeCode>();
 
@@ -41,6 +43,7 @@ const RuleFunctions = {
         return result;
     },
 
+    // "Adj" helpers mean distance=1; "Not" means forbidden, "Must" means required.
     AdjNot: (other: ShapeCode, description: string) => new Rule((shapes, index) => !RuleFunctions.Neighbours(shapes, index, 1).includes(other), description),
     AdjNotAny: (others: Array<ShapeCode>, description: string) => new Rule((shapes, index) => !RuleFunctions.Neighbours(shapes, index, 1).some((s) => others.includes(s)), description),
     AdjNotSelf: (description: string) => new Rule((shapes, index) => !RuleFunctions.Neighbours(shapes, index, 1).includes(shapes[index]), description),
@@ -129,6 +132,8 @@ export function generateShaple(length: number, seed: number): Array<ShapeCode> {
     let rng = prand.xorshift128plus(seed);
     let attempts = 20000;
     
+    // Limit the total number of attempts to avoid infinite loops in case of unsolvable puzzles.
+    // Should only happen during dev if the rules are messed up
     while (attempts-- > 0) {
         for (let i = 0; i < length; i++) {
             [shapeIndex, rng] = prand.uniformIntDistribution(0, AllShapes.length - 1, rng);
