@@ -202,9 +202,11 @@ export default function App() {
               </div>
             </div>
           </Show>
-
+        </div>
+        
+        <div class="bg-slate-800 p-6 rounded-lg shadow-lg mt-8">
           <Show when={!isDone()}>
-            <div class="mt-2 grid grid-cols-5 gap-2">
+            <div class="mb-2 grid grid-cols-5 gap-2">
               <For each={generator.AllShapes}>{(s)=> (
                 <button class="flex-1 min-w-10 h-10 rounded-md border flex items-center justify-center font-semibold border-slate-600 bg-slate-700 hover:bg-slate-600 active:bg-slate-500"
                         onClick={() => pickShape(s)}>
@@ -214,7 +216,7 @@ export default function App() {
             </div>
           </Show>
           
-          <div class="flex gap-2 mt-2">
+          <div class="flex gap-2">
             <Show when={!isDone()}>
               <button class="flex-1 min-w-10 h-10 rounded-md border flex items-center justify-center font-semibold border-slate-600 bg-slate-700 hover:bg-slate-600 active:bg-slate-500 disabled:bg-neutral-900" 
                       onClick={removeLast}
@@ -227,9 +229,10 @@ export default function App() {
             <button class="flex-1 min-w-10 h-10 rounded-md border flex items-center justify-center font-semibold border-slate-600 bg-gray-600 hover:bg-gray-500 active:bg-gray-400 disabled:bg-neutral-900" 
                     onClick={toggleDailySeed}>{isDailySeed() ? 'RANDOM' : 'DAILY'}</button>
           </div>
-          <div class="mt-2">
-            <RulesSection />
-          </div>
+        </div>
+      
+        <div class="bg-slate-800 p-6 rounded-lg shadow-lg mt-8">
+          <RulesSection />
         </div>
       </div>
     </div>
