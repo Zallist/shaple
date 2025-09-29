@@ -87,11 +87,11 @@ export const ShapeDefinitions: Record<ShapeCode, ShapeDefinition> = {
     ], 'hexagon'),
     cross: new ShapeDefinition('cross', 'Cross', [
         RuleFunctions.AdjNotAny(['triangle', 'hexagon'], "Cross cannot be adjacent to Triangle or Hexagon"),
-        RuleFunctions.DistMust(2, 'wave', "Cross must be 2-away from Wave", true)
+        RuleFunctions.DistMust(2, 'wave', "Cross must be 2-away from Wave if Wave exists", true)
     ], 'close'),
     crescent: new ShapeDefinition('crescent', 'Crescent', [
-        RuleFunctions.AdjMust('circle', "Hexagon must be adjacent to Circle"),
-        RuleFunctions.AdjNot('cross', "Hexagon cannot be adjacent to Cross")
+        RuleFunctions.AdjNot('arrow', "Crescent cannot be adjacent to Arrow"),
+        RuleFunctions.DistMust(2, 'diamond', "Crescent must be 2-away from Diamond if Diamond exists", true)
     ], 'bedtime'),
     diamond: new ShapeDefinition('diamond', 'Diamond', [
         RuleFunctions.AdjMustAny(['wave', 'crescent'], "Diamond must be adjacent to Wave or Crescent"),
