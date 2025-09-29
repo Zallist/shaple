@@ -65,45 +65,45 @@ const RuleFunctions = {
 
 export const ShapeDefinitions: Record<ShapeCode, ShapeDefinition> = {
     circle: new ShapeDefinition('circle', 'Circle', [
-        RuleFunctions.AdjNot('square', "Circle cannot be adjacent to Square"),
-        RuleFunctions.DistNot(2, 'hexagon', "Circle cannot be 2-away from Hexagon")
+        RuleFunctions.AdjNot('square', "<circle> cannot be adjacent to <square>"),
+        RuleFunctions.DistNot(2, 'hexagon', "<circle> cannot be 2-away from <hexagon>")
     ], 'circle'),
     square: new ShapeDefinition('square', 'Square', [
-        RuleFunctions.AdjNot('circle', "Square cannot be adjacent to Circle"),
-        RuleFunctions.AdjNot('triangle', "Square cannot be adjacent to Triangle"),
-        RuleFunctions.DistMust(2, 'star', "Square must be 2-away from Star if Star exists", true)
+        RuleFunctions.AdjNot('circle', "<square> cannot be adjacent to <circle>"),
+        RuleFunctions.AdjNot('triangle', "<square> cannot be adjacent to <triangle>"),
+        RuleFunctions.DistMust(2, 'star', "<square> must be 2-away from <star> if <star> exists", true)
     ], 'square'),
     triangle: new ShapeDefinition('triangle', 'Triangle', [
-        RuleFunctions.AdjMustAny(['star', 'hexagon'], "Triangle must be adjacent to Star or Hexagon"),
-        RuleFunctions.DistNot(2, 'cross', "Triangle cannot be 2-away from Cross")
+        RuleFunctions.AdjMustAny(['star', 'hexagon'], "<triangle> must be adjacent to <star> or <hexagon>"),
+        RuleFunctions.DistNot(2, 'cross', "<triangle> cannot be 2-away from <cross>")
     ], 'change_history'),
     star: new ShapeDefinition('star', 'Star', [
-        RuleFunctions.AdjNotSelf("Star cannot be adjacent to Star"),
-        RuleFunctions.AdjMustAny(['triangle', 'arrow'], "Star must be adjacent to Triangle or Arrow")
+        RuleFunctions.AdjNotSelf("<star> cannot be adjacent to <star>"),
+        RuleFunctions.AdjMustAny(['triangle', 'arrow'], "<star> must be adjacent to <triangle> or <arrow>")
     ], 'star'),
     hexagon: new ShapeDefinition('hexagon', 'Hexagon', [
-        RuleFunctions.AdjMust('circle', "Hexagon must be adjacent to Circle"),
-        RuleFunctions.AdjNot('cross', "Hexagon cannot be adjacent to Cross")
+        RuleFunctions.AdjMust('circle', "<hexagon> must be adjacent to <circle>"),
+        RuleFunctions.AdjNot('cross', "<hexagon> cannot be adjacent to <cross>")
     ], 'hexagon'),
     cross: new ShapeDefinition('cross', 'Cross', [
-        RuleFunctions.AdjNotAny(['triangle', 'hexagon'], "Cross cannot be adjacent to Triangle or Hexagon"),
-        RuleFunctions.DistMust(2, 'wave', "Cross must be 2-away from Wave if Wave exists", true)
+        RuleFunctions.AdjNotAny(['triangle', 'hexagon'], "<cross> cannot be adjacent to <triangle> or <hexagon>"),
+        RuleFunctions.DistMust(2, 'wave', "<cross> must be 2-away from <wave> if <wave> exists", true)
     ], 'close'),
     crescent: new ShapeDefinition('crescent', 'Crescent', [
-        RuleFunctions.AdjNot('arrow', "Crescent cannot be adjacent to Arrow"),
-        RuleFunctions.DistMust(2, 'diamond', "Crescent must be 2-away from Diamond if Diamond exists", true)
+        RuleFunctions.AdjNot('arrow', "<crescent> cannot be adjacent to <arrow>"),
+        RuleFunctions.DistMust(2, 'diamond', "<crescent> must be 2-away from <diamond> if <diamond> exists", true)
     ], 'bedtime'),
     diamond: new ShapeDefinition('diamond', 'Diamond', [
-        RuleFunctions.AdjMustAny(['wave', 'crescent'], "Diamond must be adjacent to Wave or Crescent"),
-        RuleFunctions.DistNot(2, 'circle', "Diamond cannot be 2-away from Circle")
+        RuleFunctions.AdjMustAny(['wave', 'crescent'], "<diamond> must be adjacent to <wave> or <crescent>"),
+        RuleFunctions.DistNot(2, 'circle', "<diamond> cannot be 2-away from <circle>")
     ], 'diamond'),
     arrow: new ShapeDefinition('arrow', 'Arrow', [
-        RuleFunctions.AdjMustAny(['triangle', 'star'], "Arrow must be adjacent to Triangle or Star"),
-        RuleFunctions.AdjNot('crescent', "Arrow cannot be adjacent to Crescent")
+        RuleFunctions.AdjMustAny(['triangle', 'star'], "<arrow> must be adjacent to <triangle> or <star>"),
+        RuleFunctions.AdjNot('crescent', "<arrow> cannot be adjacent to <crescent>")
     ], 'arrow_forward'),
     wave: new ShapeDefinition('wave', 'Wave', [
-        RuleFunctions.AdjNot('cross', "Wave cannot be adjacent to Cross"),
-        RuleFunctions.AdjMust('diamond', "Wave must be adjacent to Diamond")
+        RuleFunctions.AdjNot('cross', "<wave> cannot be adjacent to <cross>"),
+        RuleFunctions.AdjMust('diamond', "<wave> must be adjacent to <diamond>")
     ], 'airwave')
 };
 

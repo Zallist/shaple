@@ -1,7 +1,14 @@
 @import 'tailwindcss';
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100..900&display=swap');
 
 body {
     @apply flex items-center justify-center p-4;
     @apply bg-slate-900;
     @apply text-slate-100;
+    
+    font-family: "Roboto", monospace;
+}
+
+.material-symbols-outlined {
+    @apply align-middle;
 }
