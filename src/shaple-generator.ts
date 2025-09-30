@@ -145,3 +145,43 @@ export function generateShaple(length: number, seed: number): Array<ShapeCode> {
 
     throw new Error("Failed to generate shaple");
 };
+
+
+(window as any).validateShaple = function(length: number) {
+    const result = Array<ShapeCode>(length);
+    const validShaples = new Set<Array<ShapeCode>>();
+
+    validate(0);
+
+    console.log(`Found ${validShaples.size} valid shaples`);
+
+    for (let i = 0; i < AllShapes.length; i++) {
+        const shape = AllShapes[i];
+
+        let shaplesContainingShape = 0;
+        let totalShapeCount = 0;
+
+        for (const validShaple of validShaples) {
+            const shapeCount = validShaple.filter(s => s === shape).length;
+            totalShapeCount += shapeCount;
+            if (shapeCount > 0)    
+                shaplesContainingShape++;
+        }
+
+        console.log(`Shape ${shape} appears in ${shaplesContainingShape} shaples, ${totalShapeCount} times total`);
+    }
+
+    function validate(index: number) {
+        if (index >= length) {
+            if (isShapleValid(result)) {
+                validShaples.add([...result]);
+            }
+            return;
+        }
+        
+        for (let i = 0; i < AllShapes.length; i++) {
+            result[index] = AllShapes[i];
+            validate(index + 1);
+        }
+    }
+}
