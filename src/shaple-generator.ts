@@ -1,7 +1,7 @@
 import prand from 'pure-rand';
 
 export type ShapeCode = 'circle' | 'square' | 'triangle' | 'star' | 'hexagon' | 
-                        'egg' | 'crescent' | 'diamond' | 'hive' | 'wave';
+                        'lightning' | 'crescent' | 'diamond' | 'hive' | 'wave';
 
 export class ShapeDefinition {
     code: ShapeCode;
@@ -78,7 +78,7 @@ export const ShapeDefinitions: Record<ShapeCode, ShapeDefinition> = {
     ], 'square'),
     triangle: new ShapeDefinition('triangle', 'Triangle', [
         RuleFunctions.AdjMustAny(['star', 'hexagon'], "<triangle> must be adjacent to <star> or <hexagon>"),
-        RuleFunctions.DistNot(2, 'egg', "<triangle> cannot be 2-away from <egg>")
+        RuleFunctions.DistNot(2, 'lightning', "<triangle> cannot be 2-away from <lightning>")
     ], 'change_history'),
     star: new ShapeDefinition('star', 'Star', [
         RuleFunctions.AdjNotSelf("<star> cannot be adjacent to <star>"),
@@ -86,12 +86,12 @@ export const ShapeDefinitions: Record<ShapeCode, ShapeDefinition> = {
     ], 'star'),
     hexagon: new ShapeDefinition('hexagon', 'Hexagon', [
         RuleFunctions.AdjMust('circle', "<hexagon> must be adjacent to <circle>"),
-        RuleFunctions.AdjNot('egg', "<hexagon> cannot be adjacent to <egg>")
+        RuleFunctions.AdjNot('lightning', "<hexagon> cannot be adjacent to <lightning>")
     ], 'hexagon'),
-    egg: new ShapeDefinition('egg', 'Egg', [
-        RuleFunctions.AdjNotAny(['triangle', 'hexagon'], "<egg> cannot be adjacent to <triangle> or <hexagon>"),
-        RuleFunctions.DistMust(2, 'wave', "<egg> must be 2-away from <wave> if <wave> exists", true)
-    ], 'egg'),
+    lightning: new ShapeDefinition('lightning', 'Lightning', [
+        RuleFunctions.AdjNotAny(['triangle', 'hexagon'], "<lightning> cannot be adjacent to <triangle> or <hexagon>"),
+        RuleFunctions.DistMust(2, 'wave', "<lightning> must be 2-away from <wave> if <wave> exists", true)
+    ], 'electric_bolt'),
     crescent: new ShapeDefinition('crescent', 'Crescent', [
         RuleFunctions.AdjNot('hive', "<crescent> cannot be adjacent to <hive>"),
         RuleFunctions.DistMust(2, 'diamond', "<crescent> must be 2-away from <diamond> if <diamond> exists", true)
@@ -105,7 +105,7 @@ export const ShapeDefinitions: Record<ShapeCode, ShapeDefinition> = {
         RuleFunctions.AdjNot('crescent', "<hive> cannot be adjacent to <crescent>")
     ], 'hive'),
     wave: new ShapeDefinition('wave', 'Wave', [
-        RuleFunctions.AdjNot('egg', "<wave> cannot be adjacent to <egg>"),
+        RuleFunctions.AdjNot('lightning', "<wave> cannot be adjacent to <lightning>"),
         RuleFunctions.AdjMust('diamond', "<wave> must be adjacent to <diamond>")
     ], 'airwave')
 };
