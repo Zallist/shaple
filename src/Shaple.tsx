@@ -1,4 +1,4 @@
-import { createSignal, For, Show, createMemo, createEffect, batch } from 'solid-js'
+import { createSignal, For, Show, createMemo, createEffect, batch, onCleanup } from 'solid-js'
 import * as generator from './shaple-generator'
 import prand from 'pure-rand'
 import 'animate.css'
@@ -140,6 +140,24 @@ export default function App() {
     setStoredAttempts(seed(), attempts());
   });
 
+  // Handle URL hash changes
+  createEffect(() => {
+    const handleHashChange = () => {
+      const newSeed = getCurrentSeed();
+      if (newSeed !== seed()) {
+        setSeedAndReset(newSeed);
+      }
+    };
+
+    // Add event listener for hash changes
+    window.addEventListener('hashchange', handleHashChange);
+    
+    // Clean up the event listener when the component is unmounted
+    onCleanup(() => {
+      window.removeEventListener('hashchange', handleHashChange);
+    });
+  });
+
   function setSeedAndReset(s: number) {
     var newAttempts = getStoredAttempts(s);
     
@@ -174,19 +192,16 @@ export default function App() {
   }
 
   function toggleDailySeed() {
-    let seed;
-
     if (isDailySeed()) {
       // Switch to a random seed and encode it in the URL so puzzles are shareable/bookmarkable.
-      seed = getRandomSeed();
-      window.location.hash = `#seed=${numberToString(seed)}`;
+      const newSeed = getRandomSeed();
+      window.location.hash = `#seed=${numberToString(newSeed)}`;
+      // setSeedAndReset will be called by the hashchange handler
     } else {
       // Return to the deterministic daily seed and clear the hash.
-      seed = seedForDate();
+      // Don't call setSeedAndReset here - it will be called by the hashchange handler
       window.location.hash = '';
     }
-
-    setSeedAndReset(seed);
   }
 
   return (
