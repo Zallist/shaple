@@ -1,11 +1,14 @@
 import prand from 'pure-rand';
 
+// An array up-front so we have a defined index, rather than a type/enum which are undefined for order
 const allShapeCodes = [
     'circle', 'square', 'triangle', 'star', 'hexagon', 
     'lightning', 'crescent', 'diamond', 'hive', 'wave'
 ] as const;
 
 export type ShapeCode = typeof allShapeCodes[number];
+
+// And expose it converted to the right type
 export const AllShapes: ShapeCode[] = [...allShapeCodes];
 
 export class ShapeDefinition {
