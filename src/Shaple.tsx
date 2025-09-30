@@ -1,4 +1,4 @@
-import { createSignal, For, Show, createMemo, createEffect } from 'solid-js'
+import { createSignal, For, Show, createMemo, createEffect, batch } from 'solid-js'
 import * as generator from './shaple-generator'
 import prand from 'pure-rand'
 import 'animate.css'
@@ -34,11 +34,35 @@ function getRandomSeed(): number {
 function getStoredAttempts(seed: number): generator.ShapeCode[][] {
   // Store attempts per-seed, so switching between daily/random retains distinct histories.
   const stored = localStorage.getItem(`shaple_attempts_${seed}`);
-  return stored ? JSON.parse(stored) : [];
+  
+  if (!stored)
+    return [];
+
+  const parsed = JSON.parse(stored) as Array<Array<any>>;
+
+  if (!parsed) {
+    console.error('Invalid stored attempts:', stored);
+    return [];
+  }
+
+  // if numeric, then use indices
+  if (parsed.every(attempt => attempt.every(index => typeof index === 'number'))) {
+    return parsed.map(attempt => attempt.map(index => generator.AllShapes[index]));
+  }
+
+  // else if string then use names (unless doesn't exist)
+  if (parsed.every(attempt => attempt.every(shape => typeof shape === 'string'))) {
+    return parsed.map(attempt => attempt.map(shape => generator.AllShapes.includes(shape as generator.ShapeCode) ? shape as generator.ShapeCode : generator.AllShapes[0]));
+  }
+
+  console.error('Invalid stored attempts:', stored);
+  return [];
 }
 
 function setStoredAttempts(seed: number, attempts: generator.ShapeCode[][]) {
-  localStorage.setItem(`shaple_attempts_${seed}`, JSON.stringify(attempts));
+  // convert to the raw indices so that we don't store the text
+  const rawAttempts = attempts.map(attempt => attempt.map(shape => generator.AllShapes.indexOf(shape)));
+  localStorage.setItem(`shaple_attempts_${seed}`, JSON.stringify(rawAttempts));
 }
 
 function getCurrentSeed(): number {
@@ -114,27 +138,34 @@ export default function App() {
   function setSeedAndReset(s: number) {
     var newAttempts = getStoredAttempts(s);
     
-    setSeed(s);
-    setAttempts(newAttempts);
-    setCurrentGuess([]);
+    batch(() => {
+      setSeed(s);
+      setAttempts(newAttempts);
+      setCurrentGuess([]);
+    });
   }
 
   function pickShape(s: generator.ShapeCode) { 
     if (isDone()) return; 
     if (currentGuess().length >= LENGTH) return; 
+
     setCurrentGuess([...currentGuess(), s]); 
   }
   
   function removeLast() { 
     if (isDone()) return; 
+
     setCurrentGuess(currentGuess().slice(0, -1)); 
   }
 
   function submit() {
     if (currentGuess().length !== LENGTH) return;
-    const g = currentGuess();
-    setAttempts([...attempts(), g]);
-    setCurrentGuess([]);
+
+    batch(() => {
+      const g = currentGuess();
+      setAttempts([...attempts(), g]);
+      setCurrentGuess([]);
+    });
   }
 
   function toggleDailySeed() {

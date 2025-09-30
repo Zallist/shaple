@@ -1,7 +1,12 @@
 import prand from 'pure-rand';
 
-export type ShapeCode = 'circle' | 'square' | 'triangle' | 'star' | 'hexagon' | 
-                        'lightning' | 'crescent' | 'diamond' | 'hive' | 'wave';
+const allShapeCodes = [
+    'circle', 'square', 'triangle', 'star', 'hexagon', 
+    'lightning', 'crescent', 'diamond', 'hive', 'wave'
+] as const;
+
+export type ShapeCode = typeof allShapeCodes[number];
+export const AllShapes: ShapeCode[] = [...allShapeCodes];
 
 export class ShapeDefinition {
     code: ShapeCode;
@@ -109,8 +114,6 @@ export const ShapeDefinitions: Record<ShapeCode, ShapeDefinition> = {
         RuleFunctions.AdjMust('diamond', "<wave> must be adjacent to <diamond>")
     ], 'airwave')
 };
-
-export const AllShapes = Object.keys(ShapeDefinitions) as ShapeCode[];
 
 export function isShapleValid(shapes: Array<ShapeCode>): boolean {
     for (let i = 0; i < shapes.length; i++) {
