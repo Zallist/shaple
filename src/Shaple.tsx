@@ -1,8 +1,7 @@
-import { createSignal, For, Show, Switch, createMemo, createEffect, Match } from 'solid-js'
-import { Portal, Dynamic } from 'solid-js/web'
+import { createSignal, For, Show, createMemo, createEffect } from 'solid-js'
 import * as generator from './shaple-generator'
-import { DEV } from 'solid-js'
 import prand from 'pure-rand'
+import 'animate.css'
 
 const LENGTH = 5
 const MAX_ATTEMPTS = 5
@@ -101,8 +100,11 @@ export default function App() {
   });
 
   const isDailySeed = createMemo(() => seed() === seedForDate());
+
+  const isCorrect = createMemo(() => feedbacks().at(-1)?.every(f => f === 'exact'));
+
   // Game ends either when max attempts are used or the latest attempt is all 'exact'.
-  const isDone = createMemo(() => attempts().length >= MAX_ATTEMPTS || feedbacks().at(-1)?.every(f => f === 'exact'));
+  const isDone = createMemo(() => attempts().length >= MAX_ATTEMPTS || isCorrect());
 
   createEffect(() => {
     // Persist attempts for the current seed whenever attempts change.
@@ -152,51 +154,90 @@ export default function App() {
   }
 
   return (
-    <div class="flex justify-center p-4">
+    <div class="flex justify-center p-4 bg-gradient-to-b from-slate-900 to-slate-800">
       <div class="w-full">
-        <div class="bg-slate-800 p-6 rounded-lg shadow-lg">
-          <h1 class="text-2xl font-bold mb-4">
-            Shaple - {isDailySeed() ? 'Daily' : 'Seeded'}
-            <span title="Seed" class="text-slate-400 text-xs"> ({seed()})</span>
-          </h1>
+        <div class="bg-slate-800/80 backdrop-blur-sm p-6 rounded-xl shadow-2xl border border-slate-700/50 transition-all duration-300 hover:shadow-xl hover:shadow-slate-900/20">
+          <div class="flex items-center justify-between mb-4">
+            <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+              Shaple - {isDailySeed() ? 'Daily' : 'Seeded'}
+            </h1>
+            <span title="Seed" class="text-slate-400 text-sm bg-slate-700/50 px-2 py-1 rounded-md">
+              {seed()}
+            </span>
+          </div>
 
           <div class="space-y-2">
             <For each={attempts()}>
               {(guess, idx) => {
-                const fb = feedbacks()[idx()] || []
+                const fb = feedbacks()[idx()] || [];
+                
                 return (
-                  <div class="flex gap-2">
-                    <For each={Array.from({length:LENGTH})}>{(_, j)=>(
-                      <div class={`flex-1 min-w-14 h-14 rounded-md border flex items-center justify-center font-semibold ${fb[j()]==='exact' ? 'bg-green-600 border-green-700' : fb[j()]==='present' ? 'bg-yellow-500 border-yellow-600' : 'bg-slate-700 border-slate-600'}`}>
-                        { (guess[j()] ? shapeKey(guess[j()]) : '') }
-                      </div>
-                    )}</For>
+                  <div class="flex gap-2 animate__animated animate__fadeIn">
+                    <For each={Array.from({length:LENGTH})}>{(_, j)=>{
+                      const feedback = fb[j()];
+                      const classes = [
+                        'flex-1 min-w-14 h-14 rounded-lg border-2 flex items-center justify-center font-semibold',
+                        'transform transition-all duration-300 hover:scale-105',
+                        feedback === 'exact' ? 'bg-green-600/90 border-green-400 shadow-lg shadow-green-900/30' :
+                        feedback === 'present' ? 'bg-yellow-500/90 border-yellow-400 shadow-lg shadow-yellow-900/30' :
+                        'bg-slate-700/70 border-slate-600/50 hover:border-slate-500/70'
+                      ].join(' ');
+                      
+                      return (
+                        <div 
+                          class={`${classes} animate__animated animate__bounceIn`}
+                          style={`animation-delay: ${j() * 50}ms`}
+                        >
+                          {guess[j()] ? shapeKey(guess[j()]) : ''}
+                        </div>
+                      );
+                    }}</For>
                   </div>
-                )
+                );
               }}
             </For>
 
             <Show when={!isDone()}>
               <div class="flex gap-2">
-                <For each={Array.from({length:LENGTH})}>{(_, j)=>(
-                  <div class={`flex-1 min-w-14 h-14 rounded-md border flex items-center justify-center font-semibold`}>
-                    { (currentGuess()[j()] ? shapeKey(currentGuess()[j()]) : '') }
-                  </div>
-                )}</For>
+                <For each={Array.from({length:LENGTH})}>{(_, j)=>{
+                  const isEmpty = !currentGuess()[j()];
+                  return (
+                    <div 
+                      class={`flex-1 min-w-14 h-14 rounded-lg border-2 flex items-center justify-center font-semibold
+                        ${isEmpty ? 'border-dashed border-slate-600/50 hover:border-slate-500/70 bg-slate-800/50' : 'border-slate-500/70 bg-slate-700/70'}
+                        transform transition-all duration-300 hover:scale-105`}
+                    >
+                      {currentGuess()[j()] ? (
+                        <div class="animate__animated animate__bounceIn">
+                          {shapeKey(currentGuess()[j()])}
+                        </div>
+                      ) : (
+                        <span class="text-slate-600">?</span>
+                      )}
+                    </div>
+                  );
+                }}</For>
               </div>
             </Show>
           </div>
 
           <Show when={isDone()}>
-            <div class="mt-2">
-              <div class="mb-2 text-sm text-slate-400 font-semibold">
-                Solution
+            <div class={`mt-4 p-4 rounded-lg bg-slate-700/30 backdrop-blur-sm border border-slate-600/30 ${isCorrect() ? 'animate__animated animate__pulse animate__infinite' : ''}`}>
+              <div class="text-sm text-slate-300 font-semibold mb-2 flex items-center">
+                <span class="material-symbols-outlined text-yellow-400 mr-1">emoji_events</span>
+                {isCorrect() ? 'Puzzle Solved!' : 'Solution'}
               </div>
 
               <div class="flex gap-2">
-                <For each={solution()}>{s=>(
-                  <div class={`flex-1 min-w-14 h-14 rounded-md border flex items-center justify-center font-semibold`}>
-                    {shapeKey(s)}
+                <For each={solution()}>{(s, i) => (
+                  <div 
+                    class={`flex-1 min-w-14 h-14 rounded-lg border-2 flex items-center justify-center font-semibold
+                      bg-gradient-to-br from-slate-700 to-slate-800 border-slate-600 shadow-lg
+                      transform transition-all duration-500 hover:scale-110 hover:rotate-6 hover:z-10`}
+                  >
+                    <div class="animate__animated animate__bounceIn">
+                      {shapeKey(s)}
+                    </div>
                   </div>
                 )}</For>
               </div>
@@ -204,30 +245,71 @@ export default function App() {
           </Show>
         </div>
         
-        <div class="bg-slate-800 p-6 rounded-lg shadow-lg mt-8">
+        <div class="bg-slate-800/80 backdrop-blur-sm p-6 rounded-xl shadow-xl border border-slate-700/50 mt-6 transition-all duration-300 hover:shadow-2xl hover:shadow-slate-900/30">
           <Show when={!isDone()}>
-            <div class="mb-2 grid grid-cols-5 gap-2">
-              <For each={generator.AllShapes}>{(s)=> (
-                <button class="flex-1 min-w-10 h-10 rounded-md border flex items-center justify-center font-semibold border-slate-600 bg-slate-700 hover:bg-slate-600 active:bg-slate-500"
-                        onClick={() => pickShape(s)}>
-                    {shapeKey(s)}
-                </button>
-              )}</For>
+            <div class="mb-3 grid grid-cols-5 gap-2">
+              <For each={generator.AllShapes}>{(s, i) => {
+                const isSelected = createMemo(() => currentGuess().includes(s));
+                return (
+                  <button 
+                    onClick={() => {
+                      pickShape(s);
+                    }}
+                    class={`flex-1 min-w-10 h-10 rounded-lg border-2 flex items-center justify-center font-semibold
+                      transform transition-all duration-200 active:scale-90
+                      bg-slate-700/70 border-slate-600/50 hover:bg-slate-600/70 hover:border-slate-500/70
+                      animate__animated`}
+                  >
+                    <div class={isSelected() ? 'animate__animated animate__bounceIn' : ''}>
+                      {shapeKey(s)}
+                    </div>
+                  </button>
+                );
+              }}</For>
             </div>
           </Show>
           
-          <div class="flex gap-2">
+          <div class="flex gap-3">
             <Show when={!isDone()}>
-              <button class="flex-1 min-w-10 h-10 rounded-md border flex items-center justify-center font-semibold border-slate-600 bg-slate-700 hover:bg-slate-600 active:bg-slate-500 disabled:bg-neutral-900" 
-                      onClick={removeLast}
-                      disabled={currentGuess().length === 0}>REMOVE</button>
-              <button class="flex-1 min-w-10 h-10 rounded-md border flex items-center justify-center font-semibold border-slate-600 bg-blue-600 hover:bg-blue-500 active:bg-blue-400 disabled:bg-neutral-900" 
-                      onClick={submit}
-                      disabled={currentGuess().length !== LENGTH}>SUBMIT</button>
+              <button 
+                onClick={() => {
+                  if (currentGuess().length > 0) {
+                    removeLast();
+                  }
+                }}
+                disabled={currentGuess().length === 0}
+                class={`flex-1 h-12 rounded-lg border-2 flex items-center justify-center font-semibold transition-all duration-200
+                  ${currentGuess().length === 0 ? 'bg-slate-800/30 border-slate-700/50 text-slate-600' : 
+                    'bg-slate-700/70 border-slate-600/50 hover:bg-slate-600/70 hover:border-slate-500/70 active:scale-95'}
+                  animate__animated`}
+              >
+                <span class="material-symbols-outlined mr-1">backspace</span>
+                Remove
+              </button>
+              
+              <button 
+                onClick={submit}
+                disabled={currentGuess().length !== LENGTH}
+                class={`flex-1 h-12 rounded-lg border-2 flex items-center justify-center font-semibold transition-all duration-200
+                  ${currentGuess().length !== LENGTH ? 'bg-blue-900/30 border-blue-800/50 text-blue-600' : 
+                    'bg-blue-600/90 border-blue-400 hover:bg-blue-500/90 hover:border-blue-300 active:scale-95 shadow-lg shadow-blue-900/30'}
+                  animate__animated`}
+              >
+                <span class="material-symbols-outlined mr-1">send</span>
+                Submit
+              </button>
             </Show>
 
-            <button class="flex-1 min-w-10 h-10 rounded-md border flex items-center justify-center font-semibold border-slate-600 bg-gray-600 hover:bg-gray-500 active:bg-gray-400 disabled:bg-neutral-900" 
-                    onClick={toggleDailySeed}>{isDailySeed() ? 'RANDOM' : 'DAILY'}</button>
+            <button 
+              onClick={toggleDailySeed}
+              class="flex-1 h-12 rounded-lg border-2 border-slate-600/50 flex items-center justify-center font-semibold
+                bg-slate-700/70 hover:bg-slate-600/70 hover:border-slate-500/70 active:scale-95 transition-all duration-200"
+            >
+              <span class="material-symbols-outlined mr-1">
+                {isDailySeed() ? 'shuffle' : 'calendar_month'}
+              </span>
+              {isDailySeed() ? 'Random' : 'Daily'}
+            </button>
           </div>
         </div>
       
@@ -262,18 +344,35 @@ function RulesSection() {
 
   return (
     <>
-      <button class="w-full min-w-10 h-10 rounded-md border justify-center font-semibold border-slate-600 bg-gray-600 hover:bg-gray-500 active:bg-gray-400 disabled:bg-neutral-900" 
-              onClick={() => setRulesAreVisible(!areRulesVisible())}>{areRulesVisible() ? 'HIDE' : 'SHOW'} RULES</button>
-      <Show when={areRulesVisible()}>
-        <p class="font-semibold text-lg mt-2">Pattern Generator Rules</p>
-        <ul class="list-disc list-outside">
-          <For each={Object.values(generator.ShapeDefinitions)}>{shape => (
-            <For each={shape.rules}>{rule => (
-              <li>{parseDescription(rule.description)}</li>
+      <button 
+        onClick={() => setRulesAreVisible(!areRulesVisible())}
+        class="w-full h-12 rounded-lg border-2 border-slate-600/50 flex items-center justify-center font-semibold
+          bg-slate-700/70 hover:bg-slate-600/70 hover:border-slate-500/70 active:scale-95 transition-all duration-200"
+      >
+        <span class="material-symbols-outlined mr-2 transition-transform duration-300" 
+              style={`transform: rotate(${areRulesVisible() ? '180deg' : '0'})`}>
+          expand_more
+        </span>
+        {areRulesVisible() ? 'HIDE' : 'SHOW'} RULES
+      </button>
+      
+      <div class={`overflow-hidden transition-all duration-500 ease-in-out ${areRulesVisible() ? 'max-h-auto opacity-100' : 'max-h-0 opacity-0'}`}>
+        <div class="mt-4">
+          <p class="font-semibold text-lg mb-3 text-slate-200 flex items-center">
+            <span class="material-symbols-outlined mr-2 text-blue-400">info</span>
+            Pattern Generator Rules
+          </p>
+          <ul class="list-disc list-outside pl-5 space-y-2 text-slate-300">
+            <For each={Object.values(generator.ShapeDefinitions)}>{(shape, i) => (
+              <For each={shape.rules}>{(rule, j) => (
+                <li class="animate__animated animate__fadeIn" style={`animation-delay: ${(i() * 2 + j()) * 50}ms`}>
+                  {parseDescription(rule.description)}
+                </li>
+              )}</For>
             )}</For>
-          )}</For>
-        </ul>
-      </Show>
+          </ul>
+        </div>
+      </div>
     </>
   );
 }
