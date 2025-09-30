@@ -13,10 +13,18 @@ function shapeKey(s: generator.ShapeCode) {
 
 type Feedback = 'exact' | 'present' | 'absent'
 
+function numberToString(n: number): string {
+  return n.toString(36).toUpperCase();
+}
+function stringToNumber(s: string): number {
+  return parseInt(s.toLowerCase(), 36);
+}
+
 function seedForDate(d = new Date()): number {
   // Normalize to UTC midnight so all users get the same daily puzzle regardless of timezone.
   const utc = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
   const s = `${utc.getUTCFullYear()}${String(utc.getUTCMonth()+1).padStart(2,'0')}${String(utc.getUTCDate()).padStart(2,'0')}`;
+
   // simple numeric hash
   let h = 2166136261 >>> 0;
   for (let i=0; i<s.length; i++) { 
@@ -27,7 +35,7 @@ function seedForDate(d = new Date()): number {
 
 function getRandomSeed(): number {
   const rng = prand.xorshift128plus(Date.now() ^ (Math.random() * 0x100000000));
-  let seed = prand.unsafeUniformIntDistribution((2**31 - 1) * -1, 2**31 - 1, rng);
+  let seed = prand.unsafeUniformIntDistribution(0, 36**8 - 1, rng); // 8 characters seed
   return seed;
 }
 
@@ -73,10 +81,7 @@ function getCurrentSeed(): number {
     for (let i = 0; i < params.length; i++) {
       const param = params[i].split('=', 2);
       if (param[0] === 'seed' && param.length === 2) {
-        const seed = parseInt(param[1]);
-
-        if (!isNaN(seed)) 
-          return seed;
+        return stringToNumber(param[1]);
       }
     }
   }
@@ -174,7 +179,7 @@ export default function App() {
     if (isDailySeed()) {
       // Switch to a random seed and encode it in the URL so puzzles are shareable/bookmarkable.
       seed = getRandomSeed();
-      window.location.hash = `#seed=${seed}`;
+      window.location.hash = `#seed=${numberToString(seed)}`;
     } else {
       // Return to the deterministic daily seed and clear the hash.
       seed = seedForDate();
@@ -193,7 +198,7 @@ export default function App() {
               Shaple - {isDailySeed() ? 'Daily' : 'Seeded'}
             </h1>
             <span title="Seed" class="text-slate-400 text-sm bg-slate-700/50 px-2 py-1 rounded-md">
-              {seed()}
+              {numberToString(seed())}
             </span>
           </div>
 
