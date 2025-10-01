@@ -57,6 +57,7 @@ ShapeDefinitions.crown.rules = [
     new shapeRules.IsDistanceTo('circle', 2),
     new shapeRules.IsNotAdjacentTo(['skull', 'spiral']),
     new shapeRules.IsNotDistanceTo(['star', 'hexagon', 'heart'], 2),
+    new shapeRules.IsNotDistanceTo('wave', 2), // crown resents being near uncontrolled seas
 ];
 
 // --- BEACON AVOIDERS: fear or are corrupted by Circle (must remain distance 2) ---
@@ -102,6 +103,7 @@ ShapeDefinitions.gear.rules = [
     new shapeRules.IsAdjacentTo(['clock', 'hexagon', 'shield']),
     new shapeRules.IsNotAdjacentTo(['flame', 'spiral']),
     new shapeRules.IsNotDistanceTo('wave', 2),
+    new shapeRules.IsNotDistanceTo('hive', 2)
 ];
 
 // Shield: Protector. Binds with gear/key/lock, refuses watchers and decay.
@@ -109,6 +111,7 @@ ShapeDefinitions.shield.rules = [
     new shapeRules.IsAdjacentTo(['gear', 'key', 'lock']),
     new shapeRules.IsNotAdjacentTo(['skull', 'eye']),
     new shapeRules.IsDistanceTo('square', 2),
+    new shapeRules.IsNotDistanceTo(['lightning', 'cloud'], 2)
 ];
 
 // Clock: Timekeeping machinery. Tied to gear/lightning; enforces distance vs organic.
@@ -116,6 +119,7 @@ ShapeDefinitions.clock.rules = [
     new shapeRules.IsAdjacentTo(['gear', 'lightning']),
     new shapeRules.IsNotAdjacentTo(['leaf', 'flame']),
     new shapeRules.IsDistanceTo('hourglass', 2),
+    new shapeRules.IsNotDistanceTo('hive', 2),
 ];
 
 // Key: Passage enabler. Ally to lock/shield; avoids greed (diamond) and death.
@@ -146,6 +150,7 @@ ShapeDefinitions.wave.rules = [
     new shapeRules.IsNotAdjacentTo('skull'),
     new shapeRules.IsNotAdjacentTo(['crown', 'gear']), // avoids overt authority and machinery
     new shapeRules.IsDistanceTo('leaf', 2),
+    new shapeRules.IsNotDistanceTo(['crown', 'heart'], 2),
 ];
 
 // Droplet: Life-giving but now constrained — must be near leaf yet distant from certain machines.
@@ -153,6 +158,7 @@ ShapeDefinitions.droplet.rules = [
     new shapeRules.IsAdjacentTo(['leaf', 'wave', 'cloud', 'paw']),
     new shapeRules.IsNotAdjacentTo(['flame', 'skull']),
     new shapeRules.IsNotDistanceTo('clock', 2), // cannot be more than 2 away from clock (ties water to time)
+    new shapeRules.IsNotDistanceTo(['star', 'crown'], 2),
 ];
 
 // Leaf: Over-popular; force it into nature cluster with stricter avoids and a distance.
@@ -160,6 +166,7 @@ ShapeDefinitions.leaf.rules = [
     new shapeRules.IsAdjacentTo(['droplet', 'wave', 'hive', 'paw']),
     new shapeRules.IsNotAdjacentTo(['lightning', 'square']),
     new shapeRules.IsDistanceTo('sun', 2), // seeks sunlight at distance
+    new shapeRules.IsNotDistanceTo(['star', 'crown'], 2),
 ];
 
 // Hive: Collective; reduce bridging by forbidding certain celestial ties and adding distance rules.
@@ -167,6 +174,7 @@ ShapeDefinitions.hive.rules = [
     new shapeRules.IsAdjacentTo(['triangle', 'star', 'leaf']),
     new shapeRules.IsNotAdjacentTo(['crescent', 'square']),
     new shapeRules.IsNotDistanceTo('crown', 2),
+    new shapeRules.IsNotDistanceTo(['wave', 'cloud'], 2),
 ];
 
 // Paw: Beast loyalty; constrained adjacency and forced distance from Beacon-avoiders.
@@ -174,6 +182,7 @@ ShapeDefinitions.paw.rules = [
     new shapeRules.IsAdjacentTo(['leaf', 'heart', 'raven', 'droplet']),
     new shapeRules.IsNotAdjacentTo(['skull', 'lightning']),
     new shapeRules.IsDistanceTo('circle', 2), // some beasts revere the Beacon at distance
+    new shapeRules.IsNotDistanceTo(['lightning', 'cloud'], 2),
 ];
 
 // --- SYMBOLIC & CELESTIAL ---
@@ -254,43 +263,6 @@ ShapeDefinitions.heart.rules = [
     new shapeRules.IsNotDistanceTo(['hexagon', 'star'], 2),
     new shapeRules.IsNotAdjacentTo('skull'),
 ];
-
-// Crown handled above; add one more limiter to reduce sequences.
-ShapeDefinitions.crown.rules.push(
-    new shapeRules.IsNotDistanceTo('wave', 2) // crown resents being near uncontrolled seas
-);
-
-// Gear / Clock / Shield already constrained; add a mutual distance to limit big machine clusters.
-ShapeDefinitions.gear.rules.push(
-    new shapeRules.IsNotDistanceTo('hive', 2)
-);
-ShapeDefinitions.clock.rules.push(
-    new shapeRules.IsNotDistanceTo('hive', 2)
-);
-
-// Droplet and Leaf tighter: avoid being simultaneously near Circle-seekers to prevent combos.
-ShapeDefinitions.droplet.rules.push(
-    new shapeRules.IsNotDistanceTo(['star', 'crown'], 2)
-);
-ShapeDefinitions.leaf.rules.push(
-    new shapeRules.IsNotDistanceTo(['star', 'crown'], 2)
-);
-
-// Reduce over-placement of Paw and Shield by enforcing distance between them and Beacon-avoiders.
-ShapeDefinitions.paw.rules.push(
-    new shapeRules.IsNotDistanceTo(['lightning', 'cloud'], 2)
-);
-ShapeDefinitions.shield.rules.push(
-    new shapeRules.IsNotDistanceTo(['lightning', 'cloud'], 2)
-);
-
-// Final targeted pernicious bridge reductions.
-ShapeDefinitions.hive.rules.push(
-    new shapeRules.IsNotDistanceTo(['wave', 'cloud'], 2)
-);
-ShapeDefinitions.wave.rules.push(
-    new shapeRules.IsNotDistanceTo(['crown', 'heart'], 2)
-);
 
 export function isShapleValid(shapes: Array<ShapeCode>): boolean {
     for (let i = 0; i < shapes.length; i++) {
