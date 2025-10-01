@@ -484,7 +484,7 @@ export default function App() {
       <>
         <button 
           onClick={() => setRulesAreVisible(!areRulesVisible())}
-          class="mb-4 w-full h-12 rounded-lg border-2 border-slate-600/50 flex items-center justify-center font-semibold
+          class="w-full h-12 rounded-lg border-2 border-slate-600/50 flex items-center justify-center font-semibold
             bg-slate-700/70 hover:bg-slate-600/70 hover:border-slate-500/70 active:scale-95 transition-all duration-200"
         >
           <span class="material-symbols-outlined mr-2 transition-transform duration-300" 
@@ -494,21 +494,22 @@ export default function App() {
           {areRulesVisible() ? 'HIDE' : 'SHOW'} HELP
         </button>
         
-        <div class={`bg-slate-800 p-6 rounded-lg shadow-lg 
-                     overflow-hidden transition-all duration-500 ease-in-out ${areRulesVisible() ? 'max-h-auto opacity-100' : 'max-h-0 opacity-0'}`}>
-          <p class="font-semibold text-lg mb-3 text-slate-200 flex items-center">
-            <span class="material-symbols-outlined mr-2 text-blue-400">info</span>
-            Pattern Generator Rules
-          </p>
-          <ul class="list-disc list-outside pl-5 space-y-2 text-slate-300">
-            <For each={Object.keys(shapeRules())}>{(shapeCode, _) => (
-              <For each={shapeRules()[shapeCode as ShapeCode]}>{(rule, j) => (
-                <li>
-                  {parseDescription(rule, shapeCode as ShapeCode)}
-                </li>
+        <div class={`overflow-hidden transition-all duration-500 ease-in-out ${areRulesVisible() ? 'max-h-auto opacity-100' : 'max-h-0 opacity-0'}`}>
+          <div class="bg-slate-800 rounded-lg shadow-lg mt-4 p-6">
+            <p class="font-semibold text-lg mb-3 text-slate-200 flex items-center">
+              <span class="material-symbols-outlined mr-2 text-blue-400">info</span>
+              Pattern Generator Rules
+            </p>
+            <ul class="list-disc list-outside pl-5 space-y-2 text-slate-300">
+              <For each={Object.keys(shapeRules())}>{(shapeCode, _) => (
+                <For each={shapeRules()[shapeCode as ShapeCode]}>{(rule, j) => (
+                  <li>
+                    {parseDescription(rule, shapeCode as ShapeCode)}
+                  </li>
+                )}</For>
               )}</For>
-            )}</For>
-          </ul>
+            </ul>
+          </div>
         </div>
       </>
     );
