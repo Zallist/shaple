@@ -234,8 +234,8 @@ export default function App() {
   }
 
   return (
-    <div class="flex justify-center p-4 bg-gradient-to-b from-slate-900 to-slate-800">
-      <div class="w-full">
+    <div class="flex flex-col justify-center items-center">
+      <div class="bg-gradient-to-b from-slate-900 to-slate-800 p-4 rounded-xl">
         <div class="bg-slate-800/80 backdrop-blur-sm p-6 rounded-xl shadow-2xl border border-slate-700/50 transition-all duration-300 hover:shadow-xl hover:shadow-slate-900/20">
           <div class="flex items-center justify-between mb-4">
             <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
@@ -300,30 +300,30 @@ export default function App() {
               </div>
             </Show>
           </div>
-
-          <Show when={isDone()}>
-            <div class={`mt-4 p-4 rounded-lg bg-slate-700/30 backdrop-blur-sm border border-slate-600/30 ${isCorrect() ? 'animate__animated animate__pulse animate__infinite' : ''}`}>
-              <div class="text-sm text-slate-300 font-semibold mb-2 flex items-center">
-                <span class="material-symbols-outlined text-yellow-400 mr-1">emoji_events</span>
-                {isCorrect() ? 'Puzzle Solved!' : 'Solution'}
-              </div>
-
-              <div class="flex gap-2">
-                <For each={solution()}>{(s, i) => (
-                  <div 
-                    class={`flex-1 min-w-14 h-14 rounded-lg border-2 flex items-center justify-center font-semibold
-                      bg-gradient-to-br from-slate-700 to-slate-800 border-slate-600 shadow-lg
-                      transform transition-all duration-500 hover:scale-110 hover:rotate-6 hover:z-10`}
-                  >
-                    <div class="animate__animated animate__bounceIn">
-                      {shapeKey(s)}
-                    </div>
-                  </div>
-                )}</For>
-              </div>
-            </div>
-          </Show>
         </div>
+        
+        <Show when={isDone()}>
+          <div class={`mt-4 p-4 rounded-lg bg-slate-700/30 backdrop-blur-sm border border-slate-600/30 ${isCorrect() ? 'animate__animated animate__pulse animate__infinite' : ''}`}>
+            <div class="text-sm text-slate-300 font-semibold mb-2 flex items-center">
+              <span class="material-symbols-outlined text-yellow-400 mr-1">emoji_events</span>
+              {isCorrect() ? 'Puzzle Solved!' : 'Solution'}
+            </div>
+
+            <div class="flex gap-2">
+              <For each={solution()}>{(s, i) => (
+                <div 
+                  class={`flex-1 min-w-14 h-14 rounded-lg border-2 flex items-center justify-center font-semibold
+                    bg-gradient-to-br from-slate-700 to-slate-800 border-slate-600 shadow-lg
+                    transform transition-all duration-500 hover:scale-110 hover:rotate-6 hover:z-10`}
+                >
+                  <div class="animate__animated animate__bounceIn">
+                    {shapeKey(s)}
+                  </div>
+                </div>
+              )}</For>
+            </div>
+          </div>
+        </Show>
         
         <div class="bg-slate-800/80 backdrop-blur-sm p-6 rounded-xl shadow-xl border border-slate-700/50 mt-6 transition-all duration-300 hover:shadow-2xl hover:shadow-slate-900/30">
           <Show when={!isDone()}>
@@ -392,10 +392,10 @@ export default function App() {
             </button>
           </div>
         </div>
+      </div>
       
-        <div class="bg-slate-800 p-6 rounded-lg shadow-lg mt-8">
-          <RulesSection />
-        </div>
+      <div class="bg-slate-800 p-6 rounded-lg shadow-lg mt-8">
+        <RulesSection />
       </div>
     </div>
   )
