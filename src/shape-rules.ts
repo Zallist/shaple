@@ -24,15 +24,19 @@ abstract class SimpleRule implements ShapeRule {
         return this.not ? !this.evaluateInternal(sequence, index) : this.evaluateInternal(sequence, index);
     }
 
-    public abstract evaluateInternal(sequence: Array<ShapeCode>, index: number): boolean;
+    protected abstract evaluateInternal(sequence: Array<ShapeCode>, index: number): boolean;
     
     public abstract getDescription(forShape: ShapeCode): string;
+
+    public isRelevant(forShape: ShapeCode): boolean {
+        return this.getShapes().includes(forShape);
+    }
 }
 
 export class IsAdjacentTo extends SimpleRule {
     constructor(shapes: ShapeCode[] | ShapeCode) { super(shapes); }
 
-    public evaluateInternal(sequence: Array<ShapeCode>, index: number): boolean {
+    protected evaluateInternal(sequence: Array<ShapeCode>, index: number): boolean {
         return getNeighbours(sequence, index, 1).some((s) => this.getShapes().includes(s));
     }
 
@@ -52,7 +56,7 @@ export class IsNotAdjacentTo extends IsAdjacentTo {
 export class IsDistanceTo extends SimpleRule {
     constructor(shapes: ShapeCode[] | ShapeCode, protected distance: number, protected requireOther: boolean = false) { super(shapes); }
 
-    public evaluateInternal(sequence: Array<ShapeCode>, index: number): boolean {
+    protected evaluateInternal(sequence: Array<ShapeCode>, index: number): boolean {
         if (this.requireOther && !sequence.some((s) => this.getShapes().includes(s))) return true;
         return getNeighbours(sequence, index, this.distance).some((s) => this.getShapes().includes(s));
     }
@@ -65,7 +69,7 @@ export class IsDistanceTo extends SimpleRule {
 export class IsNotDistanceTo extends SimpleRule {
     constructor(shapes: ShapeCode[] | ShapeCode, protected distance: number, protected requireOther: boolean = false) { super(shapes); }
 
-    public evaluateInternal(sequence: Array<ShapeCode>, index: number): boolean {
+    protected evaluateInternal(sequence: Array<ShapeCode>, index: number): boolean {
         if (this.requireOther && !sequence.some((s) => this.getShapes().includes(s))) return true;
         return !getNeighbours(sequence, index, this.distance).some((s) => this.getShapes().includes(s));
     }

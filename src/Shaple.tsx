@@ -1,11 +1,12 @@
 import { createSignal, For, Show, createMemo, createEffect, batch, onCleanup } from 'solid-js'
-import { ShapeCode, AllShapes, ShapeDefinitions } from './shape'
-import { isShapleValid, generateShaple } from './shaple-generator'
+import { ShapeCode, AllShapes, ShapeDefinitions, ShapeRule } from './shape'
+import { generateShaple } from './shaple-generator'
 import prand from 'pure-rand'
 import 'animate.css'
 
-const LENGTH = 5
-const MAX_ATTEMPTS = 5
+const LENGTH = 5;
+const MAX_ATTEMPTS = 5;
+const MINIMUM_SHAPE_COUNT = 10;
 
 function shapeKey(s: ShapeCode) {
   let shapeDefinition = ShapeDefinitions[s];
@@ -97,6 +98,33 @@ export default function App() {
 
   const [attempts, setAttempts] = createSignal<ShapeCode[][]>(getStoredAttempts(seed()));
   const [currentGuess, setCurrentGuess] = createSignal<ShapeCode[]>([]);
+
+  const availableShapes = createMemo(() => {
+    const shapes: ShapeCode[] = [...AllShapes];
+    const sol = solution();
+    
+    // Randomly shuffle the shapes
+    let rng = prand.xorshift128plus(seed());
+    
+    for (let i = shapes.length - 1; i > 0; i--) {
+      const [j, rng2] = prand.uniformIntDistribution(0, i, rng);
+
+      rng = rng2;
+
+      const temp = shapes[i];
+      shapes[i] = shapes[j];
+      shapes[j] = temp;
+    }
+
+    // Remove until we have the minimum shape count
+    for (let i = shapes.length - 1; i >= 0 && shapes.length > MINIMUM_SHAPE_COUNT; i--) {
+      if (!sol.includes(shapes[i])) {
+        shapes.splice(i, 1);
+      }
+    }
+      
+    return shapes;
+  });
 
   const feedbacks = createMemo<Feedback[][]>(() => {
     return attempts().map(attempt => {
@@ -300,7 +328,7 @@ export default function App() {
         <div class="bg-slate-800/80 backdrop-blur-sm p-6 rounded-xl shadow-xl border border-slate-700/50 mt-6 transition-all duration-300 hover:shadow-2xl hover:shadow-slate-900/30">
           <Show when={!isDone()}>
             <div class="mb-3 grid grid-cols-5 gap-2">
-              <For each={AllShapes}>{(s, i) => {
+              <For each={availableShapes()}>{(s, i) => {
                 const isSelected = createMemo(() => currentGuess().includes(s));
                 return (
                   <button 
@@ -371,60 +399,83 @@ export default function App() {
       </div>
     </div>
   )
-}
 
-function RulesSection() {
-  const [areRulesVisible, setRulesAreVisible] = createSignal(false);
-
-  function parseDescription(desc: string) {
-    // Replace tokens like <circle> with the corresponding icon and tooltip.
-    const parts = desc.split(/(<[a-z]+>)/gi);
+  function RulesSection() {
+    const [areRulesVisible, setRulesAreVisible] = createSignal(false);
   
-    return parts.map(part => {
-      const match = part.match(/^<([a-z]+)>$/i);
-      if (match) {
-        const shapeCode = match[1] as ShapeCode;
-        return (
-          <span class="font-semibold" title={ShapeDefinitions[shapeCode].displayName}>
-            {shapeKey(shapeCode)}
-          </span>
-        );
-      }
-      return part;
-    });
-  }
+    function parseDescription(desc: string) {
+      // Replace tokens like <circle> with the corresponding icon and tooltip.
+      const parts = desc.split(/(<[a-z]+>)/gi);
+    
+      return parts.map(part => {
+        const match = part.match(/^<([a-z]+)>$/i);
+        if (match) {
+          const shapeCode = match[1] as ShapeCode;
+          return (
+            <span class="font-semibold" title={ShapeDefinitions[shapeCode].displayName}>
+              {shapeKey(shapeCode)}
+            </span>
+          );
+        }
+        return part;
+      });
+    }
 
-  return (
-    <>
-      <button 
-        onClick={() => setRulesAreVisible(!areRulesVisible())}
-        class="w-full h-12 rounded-lg border-2 border-slate-600/50 flex items-center justify-center font-semibold
-          bg-slate-700/70 hover:bg-slate-600/70 hover:border-slate-500/70 active:scale-95 transition-all duration-200"
-      >
-        <span class="material-symbols-outlined mr-2 transition-transform duration-300" 
-              style={`transform: rotate(${areRulesVisible() ? '180deg' : '0'})`}>
-          expand_more
-        </span>
-        {areRulesVisible() ? 'HIDE' : 'SHOW'} HELP
-      </button>
-      
-      <div class={`overflow-hidden transition-all duration-500 ease-in-out ${areRulesVisible() ? 'max-h-auto opacity-100' : 'max-h-0 opacity-0'}`}>
-        <div class="mt-4">
-          <p class="font-semibold text-lg mb-3 text-slate-200 flex items-center">
-            <span class="material-symbols-outlined mr-2 text-blue-400">info</span>
-            Pattern Generator Rules
-          </p>
-          <ul class="list-disc list-outside pl-5 space-y-2 text-slate-300">
-            <For each={Object.values(ShapeDefinitions)}>{(shape, i) => (
-              <For each={shape.rules}>{(rule, j) => (
-                <li class="animate__animated animate__fadeIn" style={`animation-delay: ${(i() * 2 + j()) * 50}ms`}>
-                  {parseDescription(rule.getDescription(shape.code))}
-                </li>
+    const shapeRules = createMemo(() => {
+      const result = {} as Record<ShapeCode, ShapeRule[]>;
+      const relevantShapes = availableShapes();
+
+      for (const shape of Object.values(ShapeDefinitions)) {
+        if (!relevantShapes.includes(shape.code)) {
+          continue;
+        }
+
+        const rules = shape.rules.filter(rule => {
+          return availableShapes().some(shape => rule.isRelevant(shape));
+        });
+
+        if (rules.length === 0) {
+          continue;
+        }
+
+        result[shape.code] = rules;
+      }
+
+      return result;
+    });
+  
+    return (
+      <>
+        <button 
+          onClick={() => setRulesAreVisible(!areRulesVisible())}
+          class="w-full h-12 rounded-lg border-2 border-slate-600/50 flex items-center justify-center font-semibold
+            bg-slate-700/70 hover:bg-slate-600/70 hover:border-slate-500/70 active:scale-95 transition-all duration-200"
+        >
+          <span class="material-symbols-outlined mr-2 transition-transform duration-300" 
+                style={`transform: rotate(${areRulesVisible() ? '180deg' : '0'})`}>
+            expand_more
+          </span>
+          {areRulesVisible() ? 'HIDE' : 'SHOW'} HELP
+        </button>
+        
+        <div class={`overflow-hidden transition-all duration-500 ease-in-out ${areRulesVisible() ? 'max-h-auto opacity-100' : 'max-h-0 opacity-0'}`}>
+          <div class="mt-4">
+            <p class="font-semibold text-lg mb-3 text-slate-200 flex items-center">
+              <span class="material-symbols-outlined mr-2 text-blue-400">info</span>
+              Pattern Generator Rules
+            </p>
+            <ul class="list-disc list-outside pl-5 space-y-2 text-slate-300">
+              <For each={Object.keys(shapeRules())}>{(shapeCode, _) => (
+                <For each={shapeRules()[shapeCode as ShapeCode]}>{(rule, j) => (
+                  <li class="animate__animated animate__fadeIn" style={`animation-delay: ${(j() * 2 + j()) * 20}ms`}>
+                    {parseDescription(rule.getDescription(shapeCode as ShapeCode))}
+                  </li>
+                )}</For>
               )}</For>
-            )}</For>
-          </ul>
+            </ul>
+          </div>
         </div>
-      </div>
-    </>
-  );
+      </>
+    );
+  }
 }
