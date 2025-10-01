@@ -203,6 +203,29 @@ export default function App() {
 
     setCurrentGuess([...currentGuess(), s]); 
   }
+
+  function isPotentialShape(s: ShapeCode) {
+    const current = currentGuess();
+    const allAttempts = attempts();
+    const allFeedbacks = feedbacks();
+
+    const countInCurrent = current.filter(shape => shape === s).length;
+
+    for (let i = 0; i < allAttempts.length; i++) {
+      const attemptAndFeedback = allAttempts[i].map((shape, index) => {
+        return { shape, feedback: allFeedbacks[i][index] };
+      });
+
+      const attemptsOfShape = attemptAndFeedback.filter(item => item.shape === s);
+      
+      if (attemptsOfShape.filter(item => item.feedback === 'absent').length > 0 && 
+          attemptsOfShape.filter(item => item.feedback !== 'absent').length <= countInCurrent) {
+        return false;
+      }
+    }
+
+    return true;
+  }
   
   function removeLast() { 
     if (isDone()) return; 
@@ -338,7 +361,9 @@ export default function App() {
                     class={`flex-1 min-w-10 h-10 rounded-lg border-2 flex items-center justify-center font-semibold
                       transform transition-all duration-200 active:scale-90
                       bg-slate-700/70 border-slate-600/50 hover:bg-slate-600/70 hover:border-slate-500/70
+                      disabled:bg-neutral-600/50 disabled:border-neutral-500/50 disabled:hover:bg-neutral-600/50 disabled:hover:border-neutral-500/50
                       animate__animated`}
+                    disabled={!isPotentialShape(s)}
                   >
                     <div class={isSelected() ? 'animate__animated animate__bounceIn' : ''}>
                       {shapeKey(s)}
