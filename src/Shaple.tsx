@@ -432,7 +432,9 @@ export default function App() {
   function RulesSection() {
     const [areRulesVisible, setRulesAreVisible] = createSignal(false);
   
-    function parseDescription(desc: string) {
+    function parseDescription(rule: ShapeRule, shapeCode: ShapeCode) {
+      const desc = rule.getDescription(shapeCode, availableShapes());
+
       // Replace tokens like <circle> with the corresponding icon and tooltip.
       const parts = desc.split(/(<[a-z]+>)/gi);
     
@@ -496,8 +498,8 @@ export default function App() {
             <ul class="list-disc list-outside pl-5 space-y-2 text-slate-300">
               <For each={Object.keys(shapeRules())}>{(shapeCode, _) => (
                 <For each={shapeRules()[shapeCode as ShapeCode]}>{(rule, j) => (
-                  <li class="animate__animated animate__fadeIn" style={`animation-delay: ${(j() * 2 + j()) * 20}ms`}>
-                    {parseDescription(rule.getDescription(shapeCode as ShapeCode))}
+                  <li>
+                    {parseDescription(rule, shapeCode as ShapeCode)}
                   </li>
                 )}</For>
               )}</For>

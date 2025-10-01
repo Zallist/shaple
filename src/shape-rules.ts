@@ -1,4 +1,4 @@
-import { ShapeCode, ShapeRule } from './shape';
+import { AllShapes, ShapeCode, ShapeRule } from './shape';
 
 function getNeighbours(shapes: Array<ShapeCode>, index: number, distance: number): Array<ShapeCode> {
     let result = Array<ShapeCode>();
@@ -9,6 +9,10 @@ function getNeighbours(shapes: Array<ShapeCode>, index: number, distance: number
         result.push(shapes[index + distance]);
 
     return result;
+}
+
+function intersect<T>(a: T[], b: T[]) {
+    return a.filter((x) => b.includes(x));
 }
 
 abstract class SimpleRule implements ShapeRule {
@@ -26,7 +30,7 @@ abstract class SimpleRule implements ShapeRule {
 
     protected abstract evaluateInternal(sequence: Array<ShapeCode>, index: number): boolean;
     
-    public abstract getDescription(forShape: ShapeCode): string;
+    public abstract getDescription(forShape: ShapeCode, availableShapes: ShapeCode[]): string;
 
     public isRelevant(forShape: ShapeCode): boolean {
         return this.getShapes().includes(forShape);
@@ -40,41 +44,42 @@ export class IsAdjacentTo extends SimpleRule {
         return getNeighbours(sequence, index, 1).some((s) => this.getShapes().includes(s));
     }
 
-    public getDescription(forShape: ShapeCode): string {
-        return `<${forShape}> must be next to <${this.getShapes().join('> or <')}>`;
+    public getDescription(forShape: ShapeCode, availableShapes: ShapeCode[] = AllShapes): string {
+        return `<${forShape}> likes <${intersect(this.getShapes(), availableShapes).join('> and <')}>`;
     }
 }
 
 export class IsNotAdjacentTo extends IsAdjacentTo {
     constructor(shapes: ShapeCode[] | ShapeCode) { super(shapes); this.not = true; }
 
-    public getDescription(forShape: ShapeCode): string {
-        return `<${forShape}> must not be next to to <${this.getShapes().join('> or <')}>`;
+    public getDescription(forShape: ShapeCode, availableShapes: ShapeCode[] = AllShapes): string {
+        return `<${forShape}> hates <${intersect(this.getShapes(), availableShapes).join('> and <')}>`;
     }
 }
 
 export class IsDistanceTo extends SimpleRule {
-    constructor(shapes: ShapeCode[] | ShapeCode, protected distance: number, protected requireOther: boolean = false) { super(shapes); }
+    constructor(shapes: ShapeCode[] | ShapeCode, protected distance: number) { super(shapes); }
 
     protected evaluateInternal(sequence: Array<ShapeCode>, index: number): boolean {
-        if (this.requireOther && !sequence.some((s) => this.getShapes().includes(s))) return true;
+        if (!sequence.some((s) => this.getShapes().includes(s))) 
+            return true;
+
         return getNeighbours(sequence, index, this.distance).some((s) => this.getShapes().includes(s));
     }
 
-    public getDescription(forShape: ShapeCode): string {
-        return `<${forShape}> must be ${this.distance} away from <${this.getShapes().join('> or <')}>${this.requireOther ? ` if <${this.getShapes().join('> or <')}> exists` : ''}`;
+    public getDescription(forShape: ShapeCode, availableShapes: ShapeCode[] = AllShapes): string {
+        return `<${forShape}> stays ${this.distance} away from <${intersect(this.getShapes(), availableShapes).join('> or <')}>`;
     }
 }
 
 export class IsNotDistanceTo extends SimpleRule {
-    constructor(shapes: ShapeCode[] | ShapeCode, protected distance: number, protected requireOther: boolean = false) { super(shapes); }
+    constructor(shapes: ShapeCode[] | ShapeCode, protected distance: number) { super(shapes); }
 
     protected evaluateInternal(sequence: Array<ShapeCode>, index: number): boolean {
-        if (this.requireOther && !sequence.some((s) => this.getShapes().includes(s))) return true;
         return !getNeighbours(sequence, index, this.distance).some((s) => this.getShapes().includes(s));
     }
 
-    public getDescription(forShape: ShapeCode): string {
-        return `<${forShape}> must not be ${this.distance} away from <${this.getShapes().join('> or <')}>${this.requireOther ? ` if <${this.getShapes().join('> or <')}> exists` : ''}`;
+    public getDescription(forShape: ShapeCode, availableShapes: ShapeCode[] = AllShapes): string {
+        return `<${forShape}> doesn't stay ${this.distance} away from <${intersect(this.getShapes(), availableShapes).join('> or <')}>`;
     }
 }
