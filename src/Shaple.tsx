@@ -358,7 +358,7 @@ export default function App() {
                   }
                 }}
                 disabled={currentGuess().length === 0}
-                class={`flex-1 h-12 rounded-lg border-2 flex items-center justify-center font-semibold transition-all duration-200
+                class={`flex-1 h-12 rounded-lg border-2 flex items-center justify-center font-semibold text-sm transition-all duration-200
                   ${currentGuess().length === 0 ? 'bg-slate-800/30 border-slate-700/50 text-slate-600' : 
                     'bg-slate-700/70 border-slate-600/50 hover:bg-slate-600/70 hover:border-slate-500/70 active:scale-95'}
                   animate__animated`}
@@ -370,7 +370,7 @@ export default function App() {
               <button 
                 onClick={submit}
                 disabled={currentGuess().length !== LENGTH}
-                class={`flex-1 h-12 rounded-lg border-2 flex items-center justify-center font-semibold transition-all duration-200
+                class={`flex-1 h-12 rounded-lg border-2 flex items-center justify-center font-semibold text-sm transition-all duration-200
                   ${currentGuess().length !== LENGTH ? 'bg-blue-900/30 border-blue-800/50 text-blue-600' : 
                     'bg-blue-600/90 border-blue-400 hover:bg-blue-500/90 hover:border-blue-300 active:scale-95 shadow-lg shadow-blue-900/30'}
                   animate__animated`}
@@ -382,7 +382,7 @@ export default function App() {
 
             <button 
               onClick={toggleDailySeed}
-              class="flex-1 h-12 rounded-lg border-2 border-slate-600/50 flex items-center justify-center font-semibold
+              class="flex-1 h-12 rounded-lg border-2 border-slate-600/50 flex items-center justify-center font-semibold text-sm
                 bg-slate-700/70 hover:bg-slate-600/70 hover:border-slate-500/70 active:scale-95 transition-all duration-200"
             >
               <span class="material-symbols-outlined mr-1">
