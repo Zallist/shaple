@@ -359,9 +359,11 @@ export default function App() {
                       pickShape(s);
                     }}
                     class={`flex-1 min-w-10 h-10 rounded-lg border-2 flex items-center justify-center font-semibold
-                      transform transition-all duration-200 active:scale-90
-                      bg-slate-700/70 border-slate-600/50 hover:bg-slate-600/70 hover:border-slate-500/70
-                      disabled:bg-neutral-600/50 disabled:border-neutral-500/50 disabled:hover:bg-neutral-600/50 disabled:hover:border-neutral-500/50
+                      transform transition-all duration-200 
+                      active:scale-90 disabled:active:scale-100
+                      bg-slate-700/70 border-slate-600/50 
+                      hover:bg-slate-600/70 hover:border-slate-500/70
+                      disabled:bg-neutral-900/50 disabled:border-neutral-800/50 disabled:text-neutral-600
                       animate__animated`}
                     disabled={!isPotentialShape(s)}
                   >
@@ -384,9 +386,10 @@ export default function App() {
                 }}
                 disabled={currentGuess().length === 0}
                 class={`flex-1 h-12 rounded-lg border-2 flex items-center justify-center font-semibold text-sm transition-all duration-200
-                  ${currentGuess().length === 0 ? 'bg-slate-800/30 border-slate-700/50 text-slate-600' : 
-                    'bg-slate-700/70 border-slate-600/50 hover:bg-slate-600/70 hover:border-slate-500/70 active:scale-95'}
-                  animate__animated`}
+                    active:scale-95 disabled:active:scale-100
+                    bg-slate-700/70 border-slate-600/50 hover:bg-slate-600/70 hover:border-slate-500/70
+                    disabled:bg-slate-900/20 disabled:border-slate-400/20 disabled:text-slate-400
+                    animate__animated`}
               >
                 <span class="material-symbols-outlined mr-1">backspace</span>
                 Remove
@@ -396,9 +399,10 @@ export default function App() {
                 onClick={submit}
                 disabled={currentGuess().length !== LENGTH}
                 class={`flex-1 h-12 rounded-lg border-2 flex items-center justify-center font-semibold text-sm transition-all duration-200
-                  ${currentGuess().length !== LENGTH ? 'bg-blue-900/30 border-blue-800/50 text-blue-600' : 
-                    'bg-blue-600/90 border-blue-400 hover:bg-blue-500/90 hover:border-blue-300 active:scale-95 shadow-lg shadow-blue-900/30'}
-                  animate__animated`}
+                    active:scale-95 disabled:active:scale-100
+                    bg-blue-700/70 border-blue-600/50 hover:bg-blue-600/70 hover:border-blue-500/70
+                    disabled:bg-blue-900/20 disabled:border-blue-400/20 disabled:text-blue-400
+                    animate__animated`}
               >
                 <span class="material-symbols-outlined mr-1">send</span>
                 Submit
@@ -408,7 +412,7 @@ export default function App() {
             <button 
               onClick={toggleDailySeed}
               class="flex-1 h-12 rounded-lg border-2 border-slate-600/50 flex items-center justify-center font-semibold text-sm
-                bg-slate-700/70 hover:bg-slate-600/70 hover:border-slate-500/70 active:scale-95 transition-all duration-200"
+                     bg-slate-700/70 hover:bg-slate-600/70 hover:border-slate-500/70 active:scale-95 transition-all duration-200"
             >
               <span class="material-symbols-outlined mr-1">
                 {isDailySeed() ? 'shuffle' : 'calendar_month'}

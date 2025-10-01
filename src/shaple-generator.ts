@@ -243,12 +243,17 @@ export function generateShaple(length: number, seed: number): Array<ShapeCode> {
             result[i] = AllShapes[shapeIndex];
         }
 
+        if (attempts % 1000 === 0) {
+            console.log(`${attempts} tried and still no luck, seed: ${seed}`);
+        }
+
         if (isShapleValid(result)) return result;
     }
 
     throw new Error("Failed to generate shaple");
 };
 
+(window as any).generateShaple = generateShaple;
 
 (window as any).validateShaple = function(length: number, shapes: ShapeCode[] = AllShapes) {
     const result = Array<ShapeCode>(length);
