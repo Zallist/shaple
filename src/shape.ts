@@ -30,30 +30,34 @@ export const ShapeDefinitions: Record<ShapeCode, ShapeDefinition> = {
     triangle: new ShapeDefinition('triangle', 'Triangle', 'change_history'),
     star: new ShapeDefinition('star', 'Star', 'star'),
     hexagon: new ShapeDefinition('hexagon', 'Hexagon', 'hexagon'),
+
     lightning: new ShapeDefinition('lightning', 'Lightning', 'bolt'),
     crescent: new ShapeDefinition('crescent', 'Crescent', 'bedtime'),
     diamond: new ShapeDefinition('diamond', 'Diamond', 'diamond'),
     hive: new ShapeDefinition('hive', 'Hive', 'hive'),
     wave: new ShapeDefinition('wave', 'Wave', 'airwave'),
-    
+
     gear: new ShapeDefinition('gear', 'Gear', 'settings'),
     heart: new ShapeDefinition('heart', 'Heart', 'favorite'),
     flame: new ShapeDefinition('flame', 'Flame', 'local_fire_department'),
     leaf: new ShapeDefinition('leaf', 'Leaf', 'eco'),
     snowflake: new ShapeDefinition('snowflake', 'Snowflake', 'ac_unit'),
+    
     droplet: new ShapeDefinition('droplet', 'Droplet', 'water_drop'),
     skull: new ShapeDefinition('skull', 'Skull', 'skull'),
-    hourglass: new ShapeDefinition('hourglass', 'Hourglass', 'hourglass_top'),
+    hourglass: new ShapeDefinition('hourglass', 'Hourglass', 'hourglass'),
     eye: new ShapeDefinition('eye', 'Eye', 'visibility'),
     shield: new ShapeDefinition('shield', 'Shield', 'shield'),
-    crown: new ShapeDefinition('crown', 'Crown', 'workspace_premium'),
+
+    crown: new ShapeDefinition('crown', 'Crown', 'crown'),
     clock: new ShapeDefinition('clock', 'Clock', 'access_time'),
     cloud: new ShapeDefinition('cloud', 'Cloud', 'cloud'),
     sun: new ShapeDefinition('sun', 'Sun', 'wb_sunny'),
     raven: new ShapeDefinition('raven', 'Raven', 'raven'),
+
     paw: new ShapeDefinition('paw', 'Paw', 'pets'),
     anchor: new ShapeDefinition('anchor', 'Anchor', 'anchor'),
-    key: new ShapeDefinition('key', 'Key', 'vpn_key'),
+    key: new ShapeDefinition('key', 'Key', 'key'),
     lock: new ShapeDefinition('lock', 'Lock', 'lock'),
-    spiral: new ShapeDefinition('spiral', 'Spiral', 'rotate_right'),
+    spiral: new ShapeDefinition('spiral', 'Spiral', 'storm'),
 };
