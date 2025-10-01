@@ -15,5 +15,19 @@ export interface ShapeRule {
 }
 
 export class ShapeDefinition {
-    constructor(public code: ShapeCode, public displayName: string, public rules: ShapeRule[], public icon_name: string) { }
+    public rules: ShapeRule[] = [];
+    constructor(public code: ShapeCode, public displayName: string, public icon_name: string) { }
 }
+
+export const ShapeDefinitions: Record<ShapeCode, ShapeDefinition> = {
+    circle: new ShapeDefinition('circle', 'Circle', 'circle'),
+    square: new ShapeDefinition('square', 'Square', 'square'),
+    triangle: new ShapeDefinition('triangle', 'Triangle', 'change_history'),
+    star: new ShapeDefinition('star', 'Star', 'star'),
+    hexagon: new ShapeDefinition('hexagon', 'Hexagon', 'hexagon'),
+    lightning: new ShapeDefinition('lightning', 'Lightning', 'electric_bolt'),
+    crescent: new ShapeDefinition('crescent', 'Crescent', 'bedtime'),
+    diamond: new ShapeDefinition('diamond', 'Diamond', 'diamond'),
+    hive: new ShapeDefinition('hive', 'Hive', 'hive'),
+    wave: new ShapeDefinition('wave', 'Wave', 'airwave')
+};

@@ -1,6 +1,6 @@
 import { createSignal, For, Show, createMemo, createEffect, batch, onCleanup } from 'solid-js'
-import { ShapeCode, AllShapes } from './shape'
-import { ShapeDefinitions, isShapleValid, generateShaple } from './shaple-generator'
+import { ShapeCode, AllShapes, ShapeDefinitions } from './shape'
+import { isShapleValid, generateShaple } from './shaple-generator'
 import prand from 'pure-rand'
 import 'animate.css'
 

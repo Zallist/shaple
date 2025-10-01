@@ -1,50 +1,49 @@
 import prand from 'pure-rand';
-import { ShapeCode, AllShapes, ShapeDefinition } from './shape';
+import { ShapeCode, AllShapes, ShapeDefinitions } from './shape';
 import * as shapeRules from './shape-rules';
 
-export const ShapeDefinitions: Record<ShapeCode, ShapeDefinition> = {
-    circle: new ShapeDefinition('circle', 'Circle', [
-        new shapeRules.IsNotAdjacentTo('square'),
-        new shapeRules.IsNotDistanceTo('hexagon', 2)
-    ], 'circle'),
-    square: new ShapeDefinition('square', 'Square', [
-        new shapeRules.IsNotAdjacentTo('circle'),
-        new shapeRules.IsNotAdjacentTo('triangle'),
-        new shapeRules.IsDistanceTo('star', 2, true)
-    ], 'square'),
-    triangle: new ShapeDefinition('triangle', 'Triangle', [
-        new shapeRules.IsAdjacentTo(['star', 'hexagon']),
-        new shapeRules.IsNotDistanceTo('lightning', 2)
-    ], 'change_history'),
-    star: new ShapeDefinition('star', 'Star', [
-        new shapeRules.IsNotAdjacentTo('star'),
-        new shapeRules.IsAdjacentTo(['triangle', 'hive'])
-    ], 'star'),
-    hexagon: new ShapeDefinition('hexagon', 'Hexagon', [
-        new shapeRules.IsAdjacentTo('circle'),
-        new shapeRules.IsNotAdjacentTo('lightning')
-    ], 'hexagon'),
-    lightning: new ShapeDefinition('lightning', 'Lightning', [
-        new shapeRules.IsNotAdjacentTo(['triangle', 'hexagon']),
-        new shapeRules.IsDistanceTo('wave', 2, true)
-    ], 'electric_bolt'),
-    crescent: new ShapeDefinition('crescent', 'Crescent', [
-        new shapeRules.IsNotAdjacentTo('hive'),
-        new shapeRules.IsDistanceTo('diamond', 2, true)
-    ], 'bedtime'),
-    diamond: new ShapeDefinition('diamond', 'Diamond', [
-        new shapeRules.IsAdjacentTo(['wave', 'crescent']),
-        new shapeRules.IsNotDistanceTo('circle', 2)
-    ], 'diamond'),
-    hive: new ShapeDefinition('hive', 'Hive', [
-        new shapeRules.IsAdjacentTo(['triangle', 'star']),
-        new shapeRules.IsNotAdjacentTo('crescent')
-    ], 'hive'),
-    wave: new ShapeDefinition('wave', 'Wave', [
-        new shapeRules.IsNotAdjacentTo('lightning'),
-        new shapeRules.IsAdjacentTo('diamond')
-    ], 'airwave')
-};
+// Append rules for this generator
+ShapeDefinitions.circle.rules = [
+  new shapeRules.IsNotAdjacentTo('square'),
+  new shapeRules.IsNotDistanceTo('hexagon', 2),
+];
+ShapeDefinitions.square.rules = [
+  new shapeRules.IsNotAdjacentTo('circle'),
+  new shapeRules.IsNotAdjacentTo('triangle'),
+  new shapeRules.IsDistanceTo('star', 2, true),
+];
+ShapeDefinitions.triangle.rules = [
+  new shapeRules.IsAdjacentTo(['star', 'hexagon']),
+  new shapeRules.IsNotDistanceTo('lightning', 2),
+];
+ShapeDefinitions.star.rules = [
+  new shapeRules.IsNotAdjacentTo('star'),
+  new shapeRules.IsAdjacentTo(['triangle', 'hive']),
+];
+ShapeDefinitions.hexagon.rules = [
+  new shapeRules.IsAdjacentTo('circle'),
+  new shapeRules.IsNotAdjacentTo('lightning'),
+];
+ShapeDefinitions.lightning.rules = [
+  new shapeRules.IsNotAdjacentTo(['triangle', 'hexagon']),
+  new shapeRules.IsDistanceTo('wave', 2, true),
+];
+ShapeDefinitions.crescent.rules = [
+  new shapeRules.IsNotAdjacentTo('hive'),
+  new shapeRules.IsDistanceTo('diamond', 2, true),
+];
+ShapeDefinitions.diamond.rules = [
+  new shapeRules.IsAdjacentTo(['wave', 'crescent']),
+  new shapeRules.IsNotDistanceTo('circle', 2),
+];
+ShapeDefinitions.hive.rules = [
+  new shapeRules.IsAdjacentTo(['triangle', 'star']),
+  new shapeRules.IsNotAdjacentTo('crescent'),
+];
+ShapeDefinitions.wave.rules = [
+  new shapeRules.IsNotAdjacentTo('lightning'),
+  new shapeRules.IsAdjacentTo('diamond'),
+];
 
 export function isShapleValid(shapes: Array<ShapeCode>): boolean {
     for (let i = 0; i < shapes.length; i++) {
