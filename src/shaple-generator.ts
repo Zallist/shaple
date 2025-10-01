@@ -1,120 +1,48 @@
 import prand from 'pure-rand';
-
-// An array up-front so we have a defined index, rather than a type/enum which are undefined for order
-const allShapeCodes = [
-    'circle', 'square', 'triangle', 'star', 'hexagon', 
-    'lightning', 'crescent', 'diamond', 'hive', 'wave'
-] as const;
-
-export type ShapeCode = typeof allShapeCodes[number];
-
-// And expose it converted to the right type
-export const AllShapes: ShapeCode[] = [...allShapeCodes];
-
-export class ShapeDefinition {
-    code: ShapeCode;
-    displayName: string;
-    rules: Rule[];
-    icon_name: string;
-
-    constructor(code: ShapeCode, displayName: string, rules: Rule[], icon_name: string) {
-        this.code = code;
-        this.displayName = displayName;
-        this.rules = rules;
-        this.icon_name = icon_name;
-    }
-}
-
-export type RuleEvaluator = (shapes: Array<ShapeCode>, index: number) => boolean;
-
-export class Rule {
-    check: RuleEvaluator;
-    description: string;
-
-    constructor(check: RuleEvaluator, description: string) {
-        this.check = check;
-        this.description = description;
-    }
-}
-
-const RuleFunctions = {
-    // Returns the shapes at exactly `distance` away from `index` (both sides if within bounds).
-    // Example: distance=1 means immediate neighbors; out-of-range neighbors are ignored.
-    Neighbours: (shapes: Array<ShapeCode>, index: number, distance: number): Array<ShapeCode> => {
-        let result = Array<ShapeCode>();
-
-        if (index - distance >= 0)
-            result.push(shapes[index - distance]);
-        if (index + distance < shapes.length)
-            result.push(shapes[index + distance]);
-
-        return result;
-    },
-
-    // "Adj" helpers mean distance=1; "Not" means forbidden, "Must" means required.
-    AdjNot: (other: ShapeCode, description: string) => new Rule((shapes, index) => !RuleFunctions.Neighbours(shapes, index, 1).includes(other), description),
-    AdjNotAny: (others: Array<ShapeCode>, description: string) => new Rule((shapes, index) => !RuleFunctions.Neighbours(shapes, index, 1).some((s) => others.includes(s)), description),
-    AdjNotSelf: (description: string) => new Rule((shapes, index) => !RuleFunctions.Neighbours(shapes, index, 1).includes(shapes[index]), description),
-    
-    AdjMust: (other: ShapeCode, description: string) => new Rule((shapes, index) => RuleFunctions.Neighbours(shapes, index, 1).includes(other), description),
-    AdjMustAny: (others: Array<ShapeCode>, description: string) => new Rule((shapes, index) => RuleFunctions.Neighbours(shapes, index, 1).some((s) => others.includes(s)), description),
-    AdjMustSelf: (description: string) => new Rule((shapes, index) => RuleFunctions.Neighbours(shapes, index, 1).includes(shapes[index]), description),
-
-    DistNot: (distance: number, other: ShapeCode, description: string, requireOther: boolean = false): Rule => {
-        return new Rule((shapes, index) => {
-            if (requireOther && !shapes.includes(other)) return true;
-            return !RuleFunctions.Neighbours(shapes, index, distance).includes(other);
-        }, description);
-    },
-    DistMust: (distance: number, other: ShapeCode, description: string, requireOther: boolean = false): Rule => {
-        return new Rule((shapes, index) => {
-            if (requireOther && !shapes.includes(other)) return true;
-            return RuleFunctions.Neighbours(shapes, index, distance).includes(other);
-        }, description);
-    }
-};
+import { ShapeCode, AllShapes, ShapeDefinition } from './shape';
+import * as shapeRules from './shape-rules';
 
 export const ShapeDefinitions: Record<ShapeCode, ShapeDefinition> = {
     circle: new ShapeDefinition('circle', 'Circle', [
-        RuleFunctions.AdjNot('square', "<circle> cannot be adjacent to <square>"),
-        RuleFunctions.DistNot(2, 'hexagon', "<circle> cannot be 2-away from <hexagon>")
+        new shapeRules.IsNotAdjacentTo('square'),
+        new shapeRules.IsNotDistanceTo('hexagon', 2)
     ], 'circle'),
     square: new ShapeDefinition('square', 'Square', [
-        RuleFunctions.AdjNot('circle', "<square> cannot be adjacent to <circle>"),
-        RuleFunctions.AdjNot('triangle', "<square> cannot be adjacent to <triangle>"),
-        RuleFunctions.DistMust(2, 'star', "<square> must be 2-away from <star> if <star> exists", true)
+        new shapeRules.IsNotAdjacentTo('circle'),
+        new shapeRules.IsNotAdjacentTo('triangle'),
+        new shapeRules.IsDistanceTo('star', 2, true)
     ], 'square'),
     triangle: new ShapeDefinition('triangle', 'Triangle', [
-        RuleFunctions.AdjMustAny(['star', 'hexagon'], "<triangle> must be adjacent to <star> or <hexagon>"),
-        RuleFunctions.DistNot(2, 'lightning', "<triangle> cannot be 2-away from <lightning>")
+        new shapeRules.IsAdjacentTo(['star', 'hexagon']),
+        new shapeRules.IsNotDistanceTo('lightning', 2)
     ], 'change_history'),
     star: new ShapeDefinition('star', 'Star', [
-        RuleFunctions.AdjNotSelf("<star> cannot be adjacent to <star>"),
-        RuleFunctions.AdjMustAny(['triangle', 'hive'], "<star> must be adjacent to <triangle> or <hive>")
+        new shapeRules.IsNotAdjacentTo('star'),
+        new shapeRules.IsAdjacentTo(['triangle', 'hive'])
     ], 'star'),
     hexagon: new ShapeDefinition('hexagon', 'Hexagon', [
-        RuleFunctions.AdjMust('circle', "<hexagon> must be adjacent to <circle>"),
-        RuleFunctions.AdjNot('lightning', "<hexagon> cannot be adjacent to <lightning>")
+        new shapeRules.IsAdjacentTo('circle'),
+        new shapeRules.IsNotAdjacentTo('lightning')
     ], 'hexagon'),
     lightning: new ShapeDefinition('lightning', 'Lightning', [
-        RuleFunctions.AdjNotAny(['triangle', 'hexagon'], "<lightning> cannot be adjacent to <triangle> or <hexagon>"),
-        RuleFunctions.DistMust(2, 'wave', "<lightning> must be 2-away from <wave> if <wave> exists", true)
+        new shapeRules.IsNotAdjacentTo(['triangle', 'hexagon']),
+        new shapeRules.IsDistanceTo('wave', 2, true)
     ], 'electric_bolt'),
     crescent: new ShapeDefinition('crescent', 'Crescent', [
-        RuleFunctions.AdjNot('hive', "<crescent> cannot be adjacent to <hive>"),
-        RuleFunctions.DistMust(2, 'diamond', "<crescent> must be 2-away from <diamond> if <diamond> exists", true)
+        new shapeRules.IsNotAdjacentTo('hive'),
+        new shapeRules.IsDistanceTo('diamond', 2, true)
     ], 'bedtime'),
     diamond: new ShapeDefinition('diamond', 'Diamond', [
-        RuleFunctions.AdjMustAny(['wave', 'crescent'], "<diamond> must be adjacent to <wave> or <crescent>"),
-        RuleFunctions.DistNot(2, 'circle', "<diamond> cannot be 2-away from <circle>")
+        new shapeRules.IsAdjacentTo(['wave', 'crescent']),
+        new shapeRules.IsNotDistanceTo('circle', 2)
     ], 'diamond'),
     hive: new ShapeDefinition('hive', 'Hive', [
-        RuleFunctions.AdjMustAny(['triangle', 'star'], "<hive> must be adjacent to <triangle> or <star>"),
-        RuleFunctions.AdjNot('crescent', "<hive> cannot be adjacent to <crescent>")
+        new shapeRules.IsAdjacentTo(['triangle', 'star']),
+        new shapeRules.IsNotAdjacentTo('crescent')
     ], 'hive'),
     wave: new ShapeDefinition('wave', 'Wave', [
-        RuleFunctions.AdjNot('lightning', "<wave> cannot be adjacent to <lightning>"),
-        RuleFunctions.AdjMust('diamond', "<wave> must be adjacent to <diamond>")
+        new shapeRules.IsNotAdjacentTo('lightning'),
+        new shapeRules.IsAdjacentTo('diamond')
     ], 'airwave')
 };
 
@@ -122,7 +50,7 @@ export function isShapleValid(shapes: Array<ShapeCode>): boolean {
     for (let i = 0; i < shapes.length; i++) {
         const shapeDef = ShapeDefinitions[shapes[i]];
         for (const rule of shapeDef.rules) {
-            if (!rule.check(shapes, i)) {
+            if (!rule.evaluate(shapes, i)) {
                 return false;
             }
         }

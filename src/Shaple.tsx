@@ -1,13 +1,14 @@
 import { createSignal, For, Show, createMemo, createEffect, batch, onCleanup } from 'solid-js'
-import * as generator from './shaple-generator'
+import { ShapeCode, AllShapes } from './shape'
+import { ShapeDefinitions, isShapleValid, generateShaple } from './shaple-generator'
 import prand from 'pure-rand'
 import 'animate.css'
 
 const LENGTH = 5
 const MAX_ATTEMPTS = 5
 
-function shapeKey(s: generator.ShapeCode) {
-  let shapeDefinition = generator.ShapeDefinitions[s];
+function shapeKey(s: ShapeCode) {
+  let shapeDefinition = ShapeDefinitions[s];
   return <span class="material-symbols-outlined">{shapeDefinition.icon_name}</span>;
 }
 
@@ -39,7 +40,7 @@ function getRandomSeed(): number {
   return seed;
 }
 
-function getStoredAttempts(seed: number): generator.ShapeCode[][] {
+function getStoredAttempts(seed: number): ShapeCode[][] {
   // Store attempts per-seed, so switching between daily/random retains distinct histories.
   const stored = localStorage.getItem(`shaple_attempts_${seed}`);
   
@@ -55,21 +56,21 @@ function getStoredAttempts(seed: number): generator.ShapeCode[][] {
 
   // if numeric, then use indices
   if (parsed.every(attempt => attempt.every(index => typeof index === 'number'))) {
-    return parsed.map(attempt => attempt.map(index => generator.AllShapes[index]));
+    return parsed.map(attempt => attempt.map(index => AllShapes[index]));
   }
 
   // else if string then use names (unless doesn't exist)
   if (parsed.every(attempt => attempt.every(shape => typeof shape === 'string'))) {
-    return parsed.map(attempt => attempt.map(shape => generator.AllShapes.includes(shape as generator.ShapeCode) ? shape as generator.ShapeCode : generator.AllShapes[0]));
+    return parsed.map(attempt => attempt.map(shape => AllShapes.includes(shape as ShapeCode) ? shape as ShapeCode : AllShapes[0]));
   }
 
   console.error('Invalid stored attempts:', stored);
   return [];
 }
 
-function setStoredAttempts(seed: number, attempts: generator.ShapeCode[][]) {
+function setStoredAttempts(seed: number, attempts: ShapeCode[][]) {
   // convert to the raw indices so that we don't store the text
-  const rawAttempts = attempts.map(attempt => attempt.map(shape => generator.AllShapes.indexOf(shape)));
+  const rawAttempts = attempts.map(attempt => attempt.map(shape => AllShapes.indexOf(shape)));
   localStorage.setItem(`shaple_attempts_${seed}`, JSON.stringify(rawAttempts));
 }
 
@@ -92,16 +93,16 @@ function getCurrentSeed(): number {
 
 export default function App() {
   const [seed, setSeed] = createSignal(getCurrentSeed());
-  const solution = createMemo(() => generator.generateShaple(LENGTH, seed()));
+  const solution = createMemo(() => generateShaple(LENGTH, seed()));
 
-  const [attempts, setAttempts] = createSignal<generator.ShapeCode[][]>(getStoredAttempts(seed()));
-  const [currentGuess, setCurrentGuess] = createSignal<generator.ShapeCode[]>([]);
+  const [attempts, setAttempts] = createSignal<ShapeCode[][]>(getStoredAttempts(seed()));
+  const [currentGuess, setCurrentGuess] = createSignal<ShapeCode[]>([]);
 
   const feedbacks = createMemo<Feedback[][]>(() => {
     return attempts().map(attempt => {
       const fb: Feedback[] = Array(LENGTH).fill('absent');
       const sol = solution();
-      const solCounts: Record<generator.ShapeCode, number> = {} as any;
+      const solCounts: Record<ShapeCode, number> = {} as any;
       
       // Count occurrences of each shape in solution to correctly handle duplicates.
       sol.forEach(shape => {
@@ -168,7 +169,7 @@ export default function App() {
     });
   }
 
-  function pickShape(s: generator.ShapeCode) { 
+  function pickShape(s: ShapeCode) { 
     if (isDone()) return; 
     if (currentGuess().length >= LENGTH) return; 
 
@@ -299,7 +300,7 @@ export default function App() {
         <div class="bg-slate-800/80 backdrop-blur-sm p-6 rounded-xl shadow-xl border border-slate-700/50 mt-6 transition-all duration-300 hover:shadow-2xl hover:shadow-slate-900/30">
           <Show when={!isDone()}>
             <div class="mb-3 grid grid-cols-5 gap-2">
-              <For each={generator.AllShapes}>{(s, i) => {
+              <For each={AllShapes}>{(s, i) => {
                 const isSelected = createMemo(() => currentGuess().includes(s));
                 return (
                   <button 
@@ -382,9 +383,9 @@ function RulesSection() {
     return parts.map(part => {
       const match = part.match(/^<([a-z]+)>$/i);
       if (match) {
-        const shapeCode = match[1] as generator.ShapeCode;
+        const shapeCode = match[1] as ShapeCode;
         return (
-          <span class="font-semibold" title={generator.ShapeDefinitions[shapeCode].displayName}>
+          <span class="font-semibold" title={ShapeDefinitions[shapeCode].displayName}>
             {shapeKey(shapeCode)}
           </span>
         );
@@ -404,7 +405,7 @@ function RulesSection() {
               style={`transform: rotate(${areRulesVisible() ? '180deg' : '0'})`}>
           expand_more
         </span>
-        {areRulesVisible() ? 'HIDE' : 'SHOW'} RULES
+        {areRulesVisible() ? 'HIDE' : 'SHOW'} HELP
       </button>
       
       <div class={`overflow-hidden transition-all duration-500 ease-in-out ${areRulesVisible() ? 'max-h-auto opacity-100' : 'max-h-0 opacity-0'}`}>
@@ -414,10 +415,10 @@ function RulesSection() {
             Pattern Generator Rules
           </p>
           <ul class="list-disc list-outside pl-5 space-y-2 text-slate-300">
-            <For each={Object.values(generator.ShapeDefinitions)}>{(shape, i) => (
+            <For each={Object.values(ShapeDefinitions)}>{(shape, i) => (
               <For each={shape.rules}>{(rule, j) => (
                 <li class="animate__animated animate__fadeIn" style={`animation-delay: ${(i() * 2 + j()) * 50}ms`}>
-                  {parseDescription(rule.description)}
+                  {parseDescription(rule.getDescription(shape.code))}
                 </li>
               )}</For>
             )}</For>
