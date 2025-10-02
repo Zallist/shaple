@@ -14,7 +14,7 @@ function shapeKey(s: ShapeCode) {
   return <span class="material-symbols-outlined">{shapeDefinition.icon_name}</span>;
 }
 
-type Feedback = 'exact' | 'present' | 'absent' | 'invalid_reused';// | 'invalid_pattern';
+type Feedback = 'exact' | 'present' | 'absent' | 'invalid_reused' | 'invalid_pattern';
 
 function numberToString(n: number): string {
   return n.toString(36).toUpperCase();
@@ -131,6 +131,7 @@ export default function App() {
     const feedbacks: Feedback[][] = [];
     const allAttempts = attempts();
     const sol = solution();
+    const allShapes = availableShapes();
 
     for (let i = 0; i < allAttempts.length; i++) {
       const attempt = allAttempts[i];
@@ -165,10 +166,10 @@ export default function App() {
         }
 
         // check if invalid rule
-        //if (ShapeDefinitions[shape].rules.some(rule => rule.evaluate(attempt, j))) {
-        //  attemptFeedback[j].feedback = 'invalid_pattern';
-        //  continue;
-        //}
+        if (ShapeDefinitions[shape].rules.some(rule => !rule.evaluate(attempt, j, allShapes))) {
+          attemptFeedback[j] = 'invalid_pattern';
+          continue;
+        }
       }
 
       feedbacks.push(attemptFeedback);
@@ -317,10 +318,9 @@ export default function App() {
                                 animate__animated animate__bounceIn'
                         classList={{
                           'bg-green-600/90 border-green-400 shadow-lg shadow-green-900/30': feedback === 'exact',
-                          'bg-yellow-500/90 border-yellow-400 shadow-lg shadow-yellow-900/30': feedback === 'present',
-                          'bg-slate-700/70 border-slate-600/50 hover:border-slate-500/70': feedback === 'absent',
-                          'bg-yellow-600/90 border-yellow-500 shadow-lg shadow-yellow-900/30': feedback === 'invalid_reused',
-                          //'bg-red-900/20 border-red-900/20 shadow-lg shadow-red-900/10': feedback.feedback === 'invalid_pattern',
+                          'bg-yellow-500/90 border-yellow-400/90 shadow-lg shadow-yellow-900/30': feedback === 'present',
+                          'bg-yellow-500/70 border-yellow-400/70 shadow-lg shadow-yellow-900/30': feedback === 'invalid_reused',
+                          'bg-slate-700/50 border-slate-600/50 hover:border-slate-500/70': feedback === 'absent' || feedback === 'invalid_pattern',
                         }}
                         style={`animation-delay: ${j() * 50}ms`}
                       >

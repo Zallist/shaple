@@ -24,11 +24,23 @@ abstract class SimpleRule implements ShapeRule {
         return Array.isArray(this.shapes) ? this.shapes : [this.shapes];
     }
 
-    public evaluate(sequence: Array<ShapeCode>, index: number): boolean {
-        return this.not ? !this.evaluateInternal(sequence, index) : this.evaluateInternal(sequence, index);
+    public evaluate(sequence: Array<ShapeCode>, index: number, availableShapes: ShapeCode[] = AllShapes): boolean {
+        let isRelevant = false;
+
+        for (let i = 0; i < sequence.length; i++)
+            if (this.isRelevant(sequence[i]))
+                isRelevant = true;
+        for (let i = 0; i < availableShapes.length; i++)
+            if (this.isRelevant(availableShapes[i]))
+                isRelevant = true;
+
+        if (!isRelevant)
+            return true;
+
+        return this.not ? !this.evaluateInternal(sequence, index, availableShapes) : this.evaluateInternal(sequence, index, availableShapes);
     }
 
-    protected abstract evaluateInternal(sequence: Array<ShapeCode>, index: number): boolean;
+    protected abstract evaluateInternal(sequence: Array<ShapeCode>, index: number, availableShapes: ShapeCode[]): boolean;
     
     public abstract getDescription(forShape: ShapeCode, availableShapes: ShapeCode[]): string;
 
@@ -49,7 +61,7 @@ function formatShapeList(shapes: ShapeCode[], joinWord: 'or' | 'and' = 'or'): st
 export class IsNextToAny extends SimpleRule {
     constructor(shapes: ShapeCode[] | ShapeCode) { super(shapes); }
 
-    protected evaluateInternal(sequence: Array<ShapeCode>, index: number): boolean {
+    protected evaluateInternal(sequence: Array<ShapeCode>, index: number, availableShapes: ShapeCode[] = AllShapes): boolean {
         return getNeighbours(sequence, index, 1).some((s) => this.getShapes().includes(s));
     }
 
@@ -62,7 +74,7 @@ export class IsNextToAny extends SimpleRule {
 export class IsNotNextToAny extends SimpleRule {
     constructor(shapes: ShapeCode[] | ShapeCode) { super(shapes); }
 
-    protected evaluateInternal(sequence: Array<ShapeCode>, index: number): boolean {
+    protected evaluateInternal(sequence: Array<ShapeCode>, index: number, availableShapes: ShapeCode[] = AllShapes): boolean {
         return getNeighbours(sequence, index, 1).every((s) => !this.getShapes().includes(s));
     }
 
@@ -75,7 +87,7 @@ export class IsNotNextToAny extends SimpleRule {
 export class IsDistanceToAny extends SimpleRule {
     constructor(shapes: ShapeCode[] | ShapeCode, protected distance: number) { super(shapes); }
 
-    protected evaluateInternal(sequence: Array<ShapeCode>, index: number): boolean {
+    protected evaluateInternal(sequence: Array<ShapeCode>, index: number, availableShapes: ShapeCode[] = AllShapes): boolean {
         if (!sequence.some((s) => this.getShapes().includes(s))) 
             return true;
 
@@ -96,7 +108,7 @@ export class IsDistanceToAny extends SimpleRule {
 export class IsNotDistanceToAny extends SimpleRule {
     constructor(shapes: ShapeCode[] | ShapeCode, protected distance: number) { super(shapes); }
 
-    protected evaluateInternal(sequence: Array<ShapeCode>, index: number): boolean {
+    protected evaluateInternal(sequence: Array<ShapeCode>, index: number, availableShapes: ShapeCode[] = AllShapes): boolean {
         return getNeighbours(sequence, index, this.distance).every((s) => !this.getShapes().includes(s));
     }
 

@@ -14,7 +14,7 @@ export type ShapeCode = typeof allShapeCodes[number];
 export const AllShapes: ShapeCode[] = [...allShapeCodes];
 
 export interface ShapeRule {
-    evaluate (sequence: Array<ShapeCode>, index: number): boolean;
+    evaluate (sequence: Array<ShapeCode>, index: number, availableShapes?: ShapeCode[]): boolean;
     getDescription (forShape: ShapeCode, availableShapes?: ShapeCode[]): string;
     isRelevant (forShape: ShapeCode): boolean;
 }
