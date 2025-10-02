@@ -13,7 +13,7 @@ const shapeLoreMap: Partial<Record<ShapeCode, ShapeLore>> = {
     circle: {
         role: 'Beacon, Polarizer',
         summary: 'Rare sacred force; revered and shunned in equal measure',
-        description: 'The Circle is the Beacon — a sacred, polarizing anomaly. Its presence ignites devotion and disgust alike, drawing sects while destabilizing any unity around it.'
+        description: 'The Circle is the Beacon - a sacred, polarizing anomaly. Its presence ignites devotion and disgust alike, drawing sects while destabilizing any unity around it.'
     },
     star: {
         role: 'Celestial Seeker',
@@ -23,7 +23,7 @@ const shapeLoreMap: Partial<Record<ShapeCode, ShapeLore>> = {
     triangle: {
         role: 'Herald / Mediator',
         summary: 'Messenger among sects; refuses alignment or chaos influence',
-        description: 'The Triangle traverses factions as a neutral herald. Trusted for speech, not allegiance — it avoids all domination, especially from chaos or machinery.'
+        description: 'The Triangle traverses factions as a neutral herald. Trusted for speech, not allegiance - it avoids all domination, especially from chaos or machinery.'
     },
     hexagon: {
         role: 'Orderly Sect',
@@ -33,7 +33,7 @@ const shapeLoreMap: Partial<Record<ShapeCode, ShapeLore>> = {
     heart: {
         role: 'Devotional Sect',
         summary: 'Worship-bound; loyal to Beacon, rejects death',
-        description: 'The Heart beats with sacred loyalty, a devotional sect bound to the Beacon’s light while avoiding symbols of decay or rival influence.'
+        description: 'The Heart beats with sacred loyalty, a devotional sect bound to the Beacon's light while avoiding symbols of decay or rival influence.'
     },
     crown: {
         role: 'Authority Sect',
@@ -43,7 +43,7 @@ const shapeLoreMap: Partial<Record<ShapeCode, ShapeLore>> = {
     lightning: {
         role: 'Storm Chaos',
         summary: 'Wild disruption; avoids Beacon entirely',
-        description: 'Lightning is pure unrest — violent, untamed. It flees sacred ground instinctively, sparing no loyalty but chaos itself.'
+        description: 'Lightning is pure unrest - violent, untamed. It flees sacred ground instinctively, sparing no loyalty but chaos itself.'
     },
     flame: {
         role: 'Destructive Fire',
@@ -53,22 +53,22 @@ const shapeLoreMap: Partial<Record<ShapeCode, ShapeLore>> = {
     cloud: {
         role: 'Mutable Sky',
         summary: 'Shifting and indirect; avoids sacred proximity',
-        description: 'The Cloud never lingers where ideology hardens. Drifting between realms, it keeps respectful distance from the Beacon’s gravity.'
+        description: 'The Cloud never lingers where ideology hardens. Drifting between realms, it keeps respectful distance from the Beacon's gravity.'
     },
     raven: {
         role: 'Omen-Bearer',
         summary: 'Harbinger of fate; aligns with time and sky, avoids Beacon',
-        description: 'The Raven delivers prophecy in restless silence. Bound to time and celestial cycles, it steers clear of the Beacon’s glare.'
+        description: 'The Raven delivers prophecy in restless silence. Bound to time and celestial cycles, it steers clear of the Beacon's glare.'
     },
     square: {
         role: 'Structure / Foundation',
         summary: 'Constructive yet rigid; avoids sacred influence',
-        description: 'The Square builds walls against instability, but fears sacred distortion. It will fortify anything except the Beacon’s reach.'
+        description: 'The Square builds walls against instability, but fears sacred distortion. It will fortify anything except the Beacon's reach.'
     },
     gear: {
         role: 'Machinery / Precision',
         summary: 'Rejects chaos and organic interference',
-        description: 'The Gear turns with unfeeling purpose. It tolerates no disorder — mechanical purity above all.'
+        description: 'The Gear turns with unfeeling purpose. It tolerates no disorder - mechanical purity above all.'
     },
     shield: {
         role: 'Protector',
@@ -88,7 +88,7 @@ const shapeLoreMap: Partial<Record<ShapeCode, ShapeLore>> = {
     lock: {
         role: 'Seal / Containment',
         summary: 'Controls chaos; avoids contact with Spiral',
-        description: 'The Lock shuts away all that threatens balance. Its greatest enemy is the Spiral — proximity invites catastrophe.'
+        description: 'The Lock shuts away all that threatens balance. Its greatest enemy is the Spiral - proximity invites catastrophe.'
     },
     anchor: {
         role: 'Weight / Stillness',
@@ -108,7 +108,7 @@ const shapeLoreMap: Partial<Record<ShapeCode, ShapeLore>> = {
     leaf: {
         role: 'Nature / Growth',
         summary: 'Overabundant; clusters and climbs toward light',
-        description: 'The Leaf is relentless proliferation — ever reaching upward, restrained only through environmental limits.'
+        description: 'The Leaf is relentless proliferation - ever reaching upward, restrained only through environmental limits.'
     },
     hive: {
         role: 'Collective',
@@ -128,7 +128,7 @@ const shapeLoreMap: Partial<Record<ShapeCode, ShapeLore>> = {
     diamond: {
         role: 'Wealth / Symbol',
         summary: 'Adjacent to crowns and coasts; shielded from Beacon',
-        description: 'The Diamond is displayed, not spent — treasured by rulers and tides, yet hidden from sacred fire.'
+        description: 'The Diamond is displayed, not spent - treasured by rulers and tides, yet hidden from sacred fire.'
     },
     sun: {
         role: 'Majesty / Celestial Apex',
@@ -143,7 +143,7 @@ const shapeLoreMap: Partial<Record<ShapeCode, ShapeLore>> = {
     eye: {
         role: 'Watcher',
         summary: 'Observes; maintains safe distance from keys and locks',
-        description: 'The Eye records all — but will not be found near what seals or permits.'
+        description: 'The Eye records all - but will not be found near what seals or permits.'
     },
     spiral: {
         role: 'Chaos Incarnate',
@@ -158,7 +158,7 @@ const shapeLoreMap: Partial<Record<ShapeCode, ShapeLore>> = {
     skull: {
         role: 'Death / Outcast',
         summary: 'Shunned by life and sacred alike',
-        description: 'The Skull is what remains when all else has left. None seek it — save the Spiral.'
+        description: 'The Skull is what remains when all else has left. None seek it - save the Spiral.'
     }
 };
   
@@ -262,23 +262,31 @@ export function ShapeLoreComponent() {
                 {ShapeLoreDetail(selectedShape()!)}
               </Show>
               <Show when={!selectedShape()}>
-                <div class="p-4">
+              <div class="p-4">
                   <h3 class="text-xl font-bold text-slate-200 mb-4 text-center">The Realm of Shapes</h3>
                   <div class="text-slate-300 mb-6 max-w-2xl text-justify">
                     <p class="mb-4">
-                        In the fractured realm, <span class="material-symbols-outlined">{ShapeDefinitions.circle.icon_name}</span> the Beacon, radiates sacred power, rare and polarizing. From this nucleus, four sects arise—<span class="material-symbols-outlined">{ShapeDefinitions.star.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.hexagon.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.heart.icon_name}</span>, and <span class="material-symbols-outlined">{ShapeDefinitions.crown.icon_name}</span>—each seeking its favor yet locked in mutual hostility. They carve the world into rival domains, intolerant of one another even across small distances.
+                        At the center of the fractured realm stands <span class="material-symbols-outlined">{ShapeDefinitions.circle.icon_name}</span>, the Beacon, a rare and radiantly unstable locus of sacred power. Around it, sects gather like moths to flame-<span class="material-symbols-outlined">{ShapeDefinitions.star.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.hexagon.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.heart.icon_name}</span>, and <span class="material-symbols-outlined">{ShapeDefinitions.crown.icon_name}</span>-each devoted yet mutually venomous, enforcing rivalries across invisible distances with rituals of spacing that no casual observer could fathom.
                     </p>
 
                     <p class="mb-4">
-                        <span class="material-symbols-outlined">{ShapeDefinitions.triangle.icon_name}</span>, the Herald, serves these sects, bridging announcements and messaging, yet never asserting dominance, avoiding chaotic or mechanical elements. Chaos agents—<span class="material-symbols-outlined">{ShapeDefinitions.lightning.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.flame.icon_name}</span>, and <span class="material-symbols-outlined">{ShapeDefinitions.spiral.icon_name}</span>—stir the world but remain distant from the Beacon and its sects. The sky and water forms—<span class="material-symbols-outlined">{ShapeDefinitions.cloud.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.wave.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.droplet.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.leaf.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.paw.icon_name}</span>—cluster nature's forces, adhering to their tribal rules and respecting sectarian distance.
+                        <span class="material-symbols-outlined">{ShapeDefinitions.triangle.icon_name}</span>, the Herald, threads through these rivalries, announcing messages and decrees, yet it neither claims allegiance nor succumbs to the siren call of chaos or machinery. High above, the chaotic elements-<span class="material-symbols-outlined">{ShapeDefinitions.lightning.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.flame.icon_name}</span>, and <span class="material-symbols-outlined">{ShapeDefinitions.spiral.icon_name}</span>-rage and twist, ever repelled by the Beacon's radiant insistence, leaving scorched air and impossible rotations in their wake.
                     </p>
 
                     <p class="mb-4">
-                        Industrial and protective forms—<span class="material-symbols-outlined">{ShapeDefinitions.square.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.gear.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.shield.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.clock.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.lock.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.key.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.anchor.icon_name}</span>—maintain structure, machinery, and control, weaving a lattice of restrictions to balance the chaos. Celestial and symbolic shapes—<span class="material-symbols-outlined">{ShapeDefinitions.crescent.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.diamond.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.sun.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.hourglass.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.eye.icon_name}</span>—mark time, status, and observation, mediating distance between nature, chaos, and the Beacon's influence.
+                        The mutable skies and waters-<span class="material-symbols-outlined">{ShapeDefinitions.cloud.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.wave.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.droplet.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.leaf.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.paw.icon_name}</span>-cluster in erratic patterns, following tribal edicts and secret pacts with hidden currents and roots, honoring the Beacon's gravity only as far as prudence allows. Some beasts bow at distance; others leap in defiance, scattering water, leaf, and shadow.
                     </p>
 
                     <p class="mb-4">
-                        The <span class="material-symbols-outlined">{ShapeDefinitions.skull.icon_name}</span>, dead and cursed, linger at the periphery, universally shunned but linked to chaos through <span class="material-symbols-outlined">{ShapeDefinitions.spiral.icon_name}</span>, reminding all that death and disorder persist beyond even the structured or sacred. Across this world, each placement enforces schisms, and limiting alliances, a delicate balance of sacred, natural, chaotic, and constructed forces.
+                        Industrial forms-<span class="material-symbols-outlined">{ShapeDefinitions.square.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.gear.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.shield.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.clock.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.lock.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.key.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.anchor.icon_name}</span>-weave lattices of restriction and stability, enforcing mechanical laws that sometimes contradict natural instinct. These lattices creak under the weight of unseen edicts, bending reality along rules known only to themselves, creating corridors, dead-ends, and forbidden couplings where none could naturally exist.
+                    </p>
+
+                    <p class="mb-4">
+                        Celestial and symbolic actors-<span class="material-symbols-outlined">{ShapeDefinitions.crescent.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.diamond.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.sun.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.hourglass.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.eye.icon_name}</span>-mark cycles, wealth, observation, and the passage of impossible time. They intervene in patterns invisible to mortal eyes, nudging nature, chaos, and sectarian zeal, maintaining a delicate lattice of influence that only the most devout scholars of absurdity could chart.
+                    </p>
+
+                    <p class="mb-4">
+                        The <span class="material-symbols-outlined">{ShapeDefinitions.skull.icon_name}</span>, cursed and dead, hover on the periphery, universally shunned but entwined with the Spiral, whispering secrets of decay and chaos into cracks in reality itself. In this world, alliances, distances, and adjacency dictate fate more than loyalty or reason; every placement is a story, every empty space a consequence, and every absurd juxtaposition a reminder that the rules of geometry are also the rules of belief.
                     </p>
                   </div>
                 </div>

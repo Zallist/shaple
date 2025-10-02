@@ -83,13 +83,6 @@ ShapeDefinitions.cloud.rules = [
     new shapeRules.IsNotDistanceToAny('circle', 2),
 ];
 
-// Raven: Omens. Avoids Circle's sacred light; aligns with hourglass and sun but shuns seekers.
-ShapeDefinitions.raven.rules = [
-    new shapeRules.IsNextToAny(['sun', 'crescent', 'hourglass']),
-    new shapeRules.IsNotNextToAny(['flame', 'snowflake', 'cloud', 'skull']),
-    new shapeRules.IsNotDistanceToAny('circle', 2),
-];
-
 // --- STRUCTURE / CONSTRUCTIVE FACTION ---
 // Square: Structural, highly restrictive; hates circle adjacency but tolerates mechanical allies.
 ShapeDefinitions.square.rules = [
