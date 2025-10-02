@@ -288,8 +288,18 @@ export default function App() {
             <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
               Shaple - {isDailySeed() ? 'Daily' : 'Seeded'}
             </h1>
-            <span title="Seed" class="text-slate-400 text-sm bg-slate-700/50 px-2 py-1 rounded-md">
-              {numberToString(seed())}
+            
+            <span class="max-w-24 text-slate-400 text-sm bg-slate-700/50 px-2 py-1 rounded-md">
+              <input class="text-right w-full select-all"
+                     type="text" title="Seed"
+                     value={numberToString(seed())}
+                     onChange={(v) => {
+                      if (!v.target.validity.valid)
+                        v.target.value = v.target.value.replace(/[^0-9A-Za-z]/g, '');
+                      window.location.hash = `#seed=${v.target.value}`;
+                     }}
+                     maxLength={12}
+                     pattern="[0-9A-Za-z]*" />
             </span>
           </div>
 
