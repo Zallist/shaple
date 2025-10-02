@@ -264,11 +264,11 @@ ShapeDefinitions.heart.rules = [
     new shapeRules.IsNotNextToAny('skull'),
 ];
 
-export function isShapleValid(shapes: Array<ShapeCode>): boolean {
+export function isShapleValid(shapes: Array<ShapeCode>, availableShapes: Array<ShapeCode> = AllShapes): boolean {
     for (let i = 0; i < shapes.length; i++) {
         const shapeDef = ShapeDefinitions[shapes[i]];
         for (const rule of shapeDef.rules) {
-            if (!rule.evaluate(shapes, i)) {
+            if (!rule.evaluate(shapes, i, availableShapes)) {
                 return false;
             }
         }
@@ -277,36 +277,58 @@ export function isShapleValid(shapes: Array<ShapeCode>): boolean {
     return true;
 }
 
-export function generateShaple(length: number, seed: number): Array<ShapeCode> {
-    const result = Array<ShapeCode>(length);
+export function getRandomShapeSelection(shapeCount: number, rng: prand.RandomGenerator): ShapeCode[] {
+    const result: ShapeCode[] = [];
+    const shapes = [...AllShapes];
 
-    let shapeIndex: number;
-    let rng = prand.xorshift128plus(seed);
-    let attempts = 20000;
-    
-    // Limit the total number of attempts to avoid infinite loops in case of unsolvable puzzles.
-    // Should only happen during dev if the rules are messed up
-    while (attempts-- > 0) {
-        for (let i = 0; i < length; i++) {
-            [shapeIndex, rng] = prand.uniformIntDistribution(0, AllShapes.length - 1, rng);
-            result[i] = AllShapes[shapeIndex];
-        }
-
-        if (attempts % 1000 === 0) {
-            console.log(`${attempts} tried and still no luck, seed: ${seed}`);
-        }
-
-        if (isShapleValid(result)) return result;
+    // pick a random shape then remove it
+    for (let i = 0; i < shapeCount; i++) {
+        const [index, rng2] = prand.uniformIntDistribution(0, shapes.length - 1, rng);
+        rng = rng2;
+        result.push(shapes[index]);
+        shapes.splice(index, 1);
     }
 
+    return result;
+}
+
+export function generateShaple(shapeCount: number, length: number, seed: number): { shapes: ShapeCode[], solution: ShapeCode[] } {
+    const result = Array<ShapeCode>(length);
+    let rng = prand.xorshift128plus(seed);
+
+    let shapeAttempt = 1000;
+    while (shapeAttempt-- > 0) {
+        const shapes = getRandomShapeSelection(shapeCount, rng);
+        
+        let attempt = 5000;
+
+        while (attempt-- > 0) {
+            for (let i = 0; i < length; i++) {
+                const [shapeIndex, rng2] = prand.uniformIntDistribution(0, shapes.length - 1, rng);
+                rng = rng2;
+                result[i] = shapes[shapeIndex];
+            }
+
+            if (attempt % 1000 === 0) {
+                console.log(`${attempt * shapeAttempt} to go and still no luck, seed: ${seed}`);
+            }
+
+            if (isShapleValid(result, shapes)) 
+                return { shapes: shapes, solution: result };
+        }
+    }
+    
     throw new Error("Failed to generate shaple");
 };
 
 (window as any).generateShaple = generateShaple;
 
-(window as any).validateShaple = function(length: number, shapes: ShapeCode[] = AllShapes) {
+(window as any).validateShaple = function(length: number, shapes: ShapeCode[] | undefined = undefined) {
     const result = Array<ShapeCode>(length);
     const validShaples = new Set<Array<ShapeCode>>();
+
+    if (!shapes)
+        shapes = getRandomShapeSelection(10, prand.xorshift128plus(Date.now() ^ (Math.random() * 0x100000000)));
 
     validate(0);
 
@@ -330,14 +352,14 @@ export function generateShaple(length: number, seed: number): Array<ShapeCode> {
 
     function validate(index: number) {
         if (index >= length) {
-            if (isShapleValid(result)) {
+            if (isShapleValid(result, shapes)) {
                 validShaples.add([...result]);
             }
             return;
         }
         
-        for (let i = 0; i < shapes.length; i++) {
-            result[index] = shapes[i];
+        for (let i = 0; i < shapes!.length; i++) {
+            result[index] = shapes![i];
             validate(index + 1);
         }
     }

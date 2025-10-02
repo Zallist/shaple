@@ -95,37 +95,12 @@ function getCurrentSeed(): number {
 
 export default function App() {
   const [seed, setSeed] = createSignal(getCurrentSeed());
-  const solution = createMemo(() => generateShaple(LENGTH, seed()));
+  const generationResult = createMemo(() => generateShaple(MINIMUM_SHAPE_COUNT, LENGTH, seed()));
+  const availableShapes = createMemo(() => generationResult().shapes);
+  const solution = createMemo(() => generationResult().solution);
 
   const [attempts, setAttempts] = createSignal<ShapeCode[][]>(getStoredAttempts(seed()));
   const [currentGuess, setCurrentGuess] = createSignal<ShapeCode[]>([]);
-
-  const availableShapes = createMemo(() => {
-    const shapes: ShapeCode[] = [...AllShapes];
-    const sol = solution();
-    
-    // Randomly shuffle the shapes
-    let rng = prand.xorshift128plus(seed());
-    
-    for (let i = shapes.length - 1; i > 0; i--) {
-      const [j, rng2] = prand.uniformIntDistribution(0, i, rng);
-
-      rng = rng2;
-
-      const temp = shapes[i];
-      shapes[i] = shapes[j];
-      shapes[j] = temp;
-    }
-
-    // Remove until we have the minimum shape count
-    for (let i = shapes.length - 1; i >= 0 && shapes.length > MINIMUM_SHAPE_COUNT; i--) {
-      if (!sol.includes(shapes[i])) {
-        shapes.splice(i, 1);
-      }
-    }
-      
-    return shapes;
-  });
 
   const feedbacks = createMemo<Feedback[][]>(() => {
     const feedbacks: Feedback[][] = [];
