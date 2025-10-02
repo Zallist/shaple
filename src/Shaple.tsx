@@ -384,7 +384,7 @@ export default function App() {
                           case 'absent':
                             return <span>⬛</span>;
                           case 'invalid_reused':
-                            return <span>⬛</span>;
+                            return <span>🟧</span>;
                         }
                       });
 
