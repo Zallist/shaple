@@ -14,7 +14,7 @@ function shapeKey(s: ShapeCode) {
   return <span class="material-symbols-outlined">{shapeDefinition.icon_name}</span>;
 }
 
-type Feedback = 'exact' | 'present' | 'absent'
+type Feedback = 'exact' | 'present' | 'absent' | 'invalid_reused';// | 'invalid_pattern';
 
 function numberToString(n: number): string {
   return n.toString(36).toUpperCase();
@@ -128,34 +128,53 @@ export default function App() {
   });
 
   const feedbacks = createMemo<Feedback[][]>(() => {
-    return attempts().map(attempt => {
-      const fb: Feedback[] = Array(LENGTH).fill('absent');
-      const sol = solution();
-      const solCounts: Record<ShapeCode, number> = {} as any;
-      
-      // Count occurrences of each shape in solution to correctly handle duplicates.
-      sol.forEach(shape => {
-        solCounts[shape] = (solCounts[shape] || 0) + 1;
-      });
+    const feedbacks: Feedback[][] = [];
+    const allAttempts = attempts();
+    const sol = solution();
 
-      // First pass: mark exact matches and consume from counts.
-      for (let i = 0; i < LENGTH; i++) {
-        if (attempt[i] === sol[i]) {
-          fb[i] = 'exact';
-          solCounts[attempt[i]]--;
+    for (let i = 0; i < allAttempts.length; i++) {
+      const attempt = allAttempts[i];
+      const attemptFeedback: Feedback[] = attempt.map(() => 'absent');
+
+      const solutionShapeCounts = sol.reduce((acc, shape) => {
+        acc[shape] = (acc[shape] || 0) + 1;
+        return acc;
+      }, {} as Record<ShapeCode, number>);
+
+      for (let j = 0; j < attempt.length; j++) {
+        if (attempt[j] === sol[j]) {
+          attemptFeedback[j] = 'exact';
+          solutionShapeCounts[attempt[j]]--;
         }
       }
 
-      // Second pass: mark present (correct but wrong position) only if remaining count > 0.
-      for (let i = 0; i < LENGTH; i++) {
-        if (fb[i] !== 'exact' && solCounts[attempt[i]] > 0) {
-          fb[i] = 'present';
-          solCounts[attempt[i]]--;
+      for (let j = 0; j < attempt.length; j++) {
+        const shape = attempt[j];
+        if (attemptFeedback[j] !== 'absent') continue;
+
+        // check if reused in a previous feedback
+        if (feedbacks.some((feedback, index) => allAttempts[index][j] === shape && (feedback[j] === 'exact' || feedback[j] === 'present'))) {
+          attemptFeedback[j] = 'invalid_reused';
+          continue;
         }
+
+        if (solutionShapeCounts[shape] > 0) {
+          attemptFeedback[j] = 'present';
+          solutionShapeCounts[shape]--;
+          continue;
+        }
+
+        // check if invalid rule
+        //if (ShapeDefinitions[shape].rules.some(rule => rule.evaluate(attempt, j))) {
+        //  attemptFeedback[j].feedback = 'invalid_pattern';
+        //  continue;
+        //}
       }
 
-      return fb;
-    });
+      feedbacks.push(attemptFeedback);
+    }
+
+    return feedbacks;
   });
 
   const isDailySeed = createMemo(() => seed() === seedForDate());
@@ -219,13 +238,17 @@ export default function App() {
 
       const attemptsOfShape = attemptAndFeedback.filter(item => item.shape === s);
       
-      if (attemptsOfShape.filter(item => item.feedback === 'absent').length > 0 && 
-          attemptsOfShape.filter(item => item.feedback !== 'absent').length <= countInCurrent) {
+      if (attemptsOfShape.filter(item => !isGoodFeedback(item.feedback)).length > 0 && 
+          attemptsOfShape.filter(item => isGoodFeedback(item.feedback)).length <= countInCurrent) {
         return false;
       }
     }
 
     return true;
+
+    function isGoodFeedback(feedback: Feedback) {
+      return feedback !== 'absent';
+    }
   }
   
   function removeLast() { 
@@ -271,31 +294,30 @@ export default function App() {
           </div>
 
           <div class="space-y-2">
-            <For each={attempts()}>
+           <For each={attempts()}>
               {(guess, idx) => {
-                const fb = feedbacks()[idx()] || [];
-                
+                const feedbackRow = feedbacks()[idx()] || [];
+
                 return (
                   <div class="flex gap-2 animate__animated animate__fadeIn">
-                    <For each={Array.from({length:LENGTH})}>{(_, j)=>{
-                      const feedback = fb[j()];
-                      const classes = [
-                        'flex-1 min-w-14 h-14 rounded-lg border-2 flex items-center justify-center font-semibold',
-                        'transform transition-all duration-300 hover:scale-105',
-                        feedback === 'exact' ? 'bg-green-600/90 border-green-400 shadow-lg shadow-green-900/30' :
-                        feedback === 'present' ? 'bg-yellow-500/90 border-yellow-400 shadow-lg shadow-yellow-900/30' :
-                        'bg-slate-700/70 border-slate-600/50 hover:border-slate-500/70'
-                      ].join(' ');
-                      
-                      return (
-                        <div 
-                          class={`${classes} animate__animated animate__bounceIn`}
-                          style={`animation-delay: ${j() * 50}ms`}
-                        >
+                    <For each={feedbackRow}>{(feedback, j)=>(
+                      <div 
+                        class='flex-1 min-w-14 h-14 rounded-lg border-2 flex items-center justify-center font-semibold 
+                                transform transition-all duration-300 hover:scale-105
+                                animate__animated animate__bounceIn'
+                        classList={{
+                          'bg-green-600/90 border-green-400 shadow-lg shadow-green-900/30': feedback === 'exact',
+                          'bg-yellow-500/90 border-yellow-400 shadow-lg shadow-yellow-900/30': feedback === 'present',
+                          'bg-slate-700/70 border-slate-600/50 hover:border-slate-500/70': feedback === 'absent',
+                          'bg-yellow-600/90 border-yellow-500 shadow-lg shadow-yellow-900/30': feedback === 'invalid_reused',
+                          //'bg-red-900/20 border-red-900/20 shadow-lg shadow-red-900/10': feedback.feedback === 'invalid_pattern',
+                        }}
+                        style={`animation-delay: ${j() * 50}ms`}
+                      >
                           {guess[j()] ? shapeKey(guess[j()]) : ''}
-                        </div>
-                      );
-                    }}</For>
+                      </div>
+                    )}
+                    </For>
                   </div>
                 );
               }}
@@ -424,11 +446,11 @@ export default function App() {
         </div>
       </div>
       
-      <div class="mt-8">
+      <div class="max-w-4xl mt-8">
         <RulesSection />
       </div>
 
-      <div class="w-full max-w-4xl mt-8">
+      <div class="max-w-4xl mt-8">
         <ShapeLoreComponent />
       </div>
     </div>
@@ -484,14 +506,14 @@ export default function App() {
       <>
         <button 
           onClick={() => setRulesAreVisible(!areRulesVisible())}
-          class="w-full h-12 rounded-lg border-2 border-slate-600/50 flex items-center justify-center font-semibold
+          class="w-full px-6 h-12 rounded-lg border-2 border-slate-600/50 flex items-center justify-center font-semibold
             bg-slate-700/70 hover:bg-slate-600/70 hover:border-slate-500/70 active:scale-95 transition-all duration-200"
         >
           <span class="material-symbols-outlined mr-2 transition-transform duration-300" 
                 style={`transform: rotate(${areRulesVisible() ? '180deg' : '0'})`}>
             expand_more
           </span>
-          {areRulesVisible() ? 'HIDE' : 'SHOW'} HELP
+          {areRulesVisible() ? 'Hide' : 'Show'} Help
         </button>
         
         <div class={`overflow-hidden transition-all duration-500 ease-in-out ${areRulesVisible() ? 'max-h-auto opacity-100' : 'max-h-0 opacity-0'}`}>

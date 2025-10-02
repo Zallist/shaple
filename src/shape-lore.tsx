@@ -217,7 +217,7 @@ export function ShapeLoreComponent() {
   return (
     <>
       <button 
-        class="w-full h-12 rounded-lg border-2 border-slate-600/50 flex items-center justify-center font-semibold
+        class="w-full px-6 h-12 rounded-lg border-2 border-slate-600/50 flex items-center justify-center font-semibold
             bg-slate-700/70 hover:bg-slate-600/70 hover:border-slate-500/70 active:scale-95 transition-all duration-200"
         onClick={() => setIsOpen(!isOpen())}
         aria-expanded={isOpen()}
