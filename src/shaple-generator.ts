@@ -363,4 +363,46 @@ export function generateShaple(shapeCount: number, length: number, seed: number)
             validate(index + 1);
         }
     }
-}
+};
+
+(window as any).estimatePuzzleSpace = function(trials = 100, samplesPerSubset = 500) {
+    let rng = prand.xorshift128plus(Date.now());
+    let totalValid = 0;
+    let totalTried = 0;
+
+    for (let t = 0; t < trials; t++) {
+        const shapes = getRandomShapeSelection(10, rng);
+        for (let i = 0; i < samplesPerSubset; i++) {
+            const sol: ShapeCode[] = [];
+            for (let j = 0; j < 5; j++) {
+                const [shapeIndex, rng2] = prand.uniformIntDistribution(0, shapes.length - 1, rng);
+                rng = rng2;
+                sol[j] = shapes[shapeIndex];
+            }
+            totalTried++;
+            if (isShapleValid(sol, shapes)) totalValid++;
+        }
+    }
+
+    const p = totalValid / totalTried;
+    const E = p * Math.pow(10,5);
+    const totalSubsets = combination(30,10); // Precomputed as 30045015
+
+    return {
+        p,
+        E,
+        estimate: totalSubsets * E
+    };
+
+    function combination(n: number, k: number): number {
+        if (k > n) return 0;
+        if (k === 0 || k === n) return 1;
+        k = Math.min(k, n - k); // take advantage of symmetry
+        let result = 1;
+        for (let i = 1; i <= k; i++) {
+            result *= (n - (k - i));
+            result /= i;
+        }
+        return result;
+    }
+};
