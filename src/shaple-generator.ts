@@ -10,258 +10,258 @@ import * as shapeRules from './shape-rules';
 
 // Circle: Beacon, sacred and polarizing.
 ShapeDefinitions.circle.rules = [
-    new shapeRules.IsNotAdjacentTo(['square', 'skull']),
-    new shapeRules.IsDistanceTo(['star', 'hexagon', 'heart', 'crown'], 2),
-    new shapeRules.IsNotDistanceTo(['lightning', 'flame', 'cloud', 'raven'], 2),
+    new shapeRules.IsNotNextToAny(['square', 'skull']),
+    new shapeRules.IsDistanceToAny(['star', 'hexagon', 'heart', 'crown'], 2),
+    new shapeRules.IsNotDistanceToAny(['lightning', 'flame', 'cloud', 'raven'], 2),
 ];
 
 // --- SECTARIAN SEEKERS: they require Circle but hate other seeker-sects ---
 // Star: Celestial sect. Seeks Circle; refuses nearby other seekers and their symbols.
 // Star must not be adjacent to its own kind (solitary) and must avoid other seeker-sects at distance 2.
 ShapeDefinitions.star.rules = [
-    new shapeRules.IsNotAdjacentTo('star'),
-    new shapeRules.IsAdjacentTo(['triangle', 'heart', 'crown']),
-    new shapeRules.IsDistanceTo('circle', 2),
-    new shapeRules.IsNotDistanceTo(['hexagon', 'heart', 'crown'], 2),
-    new shapeRules.IsNotDistanceTo('raven', 2),
+    new shapeRules.IsNotNextToAny('star'),
+    new shapeRules.IsNextToAny(['triangle', 'heart', 'crown']),
+    new shapeRules.IsDistanceToAny('circle', 2),
+    new shapeRules.IsNotDistanceToAny(['hexagon', 'heart', 'crown'], 2),
+    new shapeRules.IsNotDistanceToAny('raven', 2),
 ];
 
 // Triangle: Herald of sects. Must serve but never dominate.
 ShapeDefinitions.triangle.rules = [
-    new shapeRules.IsAdjacentTo(['star', 'hive', 'heart']),
-    new shapeRules.IsNotAdjacentTo('circle'),
-    new shapeRules.IsNotAdjacentTo(['lightning', 'gear', 'square']),
-    new shapeRules.IsDistanceTo('crown', 2),
-    new shapeRules.IsNotDistanceTo(['hexagon', 'paw'], 2),
+    new shapeRules.IsNextToAny(['star', 'hive', 'heart']),
+    new shapeRules.IsNotNextToAny('circle'),
+    new shapeRules.IsNotNextToAny(['lightning', 'gear', 'square']),
+    new shapeRules.IsDistanceToAny('crown', 2),
+    new shapeRules.IsNotDistanceToAny(['hexagon', 'paw'], 2),
 ];
 
 // Hexagon: Orderly sect. Seeks Circle; refuses other seeker sects and chaotic elements.
 ShapeDefinitions.hexagon.rules = [
-    new shapeRules.IsAdjacentTo(['gear', 'hive']),
-    new shapeRules.IsDistanceTo('circle', 2),
-    new shapeRules.IsNotAdjacentTo('lightning'),
-    new shapeRules.IsNotDistanceTo(['star', 'heart', 'crown'], 2),
+    new shapeRules.IsNextToAny(['gear', 'hive']),
+    new shapeRules.IsDistanceToAny('circle', 2),
+    new shapeRules.IsNotNextToAny('lightning'),
+    new shapeRules.IsNotDistanceToAny(['star', 'heart', 'crown'], 2),
 ];
 
 // Heart: Devotional sect. Seeks Circle; strongly rejects death and opposing sect members nearby.
 ShapeDefinitions.heart.rules = [
-    new shapeRules.IsAdjacentTo(['star', 'crown', 'paw']),
-    new shapeRules.IsDistanceTo('circle', 2),
-    new shapeRules.IsNotAdjacentTo('skull'),
-    new shapeRules.IsNotDistanceTo(['star', 'hexagon', 'crown'], 2),
+    new shapeRules.IsNextToAny(['star', 'crown', 'paw']),
+    new shapeRules.IsDistanceToAny('circle', 2),
+    new shapeRules.IsNotNextToAny('skull'),
+    new shapeRules.IsNotDistanceToAny(['star', 'hexagon', 'crown'], 2),
 ];
 
 // Crown: Authority sect. Seeks Circle; demands ritual distance from rival seekers and chaos.
 ShapeDefinitions.crown.rules = [
-    new shapeRules.IsAdjacentTo(['heart', 'star', 'diamond']),
-    new shapeRules.IsDistanceTo('circle', 2),
-    new shapeRules.IsNotAdjacentTo(['skull', 'spiral']),
-    new shapeRules.IsNotDistanceTo(['star', 'hexagon', 'heart'], 2),
-    new shapeRules.IsNotDistanceTo('wave', 2), // crown resents being near uncontrolled seas
+    new shapeRules.IsNextToAny(['heart', 'star', 'diamond']),
+    new shapeRules.IsDistanceToAny('circle', 2),
+    new shapeRules.IsNotNextToAny(['skull', 'spiral']),
+    new shapeRules.IsNotDistanceToAny(['star', 'hexagon', 'heart'], 2),
+    new shapeRules.IsNotDistanceToAny('wave', 2), // crown resents being near uncontrolled seas
 ];
 
 // --- BEACON AVOIDERS: fear or are corrupted by Circle (must remain distance 2) ---
 // Lightning: Storm chaos. Avoids Circle (distance), shunned by many.
 ShapeDefinitions.lightning.rules = [
-    new shapeRules.IsAdjacentTo(['cloud', 'wave']),
-    new shapeRules.IsNotAdjacentTo(['triangle', 'hexagon', 'leaf', 'sun']),
-    new shapeRules.IsNotDistanceTo('circle', 2), // must be at least 3 away
+    new shapeRules.IsNextToAny(['cloud', 'wave']),
+    new shapeRules.IsNotNextToAny(['triangle', 'hexagon', 'leaf', 'sun']),
+    new shapeRules.IsNotDistanceToAny('circle', 2), // must be at least 3 away
 ];
 
 // Flame: Consuming natural fire. Actively excluded from Circle's proximity.
 ShapeDefinitions.flame.rules = [
-    new shapeRules.IsAdjacentTo(['triangle', 'wave']),
-    new shapeRules.IsNotAdjacentTo(['snowflake', 'droplet', 'leaf']),
-    new shapeRules.IsNotDistanceTo('circle', 2),
-    new shapeRules.IsNotAdjacentTo(['lightning', 'cloud']),
+    new shapeRules.IsNextToAny(['triangle', 'wave']),
+    new shapeRules.IsNotNextToAny(['snowflake', 'droplet', 'leaf']),
+    new shapeRules.IsNotDistanceToAny('circle', 2),
+    new shapeRules.IsNotNextToAny(['lightning', 'cloud']),
 ];
 
 // Cloud: Mutable sky. Avoids Circle; limited adjacency with omen-forms.
 ShapeDefinitions.cloud.rules = [
-    new shapeRules.IsAdjacentTo(['wave', 'lightning', 'droplet']),
-    new shapeRules.IsNotAdjacentTo(['flame', 'raven']),
-    new shapeRules.IsNotDistanceTo('circle', 2),
+    new shapeRules.IsNextToAny(['wave', 'lightning', 'droplet']),
+    new shapeRules.IsNotNextToAny(['flame', 'raven']),
+    new shapeRules.IsNotDistanceToAny('circle', 2),
 ];
 
 // Raven: Omens. Avoids Circle's sacred light; aligns with hourglass and sun but shuns seekers.
 ShapeDefinitions.raven.rules = [
-    new shapeRules.IsAdjacentTo(['sun', 'crescent', 'hourglass']),
-    new shapeRules.IsNotAdjacentTo(['flame', 'snowflake', 'cloud', 'skull']),
-    new shapeRules.IsNotDistanceTo('circle', 2),
+    new shapeRules.IsNextToAny(['sun', 'crescent', 'hourglass']),
+    new shapeRules.IsNotNextToAny(['flame', 'snowflake', 'cloud', 'skull']),
+    new shapeRules.IsNotDistanceToAny('circle', 2),
 ];
 
 // --- STRUCTURE / CONSTRUCTIVE FACTION ---
 // Square: Structural, highly restrictive; hates circle adjacency but tolerates mechanical allies.
 ShapeDefinitions.square.rules = [
-    new shapeRules.IsNotAdjacentTo(['circle', 'spiral', 'lightning', 'cloud', 'leaf']),
-    new shapeRules.IsAdjacentTo(['gear', 'shield']),
-    new shapeRules.IsDistanceTo('anchor', 2),
+    new shapeRules.IsNotNextToAny(['circle', 'spiral', 'lightning', 'cloud', 'leaf']),
+    new shapeRules.IsNextToAny(['gear', 'shield']),
+    new shapeRules.IsDistanceToAny('anchor', 2),
 ];
 
 // Gear: Machinery. Requires precise adjacency, rejects chaotic and organic intrusions.
 ShapeDefinitions.gear.rules = [
-    new shapeRules.IsAdjacentTo(['clock', 'hexagon', 'shield']),
-    new shapeRules.IsNotAdjacentTo(['flame', 'spiral']),
-    new shapeRules.IsNotDistanceTo('wave', 2),
-    new shapeRules.IsNotDistanceTo('hive', 2)
+    new shapeRules.IsNextToAny(['clock', 'hexagon', 'shield']),
+    new shapeRules.IsNotNextToAny(['flame', 'spiral']),
+    new shapeRules.IsNotDistanceToAny('wave', 2),
+    new shapeRules.IsNotDistanceToAny('hive', 2)
 ];
 
 // Shield: Protector. Binds with gear/key/lock, refuses watchers and decay.
 ShapeDefinitions.shield.rules = [
-    new shapeRules.IsAdjacentTo(['gear', 'key', 'lock']),
-    new shapeRules.IsNotAdjacentTo(['skull', 'eye']),
-    new shapeRules.IsDistanceTo('square', 2),
-    new shapeRules.IsNotDistanceTo(['lightning', 'cloud'], 2)
+    new shapeRules.IsNextToAny(['gear', 'key', 'lock']),
+    new shapeRules.IsNotNextToAny(['skull', 'eye']),
+    new shapeRules.IsDistanceToAny('square', 2),
+    new shapeRules.IsNotDistanceToAny(['lightning', 'cloud'], 2)
 ];
 
 // Clock: Timekeeping machinery. Tied to gear/lightning; enforces distance vs organic.
 ShapeDefinitions.clock.rules = [
-    new shapeRules.IsAdjacentTo(['gear', 'lightning']),
-    new shapeRules.IsNotAdjacentTo(['leaf', 'flame']),
-    new shapeRules.IsDistanceTo('hourglass', 2),
-    new shapeRules.IsNotDistanceTo('hive', 2),
+    new shapeRules.IsNextToAny(['gear', 'lightning']),
+    new shapeRules.IsNotNextToAny(['leaf', 'flame']),
+    new shapeRules.IsDistanceToAny('hourglass', 2),
+    new shapeRules.IsNotDistanceToAny('hive', 2),
 ];
 
 // Key: Passage enabler. Ally to lock/shield; avoids greed (diamond) and death.
 ShapeDefinitions.key.rules = [
-    new shapeRules.IsAdjacentTo(['lock', 'shield']),
-    new shapeRules.IsNotAdjacentTo(['skull', 'diamond']),
-    new shapeRules.IsDistanceTo('eye', 2),
+    new shapeRules.IsNextToAny(['lock', 'shield']),
+    new shapeRules.IsNotNextToAny(['skull', 'diamond']),
+    new shapeRules.IsDistanceToAny('eye', 2),
 ];
 
 // Lock: Sealer. Bonds with key/shield; resents chaos and proximity to Spiral.
 ShapeDefinitions.lock.rules = [
-    new shapeRules.IsAdjacentTo(['key', 'shield']),
-    new shapeRules.IsNotAdjacentTo(['skull', 'spiral']),
-    new shapeRules.IsDistanceTo('hourglass', 2),
+    new shapeRules.IsNextToAny(['key', 'shield']),
+    new shapeRules.IsNotNextToAny(['skull', 'spiral']),
+    new shapeRules.IsDistanceToAny('hourglass', 2),
 ];
 
 // Anchor: Weight of sea and machine; less common, distance-limits to reduce combinations.
 ShapeDefinitions.anchor.rules = [
-    new shapeRules.IsAdjacentTo(['wave', 'cloud', 'gear']),
-    new shapeRules.IsNotAdjacentTo(['flame', 'skull']),
-    new shapeRules.IsDistanceTo('diamond', 2),
+    new shapeRules.IsNextToAny(['wave', 'cloud', 'gear']),
+    new shapeRules.IsNotNextToAny(['flame', 'skull']),
+    new shapeRules.IsDistanceToAny('diamond', 2),
 ];
 
 // --- NATURE / WATER TRIBE ---
 // Wave: Overrepresented previously; force a side: aquatic but must avoid some celestial/industrial nodes.
 ShapeDefinitions.wave.rules = [
-    new shapeRules.IsAdjacentTo(['diamond', 'droplet', 'cloud']),
-    new shapeRules.IsNotAdjacentTo('skull'),
-    new shapeRules.IsNotAdjacentTo(['crown', 'gear']), // avoids overt authority and machinery
-    new shapeRules.IsDistanceTo('leaf', 2),
-    new shapeRules.IsNotDistanceTo(['crown', 'heart'], 2),
+    new shapeRules.IsNextToAny(['diamond', 'droplet', 'cloud']),
+    new shapeRules.IsNotNextToAny('skull'),
+    new shapeRules.IsNotNextToAny(['crown', 'gear']), // avoids overt authority and machinery
+    new shapeRules.IsDistanceToAny('leaf', 2),
+    new shapeRules.IsNotDistanceToAny(['crown', 'heart'], 2),
 ];
 
 // Droplet: Life-giving but now constrained — must be near leaf yet distant from certain machines.
 ShapeDefinitions.droplet.rules = [
-    new shapeRules.IsAdjacentTo(['leaf', 'wave', 'cloud', 'paw']),
-    new shapeRules.IsNotAdjacentTo(['flame', 'skull']),
-    new shapeRules.IsNotDistanceTo('clock', 2), // cannot be more than 2 away from clock (ties water to time)
-    new shapeRules.IsNotDistanceTo(['star', 'crown'], 2),
+    new shapeRules.IsNextToAny(['leaf', 'wave', 'cloud', 'paw']),
+    new shapeRules.IsNotNextToAny(['flame', 'skull']),
+    new shapeRules.IsNotDistanceToAny('clock', 2), // cannot be more than 2 away from clock (ties water to time)
+    new shapeRules.IsNotDistanceToAny(['star', 'crown'], 2),
 ];
 
 // Leaf: Over-popular; force it into nature cluster with stricter avoids and a distance.
 ShapeDefinitions.leaf.rules = [
-    new shapeRules.IsAdjacentTo(['droplet', 'wave', 'hive', 'paw']),
-    new shapeRules.IsNotAdjacentTo(['lightning', 'square']),
-    new shapeRules.IsDistanceTo('sun', 2), // seeks sunlight at distance
-    new shapeRules.IsNotDistanceTo(['star', 'crown'], 2),
+    new shapeRules.IsNextToAny(['droplet', 'wave', 'hive', 'paw']),
+    new shapeRules.IsNotNextToAny(['lightning', 'square']),
+    new shapeRules.IsDistanceToAny('sun', 2), // seeks sunlight at distance
+    new shapeRules.IsNotDistanceToAny(['star', 'crown'], 2),
 ];
 
 // Hive: Collective; reduce bridging by forbidding certain celestial ties and adding distance rules.
 ShapeDefinitions.hive.rules = [
-    new shapeRules.IsAdjacentTo(['triangle', 'star', 'leaf']),
-    new shapeRules.IsNotAdjacentTo(['crescent', 'square']),
-    new shapeRules.IsNotDistanceTo('crown', 2),
-    new shapeRules.IsNotDistanceTo(['wave', 'cloud'], 2),
+    new shapeRules.IsNextToAny(['triangle', 'star', 'leaf']),
+    new shapeRules.IsNotNextToAny(['crescent', 'square']),
+    new shapeRules.IsNotDistanceToAny('crown', 2),
+    new shapeRules.IsNotDistanceToAny(['wave', 'cloud'], 2),
 ];
 
 // Paw: Beast loyalty; constrained adjacency and forced distance from Beacon-avoiders.
 ShapeDefinitions.paw.rules = [
-    new shapeRules.IsAdjacentTo(['leaf', 'heart', 'raven', 'droplet']),
-    new shapeRules.IsNotAdjacentTo(['skull', 'lightning']),
-    new shapeRules.IsDistanceTo('circle', 2), // some beasts revere the Beacon at distance
-    new shapeRules.IsNotDistanceTo(['lightning', 'cloud'], 2),
+    new shapeRules.IsNextToAny(['leaf', 'heart', 'raven', 'droplet']),
+    new shapeRules.IsNotNextToAny(['skull', 'lightning']),
+    new shapeRules.IsDistanceToAny('circle', 2), // some beasts revere the Beacon at distance
+    new shapeRules.IsNotDistanceToAny(['lightning', 'cloud'], 2),
 ];
 
 // --- SYMBOLIC & CELESTIAL ---
 // Crescent: Liminal; keeps distance from massed collectives and cold sects.
 ShapeDefinitions.crescent.rules = [
-    new shapeRules.IsAdjacentTo(['raven', 'star']),
-    new shapeRules.IsNotAdjacentTo(['hive', 'snowflake']),
-    new shapeRules.IsDistanceTo('diamond', 2),
+    new shapeRules.IsNextToAny(['raven', 'star']),
+    new shapeRules.IsNotNextToAny(['hive', 'snowflake']),
+    new shapeRules.IsDistanceToAny('diamond', 2),
 ];
 
 // Diamond: Hard wealth; fewer placements: adjacent to crown/sea, but kept away from Beacon physically.
 ShapeDefinitions.diamond.rules = [
-    new shapeRules.IsAdjacentTo(['wave', 'crescent', 'crown']),
-    new shapeRules.IsNotAdjacentTo(['circle', 'spiral']),
-    new shapeRules.IsDistanceTo('anchor', 2),
+    new shapeRules.IsNextToAny(['wave', 'crescent', 'crown']),
+    new shapeRules.IsNotNextToAny(['circle', 'spiral']),
+    new shapeRules.IsDistanceToAny('anchor', 2),
 ];
 
 // Sun: Majestic, keeps certain distances to preserve rarity and reduce combinatorics.
 ShapeDefinitions.sun.rules = [
-    new shapeRules.IsAdjacentTo(['hourglass', 'raven', 'crown']),
-    new shapeRules.IsNotAdjacentTo(['snowflake', 'flame']),
-    new shapeRules.IsDistanceTo('star', 2),
+    new shapeRules.IsNextToAny(['hourglass', 'raven', 'crown']),
+    new shapeRules.IsNotNextToAny(['snowflake', 'flame']),
+    new shapeRules.IsDistanceToAny('star', 2),
 ];
 
 // Hourglass: Time binds; adjacency with omen, disallows machine intimacy.
 ShapeDefinitions.hourglass.rules = [
-    new shapeRules.IsAdjacentTo(['raven', 'sun']),
-    new shapeRules.IsNotAdjacentTo(['gear', 'spiral']),
-    new shapeRules.IsDistanceTo('circle', 2),
+    new shapeRules.IsNextToAny(['raven', 'sun']),
+    new shapeRules.IsNotNextToAny(['gear', 'spiral']),
+    new shapeRules.IsDistanceToAny('circle', 2),
 ];
 
 // Eye: Watcher; adjacency constrained, enforces distance from lock/key to reduce combos.
 ShapeDefinitions.eye.rules = [
-    new shapeRules.IsAdjacentTo(['star', 'triangle']),
-    new shapeRules.IsNotAdjacentTo(['skull', 'shield']),
-    new shapeRules.IsDistanceTo('key', 2),
+    new shapeRules.IsNextToAny(['star', 'triangle']),
+    new shapeRules.IsNotNextToAny(['skull', 'shield']),
+    new shapeRules.IsDistanceToAny('key', 2),
 ];
 
 // --- CHAOS / SPIRAL & RELATED ---
 // Spiral: Chaos agent; previously tolerated widely — now restricted heavily to collapse permutations.
 ShapeDefinitions.spiral.rules = [
-    new shapeRules.IsNotAdjacentTo(['square', 'gear', 'crown', 'lock', 'diamond', 'flame']),
-    new shapeRules.IsNotDistanceTo(['heart', 'circle'], 2), // must avoid being near certain sacred things
-    new shapeRules.IsDistanceTo('skull', 2), // spirals stir death at range
+    new shapeRules.IsNotNextToAny(['square', 'gear', 'crown', 'lock', 'diamond', 'flame']),
+    new shapeRules.IsNotDistanceToAny(['heart', 'circle'], 2), // must avoid being near certain sacred things
+    new shapeRules.IsDistanceToAny('skull', 2), // spirals stir death at range
 ];
 
 // --- COLD / WINTER ---
 // Snowflake: Rare and cold; keep it rare via adjacency constraints and distances.
 ShapeDefinitions.snowflake.rules = [
-    new shapeRules.IsAdjacentTo(['crescent', 'gear']),
-    new shapeRules.IsNotAdjacentTo(['flame', 'sun', 'lightning', 'raven']),
-    new shapeRules.IsDistanceTo('circle', 2), // reveres Beacon only conservatively
+    new shapeRules.IsNextToAny(['crescent', 'gear']),
+    new shapeRules.IsNotNextToAny(['flame', 'sun', 'lightning', 'raven']),
+    new shapeRules.IsDistanceToAny('circle', 2), // reveres Beacon only conservatively
 ];
 
 // --- CURSED / DEATH ---
 // Skull: Outcast. Widely shunned, must remain distant from living, anchor, and seals.
 ShapeDefinitions.skull.rules = [
-    new shapeRules.IsNotAdjacentTo([
+    new shapeRules.IsNotNextToAny([
         'circle', 'heart', 'crown', 'raven', 'droplet', 'wave', 'anchor', 'key', 'lock', 'shield'
     ]),
-    new shapeRules.IsDistanceTo('spiral', 2),
+    new shapeRules.IsDistanceToAny('spiral', 2),
 ];
 
 // --- MISCELLANEOUS ADJUSTMENTS ---
 // Raven: omen, but kept away from Circle and many warm things to keep combinatorics down.
 ShapeDefinitions.raven.rules = [
-    new shapeRules.IsAdjacentTo(['sun', 'crescent', 'hourglass']),
-    new shapeRules.IsNotAdjacentTo(['flame', 'snowflake', 'cloud', 'skull']),
-    new shapeRules.IsNotDistanceTo('circle', 2),
-    new shapeRules.IsDistanceTo('triangle', 2),
+    new shapeRules.IsNextToAny(['sun', 'crescent', 'hourglass']),
+    new shapeRules.IsNotNextToAny(['flame', 'snowflake', 'cloud', 'skull']),
+    new shapeRules.IsNotDistanceToAny('circle', 2),
+    new shapeRules.IsDistanceToAny('triangle', 2),
 ];
 
 // Heart / Crown / Star mutual-sect hostility already enforced above; reduce cross-compatibility elsewhere.
 // Heart: devotional; keep it rarer by adding distance constraints and forbidding certain allies from co-placing.
 ShapeDefinitions.heart.rules = [
-    new shapeRules.IsAdjacentTo(['star', 'crown', 'paw']),
-    new shapeRules.IsDistanceTo('circle', 2),
-    new shapeRules.IsNotDistanceTo(['hexagon', 'star'], 2),
-    new shapeRules.IsNotAdjacentTo('skull'),
+    new shapeRules.IsNextToAny(['star', 'crown', 'paw']),
+    new shapeRules.IsDistanceToAny('circle', 2),
+    new shapeRules.IsNotDistanceToAny(['hexagon', 'star'], 2),
+    new shapeRules.IsNotNextToAny('skull'),
 ];
 
 export function isShapleValid(shapes: Array<ShapeCode>): boolean {

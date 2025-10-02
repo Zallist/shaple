@@ -37,7 +37,7 @@ abstract class SimpleRule implements ShapeRule {
     }
 }
 
-export class IsAdjacentTo extends SimpleRule {
+export class IsNextToAny extends SimpleRule {
     constructor(shapes: ShapeCode[] | ShapeCode) { super(shapes); }
 
     protected evaluateInternal(sequence: Array<ShapeCode>, index: number): boolean {
@@ -49,15 +49,19 @@ export class IsAdjacentTo extends SimpleRule {
     }
 }
 
-export class IsNotAdjacentTo extends IsAdjacentTo {
-    constructor(shapes: ShapeCode[] | ShapeCode) { super(shapes); this.not = true; }
+export class IsNotNextToAny extends SimpleRule {
+    constructor(shapes: ShapeCode[] | ShapeCode) { super(shapes); }
+
+    protected evaluateInternal(sequence: Array<ShapeCode>, index: number): boolean {
+        return getNeighbours(sequence, index, 1).every((s) => !this.getShapes().includes(s));
+    }
 
     public getDescription(forShape: ShapeCode, availableShapes: ShapeCode[] = AllShapes): string {
         return `<${forShape}> hates <${intersect(this.getShapes(), availableShapes).join('> and <')}>`;
     }
 }
 
-export class IsDistanceTo extends SimpleRule {
+export class IsDistanceToAny extends SimpleRule {
     constructor(shapes: ShapeCode[] | ShapeCode, protected distance: number) { super(shapes); }
 
     protected evaluateInternal(sequence: Array<ShapeCode>, index: number): boolean {
@@ -72,11 +76,11 @@ export class IsDistanceTo extends SimpleRule {
     }
 }
 
-export class IsNotDistanceTo extends SimpleRule {
+export class IsNotDistanceToAny extends SimpleRule {
     constructor(shapes: ShapeCode[] | ShapeCode, protected distance: number) { super(shapes); }
 
     protected evaluateInternal(sequence: Array<ShapeCode>, index: number): boolean {
-        return !getNeighbours(sequence, index, this.distance).some((s) => this.getShapes().includes(s));
+        return getNeighbours(sequence, index, this.distance).every((s) => !this.getShapes().includes(s));
     }
 
     public getDescription(forShape: ShapeCode, availableShapes: ShapeCode[] = AllShapes): string {
