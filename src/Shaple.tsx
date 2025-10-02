@@ -366,7 +366,11 @@ export default function App() {
                 {(() => {
                   const [shown, setShown] = createSignal(false);
                   const text = createMemo(() => {
-                    const lines = [<div><a href={window.location.href} target="_blank">Shaple</a> ({numberToString(seed())}) ({attempts().length}/{LENGTH})</div>];
+                    const lines = [<div>
+                      <a href={window.location.href} target="_blank">Shaple</a> 
+                      <span class="text-slate-400"> ({attempts().length}/{LENGTH}) </span>
+                      <span class="text-slate-400"> [{numberToString(seed())}] </span>
+                    </div>];
 
                     attempts().forEach((attempt, idx) => {
                       const feedback = feedbacks()[idx];
@@ -406,7 +410,8 @@ export default function App() {
                       <Show when={shown()}>
                         <div class="w-full rounded-lg border-2 items-center justify-center font-semibold text-sm transition-all duration-200
                                     bg-slate-700/70 border-slate-600/50 hover:bg-slate-600/70 hover:border-slate-500/70 p-2
-                                    whitespace-nowrap overflow-hidden select-all">{text()}</div>
+                                    whitespace-nowrap overflow-hidden select-all
+                                    flex flex-col gap-0">{text()}</div>
                       </Show>
                     </>
                   )
