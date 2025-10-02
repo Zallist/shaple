@@ -14,7 +14,7 @@ function shapeKey(s: ShapeCode) {
   return <span class="material-symbols-outlined">{shapeDefinition.icon_name}</span>;
 }
 
-type Feedback = 'exact' | 'present' | 'absent' | 'invalid_reused';
+type Feedback = 'exact' | 'present' | 'absent' | 'invalid_reused' | 'invalid_rule';
 
 function numberToString(n: number): string {
   return n.toString(36).toUpperCase();
@@ -102,7 +102,7 @@ export default function App() {
   const [attempts, setAttempts] = createSignal<ShapeCode[][]>(getStoredAttempts(seed()));
   const [currentGuess, setCurrentGuess] = createSignal<ShapeCode[]>([]);
 
-  const feedbacks = createMemo<Feedback[][]>(() => {
+  function calculateFeedback(doRuleCheck: boolean = false) : Feedback[][] {
     const feedbacks: Feedback[][] = [];
     const allAttempts = attempts();
     const sol = solution();
@@ -128,6 +128,12 @@ export default function App() {
         const shape = attempt[j];
         if (attemptFeedback[j] !== 'absent') continue;
 
+        // check if invalid rule
+        if (doRuleCheck && ShapeDefinitions[shape].rules.some(rule => !rule.evaluate(attempt, j, allShapes))) {
+          attemptFeedback[j] = 'invalid_rule';
+          continue;
+        }
+
         if (solutionShapeCounts[shape] > 0) {
           attemptFeedback[j] = 'present';
           solutionShapeCounts[shape]--;
@@ -138,19 +144,15 @@ export default function App() {
 
           continue;
         }
-
-        // check if invalid rule
-        // if (ShapeDefinitions[shape].rules.some(rule => !rule.evaluate(attempt, j, allShapes))) {
-        //   attemptFeedback[j] = 'invalid_pattern';
-        //   continue;
-        // }
       }
 
       feedbacks.push(attemptFeedback);
     }
 
     return feedbacks;
-  });
+  }
+
+  const feedbacks = createMemo<Feedback[][]>(() => calculateFeedback(false));
 
   const isDailySeed = createMemo(() => seed() === seedForDate());
 
@@ -294,7 +296,8 @@ export default function App() {
                           'bg-green-600/90 border-green-400 shadow-lg shadow-green-900/30': feedback === 'exact',
                           'bg-yellow-500/90 border-yellow-400/90 shadow-lg shadow-yellow-900/30': feedback === 'present',
                           'bg-yellow-500/70 border-yellow-400/70 shadow-lg shadow-yellow-900/30': feedback === 'invalid_reused',
-                          'bg-slate-700/50 border-slate-600/50 hover:border-slate-500/70': feedback === 'absent'// || feedback === 'invalid_pattern',
+                          'bg-slate-700/50 border-slate-600/50 hover:border-slate-500/70': feedback === 'absent',
+                          'bg-red-700/70 border-red-400/70 shadow-lg shadow-red-900/30': feedback === 'invalid_rule',
                         }}
                         style={`animation-delay: ${j() * 50}ms`}
                       >
@@ -371,19 +374,22 @@ export default function App() {
                       <span class="text-slate-400"> [{numberToString(seed())}] </span>
                     </div>];
 
+                    const feedbacks = calculateFeedback(true);
                     attempts().forEach((attempt, idx) => {
-                      const feedback = feedbacks()[idx];
+                      const feedback = feedbacks[idx];
 
                       const result = feedback.map((f, j) => {
                         switch (f) {
                           case 'exact':
-                            return <span>🟩</span>;
+                            return <span title="Found">🟩</span>;
                           case 'present':
-                            return <span>🟨</span>;
+                            return <span title="Present">🟨</span>;
                           case 'absent':
-                            return <span>⬛</span>;
+                            return <span title="Absent">⬛</span>;
                           case 'invalid_reused':
-                            return <span>🟧</span>;
+                            return <span title="Already guessed incorrect">🟧</span>;
+                          case 'invalid_rule':
+                            return <span title="Rule violation">🟥</span>;
                         }
                       });
 
@@ -528,7 +534,7 @@ export default function App() {
                 continue;
 
               const rules = shape.rules.filter(rule => {
-                return availableShapes().some(shape => rule.isRelevant(shape));
+                return relevantShapes.some(shape => rule.isRelevant(shape));
               });
 
               if (rules.length > 0)
