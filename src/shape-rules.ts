@@ -37,6 +37,15 @@ abstract class SimpleRule implements ShapeRule {
     }
 }
 
+function formatShapeList(shapes: ShapeCode[], joinWord: 'or' | 'and' = 'or'): string {
+    if (shapes.length === 1) return `<${shapes[0]}>`;
+    if (shapes.length === 2) return `<${shapes[0]}> ${joinWord} <${shapes[1]}>`;
+    return shapes
+        .slice(0, -1)
+        .map(s => `<${s}>`)
+        .join(', ') + `, ${joinWord} <${shapes[shapes.length - 1]}>`;
+}
+
 export class IsNextToAny extends SimpleRule {
     constructor(shapes: ShapeCode[] | ShapeCode) { super(shapes); }
 
@@ -45,7 +54,8 @@ export class IsNextToAny extends SimpleRule {
     }
 
     public getDescription(forShape: ShapeCode, availableShapes: ShapeCode[] = AllShapes): string {
-        return `<${forShape}> likes <${intersect(this.getShapes(), availableShapes).join('> and <')}>`;
+        //return `<${forShape}> likes <${intersect(this.getShapes(), availableShapes).join('> and <')}>`;
+        return `<${forShape}> stays near ${formatShapeList(intersect(this.getShapes(), availableShapes), 'or')}`;
     }
 }
 
@@ -57,7 +67,8 @@ export class IsNotNextToAny extends SimpleRule {
     }
 
     public getDescription(forShape: ShapeCode, availableShapes: ShapeCode[] = AllShapes): string {
-        return `<${forShape}> hates <${intersect(this.getShapes(), availableShapes).join('> and <')}>`;
+        //return `<${forShape}> hates <${intersect(this.getShapes(), availableShapes).join('> and <')}>`;
+        return `<${forShape}> stays away from ${formatShapeList(intersect(this.getShapes(), availableShapes), 'and')}`;
     }
 }
 
@@ -72,7 +83,8 @@ export class IsDistanceToAny extends SimpleRule {
     }
 
     public getDescription(forShape: ShapeCode, availableShapes: ShapeCode[] = AllShapes): string {
-        return `<${forShape}> stays ${this.distance} away from <${intersect(this.getShapes(), availableShapes).join('> or <')}>`;
+        //return `<${forShape}> stays ${this.distance} away from <${intersect(this.getShapes(), availableShapes).join('> or <')}>`;
+        return `<${forShape}> stays ${this.distance} away from ${formatShapeList(intersect(this.getShapes(), availableShapes), 'or')}`;
     }
 }
 
@@ -84,6 +96,7 @@ export class IsNotDistanceToAny extends SimpleRule {
     }
 
     public getDescription(forShape: ShapeCode, availableShapes: ShapeCode[] = AllShapes): string {
-        return `<${forShape}> doesn't stay ${this.distance} away from <${intersect(this.getShapes(), availableShapes).join('> or <')}>`;
+        //return `<${forShape}> doesn't stay ${this.distance} away from <${intersect(this.getShapes(), availableShapes).join('> or <')}>`;
+        return `<${forShape}> doesn't stay ${this.distance} away from ${formatShapeList(intersect(this.getShapes(), availableShapes), 'and')}`;
     }
 }
