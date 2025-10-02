@@ -55,7 +55,7 @@ export class IsNextToAny extends SimpleRule {
 
     public getDescription(forShape: ShapeCode, availableShapes: ShapeCode[] = AllShapes): string {
         //return `<${forShape}> likes <${intersect(this.getShapes(), availableShapes).join('> and <')}>`;
-        return `<${forShape}> stays near ${formatShapeList(intersect(this.getShapes(), availableShapes), 'or')}`;
+        return `<${forShape}> is always near ${formatShapeList(intersect(this.getShapes(), availableShapes), 'or')}`;
     }
 }
 
@@ -79,12 +79,17 @@ export class IsDistanceToAny extends SimpleRule {
         if (!sequence.some((s) => this.getShapes().includes(s))) 
             return true;
 
-        return getNeighbours(sequence, index, this.distance).some((s) => this.getShapes().includes(s));
+        let neighbours: ShapeCode[] = [];
+        for (let i = 1; i <= this.distance; i++) {
+            neighbours.push(...getNeighbours(sequence, index, i));
+        }
+
+        return neighbours.some((s) => this.getShapes().includes(s));
     }
 
     public getDescription(forShape: ShapeCode, availableShapes: ShapeCode[] = AllShapes): string {
         //return `<${forShape}> stays ${this.distance} away from <${intersect(this.getShapes(), availableShapes).join('> or <')}>`;
-        return `<${forShape}> stays ${this.distance} away from ${formatShapeList(intersect(this.getShapes(), availableShapes), 'or')}`;
+        return `<${forShape}> tries to stay within ${this.distance} of ${formatShapeList(intersect(this.getShapes(), availableShapes), 'or')}`;
     }
 }
 
@@ -97,6 +102,6 @@ export class IsNotDistanceToAny extends SimpleRule {
 
     public getDescription(forShape: ShapeCode, availableShapes: ShapeCode[] = AllShapes): string {
         //return `<${forShape}> doesn't stay ${this.distance} away from <${intersect(this.getShapes(), availableShapes).join('> or <')}>`;
-        return `<${forShape}> doesn't stay ${this.distance} away from ${formatShapeList(intersect(this.getShapes(), availableShapes), 'and')}`;
+        return `<${forShape}> won't stay exactly ${this.distance} away from ${formatShapeList(intersect(this.getShapes(), availableShapes), 'and')}`;
     }
 }
