@@ -33,7 +33,7 @@ const shapeLoreMap: Partial<Record<ShapeCode, ShapeLore>> = {
     heart: {
         role: 'Devotional Sect',
         summary: 'Worship-bound; loyal to Beacon, rejects death',
-        description: 'The Heart beats with sacred loyalty, a devotional sect bound to the Beacon's light while avoiding symbols of decay or rival influence.'
+        description: 'The Heart beats with sacred loyalty, a devotional sect bound to the Beacon\'s light while avoiding symbols of decay or rival influence.'
     },
     crown: {
         role: 'Authority Sect',
@@ -53,17 +53,17 @@ const shapeLoreMap: Partial<Record<ShapeCode, ShapeLore>> = {
     cloud: {
         role: 'Mutable Sky',
         summary: 'Shifting and indirect; avoids sacred proximity',
-        description: 'The Cloud never lingers where ideology hardens. Drifting between realms, it keeps respectful distance from the Beacon's gravity.'
+        description: 'The Cloud never lingers where ideology hardens. Drifting between realms, it keeps respectful distance from the Beacon\'s gravity.'
     },
     raven: {
         role: 'Omen-Bearer',
         summary: 'Harbinger of fate; aligns with time and sky, avoids Beacon',
-        description: 'The Raven delivers prophecy in restless silence. Bound to time and celestial cycles, it steers clear of the Beacon's glare.'
+        description: 'The Raven delivers prophecy in restless silence. Bound to time and celestial cycles, it steers clear of the Beacon\'s glare.'
     },
     square: {
         role: 'Structure / Foundation',
         summary: 'Constructive yet rigid; avoids sacred influence',
-        description: 'The Square builds walls against instability, but fears sacred distortion. It will fortify anything except the Beacon's reach.'
+        description: 'The Square builds walls against instability, but fears sacred distortion. It will fortify anything except the Beacon\'s reach.'
     },
     gear: {
         role: 'Machinery / Precision',
