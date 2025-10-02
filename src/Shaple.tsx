@@ -128,15 +128,14 @@ export default function App() {
         const shape = attempt[j];
         if (attemptFeedback[j] !== 'absent') continue;
 
-        // check if reused in a previous feedback
-        if (feedbacks.some((feedback, index) => allAttempts[index][j] === shape && (feedback[j] === 'exact' || feedback[j] === 'present'))) {
-          attemptFeedback[j] = 'invalid_reused';
-          continue;
-        }
-
         if (solutionShapeCounts[shape] > 0) {
           attemptFeedback[j] = 'present';
           solutionShapeCounts[shape]--;
+          
+          // check if reused in a previous feedback
+          if (feedbacks.some((feedback, index) => allAttempts[index][j] === shape && (feedback[j] === 'exact' || feedback[j] === 'present')))
+            attemptFeedback[j] = 'invalid_reused';
+
           continue;
         }
 
