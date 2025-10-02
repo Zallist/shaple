@@ -14,7 +14,7 @@ function shapeKey(s: ShapeCode) {
   return <span class="material-symbols-outlined">{shapeDefinition.icon_name}</span>;
 }
 
-type Feedback = 'exact' | 'present' | 'absent' | 'invalid_reused' | 'invalid_pattern';
+type Feedback = 'exact' | 'present' | 'absent' | 'invalid_reused';
 
 function numberToString(n: number): string {
   return n.toString(36).toUpperCase();
@@ -26,26 +26,26 @@ function stringToNumber(s: string): number {
 function seedForDate(d = new Date()): number {
   // Normalize to UTC midnight so all users get the same daily puzzle regardless of timezone.
   const utc = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
-  const s = `${utc.getUTCFullYear()}${String(utc.getUTCMonth()+1).padStart(2,'0')}${String(utc.getUTCDate()).padStart(2,'0')}`;
+  const s = `${utc.getUTCFullYear()}${String(utc.getUTCMonth() + 1).padStart(2, '0')}${String(utc.getUTCDate()).padStart(2, '0')}`;
 
   // simple numeric hash
   let h = 2166136261 >>> 0;
-  for (let i=0; i<s.length; i++) { 
-    h = Math.imul(h ^ s.charCodeAt(i), 16777619) >>> 0; 
+  for (let i = 0; i < s.length; i++) {
+    h = Math.imul(h ^ s.charCodeAt(i), 16777619) >>> 0;
   }
   return h >>> 0;
 }
 
 function getRandomSeed(): number {
   const rng = prand.xorshift128plus(Date.now() ^ (Math.random() * 0x100000000));
-  let seed = prand.unsafeUniformIntDistribution(0, 36**8 - 1, rng); // 8 characters seed
+  let seed = prand.unsafeUniformIntDistribution(0, 36 ** 8 - 1, rng); // 8 characters seed
   return seed;
 }
 
 function getStoredAttempts(seed: number): ShapeCode[][] {
   // Store attempts per-seed, so switching between daily/random retains distinct histories.
   const stored = localStorage.getItem(`shaple_attempts_${seed}`);
-  
+
   if (!stored)
     return [];
 
@@ -141,10 +141,10 @@ export default function App() {
         }
 
         // check if invalid rule
-        if (ShapeDefinitions[shape].rules.some(rule => !rule.evaluate(attempt, j, allShapes))) {
-          attemptFeedback[j] = 'invalid_pattern';
-          continue;
-        }
+        // if (ShapeDefinitions[shape].rules.some(rule => !rule.evaluate(attempt, j, allShapes))) {
+        //   attemptFeedback[j] = 'invalid_pattern';
+        //   continue;
+        // }
       }
 
       feedbacks.push(attemptFeedback);
@@ -176,7 +176,7 @@ export default function App() {
 
     // Add event listener for hash changes
     window.addEventListener('hashchange', handleHashChange);
-    
+
     // Clean up the event listener when the component is unmounted
     onCleanup(() => {
       window.removeEventListener('hashchange', handleHashChange);
@@ -185,7 +185,7 @@ export default function App() {
 
   function setSeedAndReset(s: number) {
     var newAttempts = getStoredAttempts(s);
-    
+
     batch(() => {
       setSeed(s);
       setAttempts(newAttempts);
@@ -193,11 +193,11 @@ export default function App() {
     });
   }
 
-  function pickShape(s: ShapeCode) { 
-    if (isDone()) return; 
-    if (currentGuess().length >= LENGTH) return; 
+  function pickShape(s: ShapeCode) {
+    if (isDone()) return;
+    if (currentGuess().length >= LENGTH) return;
 
-    setCurrentGuess([...currentGuess(), s]); 
+    setCurrentGuess([...currentGuess(), s]);
   }
 
   function isPotentialShape(s: ShapeCode) {
@@ -213,24 +213,24 @@ export default function App() {
       });
 
       const attemptsOfShape = attemptAndFeedback.filter(item => item.shape === s);
-      
-      if (attemptsOfShape.filter(item => !isGoodFeedback(item.feedback)).length > 0 && 
-          attemptsOfShape.filter(item => isGoodFeedback(item.feedback)).length <= countInCurrent) {
+
+      if (attemptsOfShape.filter(item => !isOkayFeedback(item.feedback)).length > 0 &&
+        attemptsOfShape.filter(item => isOkayFeedback(item.feedback)).length <= countInCurrent) {
         return false;
       }
     }
 
     return true;
 
-    function isGoodFeedback(feedback: Feedback) {
+    function isOkayFeedback(feedback: Feedback) {
       return feedback !== 'absent';
     }
   }
-  
-  function removeLast() { 
-    if (isDone()) return; 
 
-    setCurrentGuess(currentGuess().slice(0, -1)); 
+  function removeLast() {
+    if (isDone()) return;
+
+    setCurrentGuess(currentGuess().slice(0, -1));
   }
 
   function submit() {
@@ -258,36 +258,36 @@ export default function App() {
 
   return (
     <div class="flex flex-col justify-center items-center">
-      <div class="bg-gradient-to-b from-slate-900 to-slate-800 p-4 rounded-xl">
+      <div>
         <div class="bg-slate-800/80 backdrop-blur-sm p-6 rounded-xl shadow-2xl border border-slate-700/50 transition-all duration-300 hover:shadow-xl hover:shadow-slate-900/20">
           <div class="flex items-center justify-between mb-4">
             <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
               Shaple - {isDailySeed() ? 'Daily' : 'Seeded'}
             </h1>
-            
+
             <span class="max-w-24 text-slate-400 text-sm bg-slate-700/50 px-2 py-1 rounded-md">
               <input class="text-right w-full select-all"
-                     type="text" title="Seed"
-                     value={numberToString(seed())}
-                     onChange={(v) => {
-                      if (!v.target.validity.valid)
-                        v.target.value = v.target.value.replace(/[^0-9A-Za-z]/g, '');
-                      window.location.hash = `#seed=${v.target.value}`;
-                     }}
-                     maxLength={12}
-                     pattern="[0-9A-Za-z]*" />
+                type="text" title="Seed"
+                value={numberToString(seed())}
+                onChange={(v) => {
+                  if (!v.target.validity.valid)
+                    v.target.value = v.target.value.replace(/[^0-9A-Za-z]/g, '');
+                  window.location.hash = `#seed=${v.target.value}`;
+                }}
+                maxLength={12}
+                pattern="[0-9A-Za-z]*" />
             </span>
           </div>
 
           <div class="space-y-2">
-           <For each={attempts()}>
+            <For each={attempts()}>
               {(guess, idx) => {
                 const feedbackRow = feedbacks()[idx()] || [];
 
                 return (
                   <div class="flex gap-2 animate__animated animate__fadeIn">
-                    <For each={feedbackRow}>{(feedback, j)=>(
-                      <div 
+                    <For each={feedbackRow}>{(feedback, j) => (
+                      <div
                         class='flex-1 min-w-14 h-14 rounded-lg border-2 flex items-center justify-center font-semibold 
                                 transform transition-all duration-300 hover:scale-105
                                 animate__animated animate__bounceIn'
@@ -295,11 +295,11 @@ export default function App() {
                           'bg-green-600/90 border-green-400 shadow-lg shadow-green-900/30': feedback === 'exact',
                           'bg-yellow-500/90 border-yellow-400/90 shadow-lg shadow-yellow-900/30': feedback === 'present',
                           'bg-yellow-500/70 border-yellow-400/70 shadow-lg shadow-yellow-900/30': feedback === 'invalid_reused',
-                          'bg-slate-700/50 border-slate-600/50 hover:border-slate-500/70': feedback === 'absent' || feedback === 'invalid_pattern',
+                          'bg-slate-700/50 border-slate-600/50 hover:border-slate-500/70': feedback === 'absent'// || feedback === 'invalid_pattern',
                         }}
                         style={`animation-delay: ${j() * 50}ms`}
                       >
-                          {guess[j()] ? shapeKey(guess[j()]) : ''}
+                        {guess[j()] ? shapeKey(guess[j()]) : ''}
                       </div>
                     )}
                     </For>
@@ -310,10 +310,10 @@ export default function App() {
 
             <Show when={!isDone()}>
               <div class="flex gap-2">
-                <For each={Array.from({length:LENGTH})}>{(_, j)=>{
+                <For each={Array.from({ length: LENGTH })}>{(_, j) => {
                   const isEmpty = !currentGuess()[j()];
                   return (
-                    <div 
+                    <div
                       class={`flex-1 min-w-14 h-14 rounded-lg border-2 flex items-center justify-center font-semibold
                         ${isEmpty ? 'border-dashed border-slate-600/50 hover:border-slate-500/70 bg-slate-800/50' : 'border-slate-500/70 bg-slate-700/70'}
                         transform transition-all duration-300 hover:scale-105`}
@@ -331,38 +331,98 @@ export default function App() {
               </div>
             </Show>
           </div>
-        </div>
-        
-        <Show when={isDone()}>
-          <div class={`mt-4 p-4 rounded-lg bg-slate-700/30 backdrop-blur-sm border border-slate-600/30 ${isCorrect() ? 'animate__animated animate__pulse animate__infinite' : ''}`}>
-            <div class="text-sm text-slate-300 font-semibold mb-2 flex items-center">
-              <span class="material-symbols-outlined text-yellow-400 mr-1">emoji_events</span>
-              {isCorrect() ? 'Puzzle Solved!' : 'Solution'}
-            </div>
 
-            <div class="flex gap-2">
-              <For each={solution()}>{(s, i) => (
-                <div 
-                  class={`flex-1 min-w-14 h-14 rounded-lg border-2 flex items-center justify-center font-semibold
-                    bg-gradient-to-br from-slate-700 to-slate-800 border-slate-600 shadow-lg
-                    transform transition-all duration-500 hover:scale-110 hover:rotate-6 hover:z-10`}
-                >
-                  <div class="animate__animated animate__bounceIn">
-                    {shapeKey(s)}
+          <Show when={isDone()}>
+            <div class="mt-4">
+              <div class="text-sm text-slate-300 font-semibold mb-2 flex items-center">
+                {isCorrect() ? (
+                  <span>
+                    <span class="material-symbols-outlined text-yellow-400 mr-1">emoji_events</span>
+                    Puzzle Solved!
+                  </span>
+                ) : (
+                  <span>
+                    <span class="material-symbols-outlined text-red-400 mr-1">emoji_events</span>
+                    Solution
+                  </span>
+                )}
+              </div>
+
+              <div class={`flex gap-2 ${isCorrect() ? 'animate__animated animate__pulse animate__infinite' : ''}`}>
+                <For each={solution()}>{(s, i) => (
+                  <div
+                    class={`flex-1 min-w-14 h-14 rounded-lg border-2 flex items-center justify-center font-semibold
+                            bg-gradient-to-br from-slate-700 to-slate-800 border-slate-600 shadow-lg
+                            transform transition-all duration-500 hover:scale-110 hover:rotate-6 hover:z-10`}
+                  >
+                    <div class="animate__animated animate__bounceIn">
+                      {shapeKey(s)}
+                    </div>
                   </div>
-                </div>
-              )}</For>
+                )}</For>
+              </div>
+
+              <div class="mt-4">
+                {(() => {
+                  const [shown, setShown] = createSignal(false);
+                  const text = createMemo(() => {
+                    const lines = [<div><a href={window.location.href} target="_blank">Shaple</a> ({numberToString(seed())}) ({attempts().length}/{LENGTH})</div>];
+
+                    attempts().forEach((attempt, idx) => {
+                      const feedback = feedbacks()[idx];
+
+                      const result = feedback.map((f, j) => {
+                        switch (f) {
+                          case 'exact':
+                            return <span>🟩</span>;
+                          case 'present':
+                            return <span>🟨</span>;
+                          case 'absent':
+                            return <span>⬛</span>;
+                          case 'invalid_reused':
+                            return <span>⬛</span>;
+                        }
+                      });
+
+                      lines.push(<div>{result}</div>);
+                    });
+
+                    return lines;
+                  });
+
+                  return (
+                    <>
+                      <Show when={!shown()}>
+                        <button class="w-full h-12 rounded-lg border-2 items-center justify-center font-semibold text-sm transition-all duration-200
+                                      active:scale-95 disabled:active:scale-100
+                                      bg-blue-700/70 border-blue-600/50 hover:bg-blue-600/70 hover:border-blue-500/70
+                                      disabled:bg-blue-900/20 disabled:border-blue-400/20 disabled:text-blue-400
+                                      animate__animated animate__bounceIn"
+                                      onClick={() => setShown(true)}>
+                          <span class="material-symbols-outlined text-blue-400 mr-1">share</span>
+                          Share
+                        </button>
+                      </Show>
+                      <Show when={shown()}>
+                        <div class="w-full rounded-lg border-2 items-center justify-center font-semibold text-sm transition-all duration-200
+                                    bg-slate-700/70 border-slate-600/50 hover:bg-slate-600/70 hover:border-slate-500/70 p-2
+                                    whitespace-nowrap overflow-hidden select-all">{text()}</div>
+                      </Show>
+                    </>
+                  )
+                })()}
+              </div>
             </div>
-          </div>
-        </Show>
-        
+          </Show>
+        </div>
+
         <div class="bg-slate-800/80 backdrop-blur-sm p-6 rounded-xl shadow-xl border border-slate-700/50 mt-6 transition-all duration-300 hover:shadow-2xl hover:shadow-slate-900/30">
           <Show when={!isDone()}>
             <div class="mb-3 grid grid-cols-5 gap-2">
               <For each={availableShapes()}>{(s, i) => {
                 const isSelected = createMemo(() => currentGuess().includes(s));
                 return (
-                  <button 
+                  <button
                     onClick={() => {
                       pickShape(s);
                     }}
@@ -383,10 +443,10 @@ export default function App() {
               }}</For>
             </div>
           </Show>
-          
+
           <div class="flex gap-3">
             <Show when={!isDone()}>
-              <button 
+              <button
                 onClick={() => {
                   if (currentGuess().length > 0) {
                     removeLast();
@@ -402,8 +462,8 @@ export default function App() {
                 <span class="material-symbols-outlined mr-1">backspace</span>
                 Remove
               </button>
-              
-              <button 
+
+              <button
                 onClick={submit}
                 disabled={currentGuess().length !== LENGTH}
                 class={`flex-1 h-12 rounded-lg border-2 flex items-center justify-center font-semibold text-sm transition-all duration-200
@@ -417,7 +477,7 @@ export default function App() {
               </button>
             </Show>
 
-            <button 
+            <button
               onClick={toggleDailySeed}
               class="flex-1 h-12 rounded-lg border-2 border-slate-600/50 flex items-center justify-center font-semibold text-sm
                      bg-slate-700/70 hover:bg-slate-600/70 hover:border-slate-500/70 active:scale-95 transition-all duration-200"
@@ -430,9 +490,84 @@ export default function App() {
           </div>
         </div>
       </div>
-      
+
       <div class="max-w-4xl mt-8">
-        <RulesSection />
+        {(() => {
+          const [areRulesVisible, setRulesAreVisible] = createSignal(false);
+
+          function parseDescription(rule: ShapeRule, shapeCode: ShapeCode) {
+            const desc = rule.getDescription(shapeCode, availableShapes());
+
+            // Replace tokens like <circle> with the corresponding icon and tooltip.
+            const parts = desc.split(/(<[a-z]+>)/gi);
+
+            return parts.map(part => {
+              const match = part.match(/^<([a-z]+)>$/i);
+              if (match) {
+                const shapeCode = match[1] as ShapeCode;
+                return (
+                  <span class="font-semibold" title={ShapeDefinitions[shapeCode].displayName}>
+                    {shapeKey(shapeCode)}
+                  </span>
+                );
+              }
+              return part;
+            });
+          }
+
+          const shapeRules = createMemo(() => {
+            const result = {} as Record<ShapeCode, ShapeRule[]>;
+            const relevantShapes = availableShapes();
+
+            for (const shape of Object.values(ShapeDefinitions)) {
+              if (!relevantShapes.includes(shape.code))
+                continue;
+
+              const rules = shape.rules.filter(rule => {
+                return availableShapes().some(shape => rule.isRelevant(shape));
+              });
+
+              if (rules.length > 0)
+                result[shape.code] = rules;
+            }
+
+            return result;
+          });
+
+          return (
+            <>
+              <button
+                onClick={() => setRulesAreVisible(!areRulesVisible())}
+                class="w-full px-6 h-12 rounded-lg border-2 border-slate-600/50 flex items-center justify-center font-semibold
+                       bg-slate-700/70 hover:bg-slate-600/70 hover:border-slate-500/70 active:scale-95 transition-all duration-200"
+              >
+                <span class="material-symbols-outlined mr-2 transition-transform duration-300"
+                  style={`transform: rotate(${areRulesVisible() ? '180deg' : '0'})`}>
+                  expand_more
+                </span>
+                {areRulesVisible() ? 'Hide' : 'Show'} Help
+              </button>
+
+              <div class={`overflow-hidden transition-all duration-500 ease-in-out ${areRulesVisible() ? 'max-h-auto opacity-100' : 'max-h-0 opacity-0'}`}>
+                <div class="bg-slate-800 rounded-lg shadow-lg mt-4 p-6">
+                  <p class="font-semibold text-lg mb-3 text-slate-200 flex items-center">
+                    <span class="material-symbols-outlined mr-2 text-blue-400">info</span>
+                    Pattern Generator Rules
+                  </p>
+                  <ul class="list-disc list-outside pl-5 space-y-2 text-slate-300">
+                    <For each={Object.keys(shapeRules())}>{(shapeCode, _) => (
+                      <For each={shapeRules()[shapeCode as ShapeCode]}>{(rule, j) => (
+                        <li>
+                          {parseDescription(rule, shapeCode as ShapeCode)}
+                        </li>
+                      )}</For>
+                    )}</For>
+                  </ul>
+                </div>
+              </div>
+            </>
+          );
+        })()}
       </div>
 
       <div class="max-w-4xl mt-8">
@@ -440,85 +575,4 @@ export default function App() {
       </div>
     </div>
   )
-
-  function RulesSection() {
-    const [areRulesVisible, setRulesAreVisible] = createSignal(false);
-  
-    function parseDescription(rule: ShapeRule, shapeCode: ShapeCode) {
-      const desc = rule.getDescription(shapeCode, availableShapes());
-
-      // Replace tokens like <circle> with the corresponding icon and tooltip.
-      const parts = desc.split(/(<[a-z]+>)/gi);
-    
-      return parts.map(part => {
-        const match = part.match(/^<([a-z]+)>$/i);
-        if (match) {
-          const shapeCode = match[1] as ShapeCode;
-          return (
-            <span class="font-semibold" title={ShapeDefinitions[shapeCode].displayName}>
-              {shapeKey(shapeCode)}
-            </span>
-          );
-        }
-        return part;
-      });
-    }
-
-    const shapeRules = createMemo(() => {
-      const result = {} as Record<ShapeCode, ShapeRule[]>;
-      const relevantShapes = availableShapes();
-
-      for (const shape of Object.values(ShapeDefinitions)) {
-        if (!relevantShapes.includes(shape.code)) {
-          continue;
-        }
-
-        const rules = shape.rules.filter(rule => {
-          return availableShapes().some(shape => rule.isRelevant(shape));
-        });
-
-        if (rules.length === 0) {
-          continue;
-        }
-
-        result[shape.code] = rules;
-      }
-
-      return result;
-    });
-  
-    return (
-      <>
-        <button 
-          onClick={() => setRulesAreVisible(!areRulesVisible())}
-          class="w-full px-6 h-12 rounded-lg border-2 border-slate-600/50 flex items-center justify-center font-semibold
-            bg-slate-700/70 hover:bg-slate-600/70 hover:border-slate-500/70 active:scale-95 transition-all duration-200"
-        >
-          <span class="material-symbols-outlined mr-2 transition-transform duration-300" 
-                style={`transform: rotate(${areRulesVisible() ? '180deg' : '0'})`}>
-            expand_more
-          </span>
-          {areRulesVisible() ? 'Hide' : 'Show'} Help
-        </button>
-        
-        <div class={`overflow-hidden transition-all duration-500 ease-in-out ${areRulesVisible() ? 'max-h-auto opacity-100' : 'max-h-0 opacity-0'}`}>
-          <div class="bg-slate-800 rounded-lg shadow-lg mt-4 p-6">
-            <p class="font-semibold text-lg mb-3 text-slate-200 flex items-center">
-              <span class="material-symbols-outlined mr-2 text-blue-400">info</span>
-              Pattern Generator Rules
-            </p>
-            <ul class="list-disc list-outside pl-5 space-y-2 text-slate-300">
-              <For each={Object.keys(shapeRules())}>{(shapeCode, _) => (
-                <For each={shapeRules()[shapeCode as ShapeCode]}>{(rule, j) => (
-                  <li>
-                    {parseDescription(rule, shapeCode as ShapeCode)}
-                  </li>
-                )}</For>
-              )}</For>
-            </ul>
-          </div>
-        </div>
-      </>
-    );
-  }
 }
