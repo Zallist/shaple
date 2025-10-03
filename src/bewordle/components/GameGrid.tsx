@@ -62,8 +62,7 @@ export default function GameGrid() {
         processMatches(swapped, matches)
       }
       else {
-        // Increment move count at the end of processing
-        setSelected(cell)
+        setSelected(null)
       }
 
       setMovesAvailable(c => c - 1)
