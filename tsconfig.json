@@ -3,7 +3,8 @@
     // General
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
-    "target": "ESNext",
+    //"target": "ESNext",
+    "target": "ES5",
 
     // Modules
     "allowSyntheticDefaultImports": true,
