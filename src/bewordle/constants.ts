@@ -1,6 +1,11 @@
 export const GRID_ROWS = 8
 export const GRID_COLS = 8
+
 export const WORD_LENGTH = 5
+
+import AllWordsRawList from './words/5-letter-words.json'
+
+export const ALL_WORDS = new Set<string>(AllWordsRawList.map(w => w.word.toUpperCase()))
 
 // Letter values based on Scrabble scoring
 export const LETTER_VALUES: Record<string, number> = {

@@ -1,10 +1,20 @@
-import { GRID_ROWS, GRID_COLS, WORD_LENGTH, LETTER_VALUES, LETTER_FREQUENCIES } from '../constants'
+import { GRID_ROWS, GRID_COLS, WORD_LENGTH, ALL_WORDS as ALL_WORDS, LETTER_FREQUENCIES } from '../constants'
 import * as prand from 'pure-rand'
-import AllWordsRawList from '../words/5-letter-words.json'
-
-export const AllWords = new Set<string>(AllWordsRawList.map(w => w.word.toUpperCase()))
 
 export type Cell = { r: number; c: number; id: string; letter: string }
+
+function seedForDate(d = new Date()): number {
+  return getRandomSeed(new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())));
+}
+
+function getRandomSeed(d: Date = new Date()): number {
+  const rng = prand.xoroshiro128plus(d.getTime());
+  rng.unsafeJump?.();
+  let seed = prand.unsafeUniformIntDistribution(0, 36 ** 8 - 1, rng); // 8 characters seed
+  return seed;
+}
+
+const rng = prand.xoroshiro128plus(seedForDate());
 
 const LETTERS = Object.keys(LETTER_FREQUENCIES);
 const VOWELS = ['A','E','I','O','U'];
@@ -28,8 +38,6 @@ function pickFromGroup(group: string[], probs: number[], rng: prand.RandomGenera
   }
   return group[group.length - 1];
 }
-
-const rng = prand.xoroshiro128plus(Date.now());
 
 export function randomLetter(row: number, col: number): string {
   prand.unsafeSkipN(rng, row * GRID_COLS + col);
@@ -90,14 +98,14 @@ export function findLineMatches(grid: Cell[][]) {
     for (let c = 0; c <= cols - WORD_LENGTH; c++) {
       const slice = grid[r].slice(c, c + WORD_LENGTH)
       const word = slice.map(s => s.letter).join('')
-      if (AllWords.has(word)) {
+      if (ALL_WORDS.has(word)) {
         matches.push({ coords: slice.map(s => ({ r: s.r, c: s.c })), dir: 'H', word })
       }
       // also check longer sequences (WORD_LENGTH+1, ...)
       for (let L = WORD_LENGTH + 1; L <= cols - c; L++) {
         const sl = grid[r].slice(c, c + L)
         const w2 = sl.map(s => s.letter).join('')
-        if (AllWords.has(w2)) {
+        if (ALL_WORDS.has(w2)) {
           matches.push({ coords: sl.map(s => ({ r: s.r, c: s.c })), dir: 'H', word: w2 })
         }
       }
@@ -110,14 +118,14 @@ export function findLineMatches(grid: Cell[][]) {
       const slice: Cell[] = []
       for (let k = 0; k < WORD_LENGTH; k++) slice.push(grid[r + k][c])
       const word = slice.map(s => s.letter).join('')
-      if (AllWords.has(word)) {
+      if (ALL_WORDS.has(word)) {
         matches.push({ coords: slice.map(s => ({ r: s.r, c: s.c })), dir: 'V', word })
       }
       for (let L = WORD_LENGTH + 1; L <= rows - r; L++) {
         const sl: Cell[] = []
         for (let k = 0; k < L; k++) sl.push(grid[r + k][c])
         const w2 = sl.map(s => s.letter).join('')
-        if (AllWords.has(w2)) {
+        if (ALL_WORDS.has(w2)) {
           matches.push({ coords: sl.map(s => ({ r: s.r, c: s.c })), dir: 'V', word: w2 })
         }
       }
@@ -158,5 +166,5 @@ export function removeAndCollapse(grid: Cell[][], matches: { coords: { r: number
 
 // Utility: validate whether a candidate horizontal/vertical window forms a word — used for hints
 export function isValidWord(seq: string) {
-  return AllWords.has(seq)
+  return ALL_WORDS.has(seq)
 }
