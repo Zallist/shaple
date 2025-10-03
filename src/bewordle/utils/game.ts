@@ -7,8 +7,11 @@ export const AllWords = new Set<string>(AllWordsRawList.map(w => w.word.toUpperC
 export type Cell = { r: number; c: number; id: string; letter: string }
 
 const LETTERS = Object.keys(LETTER_FREQUENCIES);
-const TOTAL = Object.values(LETTER_FREQUENCIES).reduce((a, b) => a + b, 0);
-const LETTER_PROBS = LETTERS.map(l => LETTER_FREQUENCIES[l] / TOTAL);
+const VOWELS = ['A','E','I','O','U'];
+const CONSONANTS = LETTERS.filter(l => !VOWELS.includes(l));
+
+const VOWEL_PROBS = VOWELS.map(v => LETTER_FREQUENCIES[v] / VOWELS.reduce((acc, l) => acc + LETTER_FREQUENCIES[l], 0));
+const CONSONANT_PROBS = CONSONANTS.map(c => LETTER_FREQUENCIES[c] / CONSONANTS.reduce((acc, l) => acc + LETTER_FREQUENCIES[l], 0));
 
 function generateFloat64(rng: prand.RandomGenerator) {
   const g1 = prand.unsafeUniformIntDistribution(0, (1 << 26) - 1, rng);
@@ -16,21 +19,25 @@ function generateFloat64(rng: prand.RandomGenerator) {
   const value = (g1 * Math.pow(2, 27) + g2) * Math.pow(2, -53);
   return value;
 }
-function weightedRandom(rng: prand.RandomGenerator): string {
+function pickFromGroup(group: string[], probs: number[], rng: prand.RandomGenerator): string {
   const p = generateFloat64(rng);
   let acc = 0;
-  for (let i = 0; i < LETTERS.length; i++) {
-    acc += LETTER_PROBS[i];
-    if (p <= acc) return LETTERS[i];
+  for (let i = 0; i < group.length; i++) {
+    acc += probs[i];
+    if (p <= acc) return group[i];
   }
-  return LETTERS[LETTERS.length - 1]; // fallback
+  return group[group.length - 1];
 }
 
 const rng = prand.xoroshiro128plus(Date.now());
 
 export function randomLetter(row: number, col: number): string {
   prand.unsafeSkipN(rng, row * GRID_COLS + col);
-  return weightedRandom(rng);
+
+  const pickVowel = generateFloat64(rng) < 0.45; // 45% chance vowel
+  if (pickVowel) 
+    return pickFromGroup(VOWELS, VOWEL_PROBS, rng);
+  return pickFromGroup(CONSONANTS, CONSONANT_PROBS, rng);
 }
 
 export function makeGrid(rows = GRID_ROWS, cols = GRID_COLS): Cell[][] {
