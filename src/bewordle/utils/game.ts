@@ -4,9 +4,7 @@ import * as prand from 'pure-rand'
 export type Cell = { 
   r: number; 
   c: number; 
-  id: string; 
-  letter: string; 
-  isMatched?: boolean;
+  letter: string;
 }
 
 function seedForDate(d = new Date()): number {
@@ -59,7 +57,7 @@ export function makeGrid(rows = GRID_ROWS, cols = GRID_COLS): Cell[][] {
   for (let r = 0; r < rows; r++) {
     const row: Cell[] = [];
     for (let c = 0; c < cols; c++) {
-      row.push({ r, c, id: `${r}-${c}`, letter: randomLetter(r, c) });
+      row.push({ r, c, letter: randomLetter(r, c) });
     }
     g.push(row);
   }
@@ -171,11 +169,6 @@ export function removeAndCollapse(grid: Cell[][], matches: { coords: { r: number
     for (const coord of match.coords) {
       const { r, c } = coord;
       matchedCoords.add(`${r},${c}`);
-      
-      // Set isMatched to true for matched cells before they're removed
-      if (newGrid[r] && newGrid[r][c]) {
-        newGrid[r][c].isMatched = true;
-      }
     }
   }
 
@@ -199,7 +192,6 @@ export function removeAndCollapse(grid: Cell[][], matches: { coords: { r: number
       newGrid[r][c] = {
         r,
         c,
-        id: `${r},${c},${Date.now()},${Math.random()}`,
         letter: randomLetter(r, c),
         isMatched: false
       };

@@ -22,6 +22,7 @@ export default function GameGrid() {
   const [score, setScore] = createSignal(0)
   const [movesAvailable, setMovesAvailable] = createSignal(INITIAL_MOVES_AVAILABLE)
   const [foundWords, setFoundWords] = createSignal<Array<{word: string, score: number, chain: number}>>([])
+  const [matchedCells, setMatchedCells] = createSignal<Set<Cell>>(new Set<Cell>())
 
   const [isChaining, setIsChaining] = createSignal(false)
   const isDone = createMemo(() => movesAvailable() <= 0)
@@ -72,7 +73,7 @@ export default function GameGrid() {
     }
   }
 
-  async function processMatches(currentGrid: Cell[][], initialMatches: any[]) {
+  async function processMatches(currentGrid: Cell[][], initialMatches: { coords: { r: number; c: number }[]; word: string }[]) {
     let g = currentGrid
     let localChain = 0
     
@@ -100,36 +101,22 @@ export default function GameGrid() {
             ...prev
           ])
         }
+
+        setMatchedCells(prev => new Set<Cell>([...prev, ...match.coords.map(coord => g[coord.r][coord.c])]));
       }
       
-      g = removeAndCollapse(g, matches)
+      g = removeAndCollapse(g, matches);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      setMatchedCells(new Set<Cell>([]))
       setGrid(g)
     }
 
     setIsChaining(false)
   }
 
-  // Animate grid on mount
-  onMount(() => {
-    const gridItems = document.querySelectorAll('.tile-container')
-    gridItems.forEach((item, i) => {
-      item.animate(
-        { 
-          opacity: [0, 1],
-          y: [20, 0],
-          scale: [0.9, 1]
-        },
-        {
-          delay: i * 50,
-          duration: 400,
-          easing: 'ease-out'
-        }
-      )
-    })
-  })
-
   return (
-    <div class="flex flex-col bg-gradient-to-br from-gray-900 to-gray-800">
+    <div class="flex flex-col">
       {/* Header */}
       <header class="sticky top-0 z-10 bg-gray-900/80 backdrop-blur-md border-b border-gray-800/50">
         <div class="container mx-auto px-4 py-3">
@@ -161,7 +148,7 @@ export default function GameGrid() {
       </header>
 
       {/* Main Game Area */}
-      <main class="flex-1 flex flex-col items-center justify-center p-4 md:p-6">
+      <main class="flex-1 flex flex-col items-center justify-center py-4">
         <div 
           class="grid gap-2 md:gap-3 p-4 bg-gray-800/30 rounded-2xl backdrop-blur-sm border border-gray-700/50 shadow-2xl"
           style={{ 
@@ -180,6 +167,7 @@ export default function GameGrid() {
                         cell={cell}
                         onClick={handleClick}
                         isSelected={isSelectedCell()}
+                        isMatched={matchedCells().has(cell)}
                       />
                     </div>
                   )
@@ -204,15 +192,15 @@ export default function GameGrid() {
         </Show>
       </main>
 
-      <div class="sticky bottom-0 bg-gray-900/80 backdrop-blur-md border-t border-gray-800/50 py-3 px-4">
-        <Show when={foundWords().length > 0}>
-          <div class="max-w-4xl mx-auto">
+      <Show when={foundWords().length > 0}>
+        <div class="sticky bottom-0 bg-gray-900/80 backdrop-blur-md border-t border-gray-800/50 py-3 px-4">
+          <div class="max-w-xl mx-auto">
             <h3 class="text-sm font-medium text-gray-400 mb-2 flex items-center">
               <span class="mr-2">Found Words</span>
               <span class="text-xs bg-gray-800 px-2 py-0.5 rounded-full">{foundWords().length}</span>
             </h3>
             <div class="flex flex-wrap gap-2">
-              <For each={foundWords().slice(0, 6)}>
+              <For each={foundWords()}>
                 {(found, i) => (
                   <div 
                     class="px-3 py-1.5 bg-gradient-to-r from-gray-800/80 to-gray-900/80 rounded-lg text-sm font-medium text-white shadow-md backdrop-blur-sm 
@@ -236,8 +224,8 @@ export default function GameGrid() {
               </For>
             </div>
           </div>
-        </Show>
-      </div>
+        </div>
+      </Show>
     </div>
   )
 }
