@@ -1,18 +1,26 @@
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 import solidPlugin from 'vite-plugin-solid';
+import legacy from '@vitejs/plugin-legacy';
 
 export default defineConfig(({ command, mode, isSsrBuild, isPreview }) => {
   if (command === 'serve') {
     return {
       base: './',
-      plugins: [solidPlugin(), tailwindcss()],
+      plugins: [
+        solidPlugin(),
+        tailwindcss(),
+        legacy({
+          targets: ['defaults', 'IE 11'],
+          additionalLegacyPolyfills: ['regenerator-runtime/runtime']
+        })
+      ],
       server: {
         port: 3000,
       },
       build: {
         outDir: 'dist',
-        target: 'es5',
+        target: 'es2015',
         minify: false,
         sourcemap: true
       },
@@ -21,13 +29,20 @@ export default defineConfig(({ command, mode, isSsrBuild, isPreview }) => {
     // command === 'build'
     return {
       base: './',
-      plugins: [solidPlugin(), tailwindcss()],
+      plugins: [
+        solidPlugin(),
+        tailwindcss(),
+        legacy({
+          targets: ['defaults', 'IE 11'],
+          additionalLegacyPolyfills: ['regenerator-runtime/runtime']
+        })
+      ],
       server: {
         port: 3000,
       },
       build: {
         outDir: 'dist',
-        target: 'es5',
+        target: 'es2015',
         minify: true,
         sourcemap: false
       },
