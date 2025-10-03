@@ -2,7 +2,7 @@ import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 import solidPlugin from 'vite-plugin-solid';
 import legacy from '@vitejs/plugin-legacy';
-import tailwindLegacy from 'vite-plugin-tailwind-legacy';
+import tailwindLegacy from './vite-plugin-tailwind-legacy';
 import type { PluginOption } from 'vite';
 
 function stripCrossorigin(): PluginOption {
