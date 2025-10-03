@@ -26,8 +26,6 @@ export default function GameGrid() {
   const [selected, setSelected] = createSignal<Cell | null>(null)
   const [score, setScore] = createSignal(0)
   const [moveCount, setMoveCount] = createSignal(0)
-  const [isDragging, setIsDragging] = createSignal(false)
-  const [dragOverCell, setDragOverCell] = createSignal<Cell | null>(null)
   const [recentWords, setRecentWords] = createSignal<Array<{word: string, score: number, chain: number}>>([])
   const [scoreMultiplier, setScoreMultiplier] = createSignal(1)
 
@@ -35,53 +33,6 @@ export default function GameGrid() {
     setGrid(makeGrid(GRID_ROWS, GRID_COLS))
   })
 
-  const handleDragStart = (cell: Cell) => {
-    setIsDragging(true)
-    setSelected(cell)
-    // Find all adjacent cells that can be swapped with
-    const adjacent = []
-    const { r, c } = cell
-    const directions = [
-      { dr: 0, dc: 1 }, { dr: 1, dc: 0 },
-      { dr: 0, dc: -1 }, { dr: -1, dc: 0 }
-    ]
-    
-    for (const { dr, dc } of directions) {
-      const nr = r + dr
-      const nc = c + dc
-      if (nr >= 0 && nr < GRID_ROWS && nc >= 0 && nc < GRID_COLS) {
-        adjacent.push(grid()[nr][nc])
-      }
-    }
-  }
-
-  const handleDragOver = (cell: Cell) => {
-    if (!isDragging()) return
-    setDragOverCell(cell)
-  }
-
-  const handleDrop = (from: Cell, to: Cell) => {
-    if (!isDragging()) return
-    
-    // Reset drag state
-    setIsDragging(false)
-    setSelected(null)
-    setDragOverCell(null)
-    
-    // If not adjacent, just select the new cell
-    if (!isAdjacent(from, to)) {
-      setSelected(to)
-      return
-    }
-    
-    // Perform the swap
-    const newGrid = swap(grid(), from, to)
-    const matches = findLineMatches(newGrid)
-    
-    setGrid(newGrid)
-    processMatches(newGrid, matches)
-  }
-  
   // Calculate score multiplier based on move count
   createEffect(() => {
     const start = 1
@@ -114,7 +65,6 @@ export default function GameGrid() {
       
       setGrid(swapped)
       processMatches(swapped, matches)
-      setSelected(null)
     } else {
       // Select the new cell if not adjacent
       setSelected(cell)
@@ -180,20 +130,12 @@ export default function GameGrid() {
               <For each={row}>
                 {(cell, colIndex) => {
                   const isSelectedCell = createMemo(() => selected()?.r === cell.r && selected()?.c === cell.c);
-                  const isOverCell = createMemo(() => dragOverCell()?.r === cell.r && dragOverCell()?.c === cell.c);
                   return (
                     <div class="flex items-center justify-center" style="width: 32px; height: 32px;">
                       <Tile
                         cell={cell}
                         onClick={handleClick}
-                        onDragStart={handleDragStart}
-                        onDragOver={handleDragOver}
-                        onDrop={handleDrop}
                         isSelected={isSelectedCell()}
-                        isMatched={false}
-                        isWord={false}
-                        isDraggable={true}
-                        isOver={isOverCell()}
                       />
                     </div>
                   )
