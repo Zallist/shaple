@@ -22,7 +22,7 @@ export default defineConfig(({ command, mode, isSsrBuild, isPreview }) => {
         solidPlugin(),
         tailwindcss(),
         legacy({
-          targets: ['defaults', 'IE 11'],
+          targets: ['fully supports es5'],
           additionalLegacyPolyfills: ['regenerator-runtime/runtime']
         }),
         stripCrossorigin()
@@ -45,7 +45,7 @@ export default defineConfig(({ command, mode, isSsrBuild, isPreview }) => {
         solidPlugin(),
         tailwindcss(),
         legacy({
-          targets: ['defaults', 'IE 11'],
+          targets: ['fully supports es5'],
           additionalLegacyPolyfills: ['regenerator-runtime/runtime']
         }),
         stripCrossorigin()

@@ -148,7 +148,7 @@ export default function App() {
 
   const isDailySeed = createMemo(() => seed() === seedForDate());
 
-  const isCorrect = createMemo(() => feedbacks().at(-1)?.every(f => f === 'exact'));
+  const isCorrect = createMemo(() => feedbacks()[feedbacks().length - 1]?.every(f => f === 'exact'));
 
   // Game ends either when max attempts are used or the latest attempt is all 'exact'.
   const isDone = createMemo(() => attempts().length >= MAX_ATTEMPTS || isCorrect());
