@@ -45,7 +45,13 @@ export default defineConfig(({ command, mode, isSsrBuild, isPreview }) => {
       outDir: 'dist',
       target: 'es2015',
       minify: isBuild,
-      sourcemap: !isBuild
+      sourcemap: !isBuild,
+      rollupOptions: {
+        input: {
+          index: 'index.html',
+          bewordle: 'bewordle/index.html',
+        }
+      }
     },
   };
 });
