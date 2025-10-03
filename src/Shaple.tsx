@@ -194,11 +194,11 @@ export default function App() {
   }
 
   function isPotentialShape(s: ShapeCode) {
-    const current = currentGuess();
+    //const current = currentGuess();
     const allAttempts = attempts();
     const allFeedbacks = feedbacks();
 
-    const countInCurrent = current.filter(shape => shape === s).length;
+    //const countInCurrent = current.filter(shape => shape === s).length;
 
     for (let i = 0; i < allAttempts.length; i++) {
       const attemptAndFeedback = allAttempts[i].map((shape, index) => {
@@ -207,8 +207,10 @@ export default function App() {
 
       const attemptsOfShape = attemptAndFeedback.filter(item => item.shape === s);
 
-      if (attemptsOfShape.filter(item => !isOkayFeedback(item.feedback)).length > 0 &&
-        attemptsOfShape.filter(item => isOkayFeedback(item.feedback)).length <= countInCurrent) {
+      if (attemptsOfShape.length > 0) {
+        if (attemptsOfShape.filter(item => isOkayFeedback(item.feedback)).length > 0)
+          return true;
+        
         return false;
       }
     }
@@ -518,8 +520,9 @@ export default function App() {
           }
 
           const shapeRules = createMemo(() => {
-            const result = {} as Record<ShapeCode, ShapeRule[]>;
+            const result: Array<{ shape: ShapeCode, rules: { rule: ShapeRule, isPotential: boolean }[] }> = [];
             const relevantShapes = availableShapes();
+            const potentialShapes = relevantShapes.filter(shape => isPotentialShape(shape));
 
             for (const shape of Object.values(ShapeDefinitions)) {
               if (!relevantShapes.includes(shape.code))
@@ -530,7 +533,10 @@ export default function App() {
               });
 
               if (rules.length > 0)
-                result[shape.code] = rules;
+                result.push({ 
+                  shape: shape.code, 
+                  rules: rules.map(rule => ({ rule, isPotential: potentialShapes.some(shape => rule.isRelevant(shape)) })) 
+                });
             }
 
             return result;
@@ -557,10 +563,12 @@ export default function App() {
                     Pattern Generator Rules
                   </p>
                   <ul class="list-disc list-outside pl-5 space-y-2 text-slate-300">
-                    <For each={Object.keys(shapeRules())}>{(shapeCode, _) => (
-                      <For each={shapeRules()[shapeCode as ShapeCode]}>{(rule, j) => (
-                        <li>
-                          {parseDescription(rule, shapeCode as ShapeCode)}
+                    <For each={shapeRules()}>{(shapeRule, _) => (
+                      <For each={shapeRule.rules}>{(rule, j) => (
+                        <li classList={{
+                          'text-slate-500': !rule.isPotential && !isDone()
+                        }}>
+                          {parseDescription(rule.rule, shapeRule.shape)}
                         </li>
                       )}</For>
                     )}</For>
