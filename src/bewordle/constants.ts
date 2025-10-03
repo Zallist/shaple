@@ -21,5 +21,5 @@ export const LETTER_FREQUENCIES: Record<string, number> = { // Rounded hard so w
 };
 
 // Scoring
-export const BASE_SCORE = 100
+export const INITIAL_MOVES_AVAILABLE = 100
 export const CHAIN_MULTIPLIER = 1.5

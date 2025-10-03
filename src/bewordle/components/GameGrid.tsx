@@ -1,22 +1,17 @@
 import { createSignal, createMemo, For, onMount, Show, createEffect } from 'solid-js'
 import { makeGrid, swap, findLineMatches, removeAndCollapse, Cell, isAdjacent } from '../utils/game'
 import Tile from './Tile'
-import { GRID_ROWS, GRID_COLS, LETTER_VALUES } from '../constants'
+import { GRID_ROWS, GRID_COLS, LETTER_VALUES, INITIAL_MOVES_AVAILABLE } from '../constants'
 
 // Calculate word score based on letter values and word length
-function calculateWordScore(word: string, moveCount: number): number {
-  let score = 0
-  let wordMultiplier = 1
+function calculateWordScore(word: string): number {
+  let score = 0;
   
   // Calculate base score from letter values
   for (const letter of word) {
-    const letterScore = LETTER_VALUES[letter] || 1
-    score += letterScore
+    const letterScore = LETTER_VALUES[letter] || 1;
+    score += letterScore;
   }
-  
-  // Apply move penalty (reduce score by 10% for each move beyond the first)
-  const movePenalty = Math.max(0, moveCount - 1) * 0.1
-  score = Math.max(1, Math.floor(score * (1 - movePenalty)))
   
   return score
 }
@@ -25,26 +20,22 @@ export default function GameGrid() {
   const [grid, setGrid] = createSignal<Cell[][]>([])
   const [selected, setSelected] = createSignal<Cell | null>(null)
   const [score, setScore] = createSignal(0)
-  const [moveCount, setMoveCount] = createSignal(0)
-  const [recentWords, setRecentWords] = createSignal<Array<{word: string, score: number, chain: number}>>([])
-  const [scoreMultiplier, setScoreMultiplier] = createSignal(1)
+  const [movesAvailable, setMovesAvailable] = createSignal(INITIAL_MOVES_AVAILABLE)
+  const [foundWords, setFoundWords] = createSignal<Array<{word: string, score: number, chain: number}>>([])
+
+  const [isChaining, setIsChaining] = createSignal(false)
+  const isDone = createMemo(() => movesAvailable() <= 0)
 
   onMount(() => {
     setGrid(makeGrid(GRID_ROWS, GRID_COLS))
   })
 
-  // Calculate score multiplier based on move count
-  createEffect(() => {
-    const start = 1
-    const target = 0.25
-    const decay = 0.9 // adjust steepness
-
-    const multiplier = target + (start - target) * Math.pow(decay, moveCount())
-    setScoreMultiplier(multiplier)
-
-  })
-
   const handleClick = (cell: Cell) => {
+    if (isDone() || isChaining()) {
+      setSelected(null);
+      return;
+    }
+
     const prev = selected()
     
     if (!prev) {
@@ -64,14 +55,17 @@ export default function GameGrid() {
       const matches = findLineMatches(swapped)
       
       setGrid(swapped)
-      
+
       if (matches.length > 0) {
         setSelected(null)
         processMatches(swapped, matches)
       }
       else {
+        // Increment move count at the end of processing
         setSelected(cell)
       }
+
+      setMovesAvailable(c => c - 1)
     } else {
       // Select the new cell if not adjacent
       setSelected(cell)
@@ -82,30 +76,29 @@ export default function GameGrid() {
     let g = currentGrid
     let localChain = 0
     
-    // Increment move count at the start of processing
-    setMoveCount(c => c + 1)
-    
     while (true) {
       const matches = initialMatches && localChain === 0 ? initialMatches : findLineMatches(g)
-      if (!matches || matches.length === 0) break
+      if (!matches || matches.length === 0) break;
+
+      setIsChaining(true)
       
       localChain++
       
       // Process each match
       for (const match of matches) {
         if (match.word) {
-          const wordScore = calculateWordScore(match.word, moveCount())
-          const chainBonus = localChain > 1 ? Math.pow(1.5, localChain - 1) : 1
-          const totalScore = Math.round(wordScore * chainBonus)
+          const wordScore = calculateWordScore(match.word);
+          const chainBonus = localChain > 1 ? Math.pow(1.5, localChain - 1) : 1;
+          const totalScore = Math.round(wordScore * chainBonus);
           
           // Update score with animation
           setScore(s => s + totalScore)
           
           // Add to recent words history
-          setRecentWords(prev => [
+          setFoundWords(prev => [
             { word: match.word, score: totalScore, chain: localChain },
             ...prev
-          ].slice(0, 5)) // Keep only last 5 words
+          ])
         }
       }
       
@@ -113,6 +106,8 @@ export default function GameGrid() {
       setGrid(g)
       await new Promise(r => setTimeout(r, 240))
     }
+
+    setIsChaining(false)
   }
 
   return (
@@ -157,24 +152,18 @@ export default function GameGrid() {
       <div class="mt-6 space-y-4">
         {/* Current move stats */}
         <div class="bg-gray-800/50 rounded-lg p-4">
-          <div class="grid grid-cols-2 gap-4">
-            <div class="text-center">
-              <div class="text-sm text-gray-300">Move Count</div>
-              <div class="text-xl font-bold">{moveCount()}</div>
-            </div>
-            <div class="text-center">
-              <div class="text-sm text-gray-300">Score Multiplier</div>
-              <div class="text-xl font-bold">{scoreMultiplier().toFixed(2)}x</div>
-            </div>
+          <div class="text-center">
+            <div class="text-sm text-gray-300">Moves Left</div>
+            <div class="text-xl font-bold">{movesAvailable()}</div>
           </div>
         </div>
 
         {/* Recent words */}
-        <Show when={recentWords().length > 0}>
+        <Show when={foundWords().length > 0}>
           <div class="mt-2">
             <h3 class="text-sm font-semibold text-gray-300 mb-2">Recent Words</h3>
             <div class="space-y-2">
-              <For each={recentWords()}>
+              <For each={foundWords()}>
                 {(item, i) => (
                   <div class="flex justify-between items-center bg-gray-800/30 rounded px-3 py-2">
                     <div class="font-mono text-lg">{item.word.toUpperCase()}</div>
