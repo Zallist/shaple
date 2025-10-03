@@ -63,9 +63,9 @@ export function makeGrid(rows = GRID_ROWS, cols = GRID_COLS): Cell[][] {
 // Swap two cells (adjacent) and return new grid copy
 // Check if two cells are adjacent (horizontally or vertically)
 export function isAdjacent(a: Cell, b: Cell): boolean {
-  const dr = Math.abs(a.r - b.r)
-  const dc = Math.abs(a.c - b.c)
-  return (dr === 0 && dc === 1) || (dr === 1 && dc === 0)
+  const dr = Math.abs(a.r - b.r);
+  const dc = Math.abs(a.c - b.c);
+  return (dr === 1 && dc === 0) || (dr === 0 && dc === 1) || (dr === 1 && dc === 1);
 }
 
 export function swap(grid: Cell[][], a: Cell, b: Cell) {
@@ -79,54 +79,60 @@ export function swap(grid: Cell[][], a: Cell, b: Cell) {
 }
 
 // Find all line matches of length >= WORD_LENGTH. Returns arrays of positions in reading order.
+type Direction = 'R' | 'D' | 'DR' | 'DL' | 'UR' | 'UL' | 'U' | 'L'
+
+/**
+ * Finds all word matches in the grid in all 8 directions
+ * @param grid The game grid to search for matches
+ * @returns Array of matches with their coordinates, direction, and the word found
+ */
 export function findLineMatches(grid: Cell[][]) {
   const rows = grid.length
   const cols = grid[0].length
-  const matches: { coords: { r: number; c: number }[]; dir: 'H' | 'V'; word?: string }[] = []
+  const matches: { coords: { r: number; c: number }[]; dir: Direction; word: string }[] = []
+  
+  // Define all 8 possible directions: right, down, down-right, down-left, up-right, up-left, up, left
+  const directions = [
+    { dr: 0, dc: 1, dir: 'R' as const },    // right
+    { dr: 1, dc: 0, dir: 'D' as const },    // down
+    { dr: 1, dc: 1, dir: 'DR' as const },   // down-right
+    { dr: 1, dc: -1, dir: 'DL' as const },  // down-left
+    { dr: -1, dc: 1, dir: 'UR' as const },  // up-right
+    { dr: -1, dc: -1, dir: 'UL' as const }, // up-left
+    { dr: -1, dc: 0, dir: 'U' as const },   // up
+    { dr: 0, dc: -1, dir: 'L' as const }    // left
+  ]
 
-  // horizontal
-  for (let r = 0; r < rows; r++) {
-    let start = 0
-    while (start < cols) {
-      let end = start + 1
-      while (end < cols) end++
-      // Instead of matching same-letter jewels (bejeweled), we match any contiguous sequence length WORD_LENGTH
-      // We'll check all windows of length WORD_LENGTH in this row
-      start++
-    }
-    // We'll instead scan for windows length >= WORD_LENGTH
-    for (let c = 0; c <= cols - WORD_LENGTH; c++) {
-      const slice = grid[r].slice(c, c + WORD_LENGTH)
-      const word = slice.map(s => s.letter).join('')
-      if (ALL_WORDS.has(word)) {
-        matches.push({ coords: slice.map(s => ({ r: s.r, c: s.c })), dir: 'H', word })
-      }
-      // also check longer sequences (WORD_LENGTH+1, ...)
-      for (let L = WORD_LENGTH + 1; L <= cols - c; L++) {
-        const sl = grid[r].slice(c, c + L)
-        const w2 = sl.map(s => s.letter).join('')
-        if (ALL_WORDS.has(w2)) {
-          matches.push({ coords: sl.map(s => ({ r: s.r, c: s.c })), dir: 'H', word: w2 })
-        }
-      }
-    }
-  }
+  for (const { dr, dc, dir } of directions) {
+    // For each direction, determine the valid starting positions
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        // Skip if we can't fit a word of WORD_LENGTH in this direction
+        const endR = r + (WORD_LENGTH - 1) * dr
+        const endC = c + (WORD_LENGTH - 1) * dc
+        if (endR < 0 || endR >= rows || endC < 0 || endC >= cols) continue
 
-  // vertical
-  for (let c = 0; c < cols; c++) {
-    for (let r = 0; r <= rows - WORD_LENGTH; r++) {
-      const slice: Cell[] = []
-      for (let k = 0; k < WORD_LENGTH; k++) slice.push(grid[r + k][c])
-      const word = slice.map(s => s.letter).join('')
-      if (ALL_WORDS.has(word)) {
-        matches.push({ coords: slice.map(s => ({ r: s.r, c: s.c })), dir: 'V', word })
-      }
-      for (let L = WORD_LENGTH + 1; L <= rows - r; L++) {
-        const sl: Cell[] = []
-        for (let k = 0; k < L; k++) sl.push(grid[r + k][c])
-        const w2 = sl.map(s => s.letter).join('')
-        if (ALL_WORDS.has(w2)) {
-          matches.push({ coords: sl.map(s => ({ r: s.r, c: s.c })), dir: 'V', word: w2 })
+        // Check words of length >= WORD_LENGTH
+        for (let L = WORD_LENGTH; ; L++) {
+          const endRLong = r + (L - 1) * dr
+          const endCLong = c + (L - 1) * dc
+          if (endRLong < 0 || endRLong >= rows || endCLong < 0 || endCLong >= cols) break
+
+          const coords: { r: number; c: number }[] = []
+          let word = ''
+          
+          // Build the word by following the direction
+          for (let i = 0; i < L; i++) {
+            const checkR = r + i * dr
+            const checkC = c + i * dc
+            coords.push({ r: checkR, c: checkC })
+            word += grid[checkR][checkC].letter
+          }
+
+          // Check if the word is in our dictionary
+          if (ALL_WORDS.has(word)) {
+            matches.push({ coords, dir, word })
+          }
         }
       }
     }
