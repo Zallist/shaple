@@ -26,7 +26,7 @@ export default defineConfig(({ command, mode, isSsrBuild, isPreview }) => {
       tailwindLegacy({
         tailwindConfig: 'tailwind.config.legacy.js',
         assetsDir: 'dist/assets',
-        publicPath: '',
+        publicPath: 'assets/',
         inputCSS: 'tailwind.legacy.css',
         injectInHTML: true,
       }),
