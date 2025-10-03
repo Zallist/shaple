@@ -12,7 +12,7 @@ export default defineConfig(({ command, mode, isSsrBuild, isPreview }) => {
       },
       build: {
         outDir: 'dist',
-        target: 'esnext',
+        target: 'es5',
         minify: false,
         sourcemap: true
       },
@@ -27,7 +27,7 @@ export default defineConfig(({ command, mode, isSsrBuild, isPreview }) => {
       },
       build: {
         outDir: 'dist',
-        target: 'esnext',
+        target: 'es5',
         minify: true,
         sourcemap: false
       },
