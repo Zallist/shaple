@@ -104,36 +104,78 @@ export default function GameGrid() {
       
       g = removeAndCollapse(g, matches)
       setGrid(g)
-      await new Promise(r => setTimeout(r, 240))
     }
 
     setIsChaining(false)
   }
 
+  // Animate grid on mount
+  onMount(() => {
+    const gridItems = document.querySelectorAll('.tile-container')
+    gridItems.forEach((item, i) => {
+      item.animate(
+        { 
+          opacity: [0, 1],
+          y: [20, 0],
+          scale: [0.9, 1]
+        },
+        {
+          delay: i * 50,
+          duration: 400,
+          easing: 'ease-out'
+        }
+      )
+    })
+  })
+
   return (
-    <div class="flex flex-col">
-      <div class="p-4 md:p-6">
-        <div class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
-          Score: <span class="text-white">{score()}</span>
+    <div class="flex flex-col bg-gradient-to-br from-gray-900 to-gray-800">
+      {/* Header */}
+      <header class="sticky top-0 z-10 bg-gray-900/80 backdrop-blur-md border-b border-gray-800/50">
+        <div class="container mx-auto px-4 py-3">
+          <div class="flex items-center justify-between">
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-2xl font-bold text-white">
+                {movesAvailable()}/{INITIAL_MOVES_AVAILABLE}
+                <span class="text-xs uppercase text-gray-400 ml-2">Moves</span>
+              </span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="text-2xl font-bold text-white">
+                  {score().toLocaleString()}
+                  <span class="text-xs uppercase text-gray-400 ml-2">Score</span>
+                </div>
+            </div>
+          </div>
+          
+          <div class="h-2 bg-gray-800 rounded-full overflow-hidden">
+            <div 
+              class="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transition-all duration-500 ease-out"
+              style={{
+                width: `${(movesAvailable() / INITIAL_MOVES_AVAILABLE) * 100}%`,
+                'box-shadow': '0 0 10px rgba(99, 102, 241, 0.5)'
+              }}
+            />
+          </div>
         </div>
-      </div>
-      
-      <div class="flex justify-center">
+      </header>
+
+      {/* Main Game Area */}
+      <main class="flex-1 flex flex-col items-center justify-center p-4 md:p-6">
         <div 
-          class="grid gap-1.5 md:gap-2" 
+          class="grid gap-2 md:gap-3 p-4 bg-gray-800/30 rounded-2xl backdrop-blur-sm border border-gray-700/50 shadow-2xl"
           style={{ 
             'grid-template-columns': `repeat(${GRID_COLS}, minmax(0, 1fr))`,
-            'width': 'fit-content',
-            'margin': '0 auto'
+            'box-shadow': '0 8px 32px rgba(0, 0, 0, 0.2)'
           }}
         >
-          <For each={grid()} fallback={<div>Loading</div>}>
+          <For each={grid()} fallback={<div>Loading...</div>}>
             {(row, rowIndex) => (
               <For each={row}>
                 {(cell, colIndex) => {
                   const isSelectedCell = createMemo(() => selected()?.r === cell.r && selected()?.c === cell.c);
                   return (
-                    <div class="flex items-center justify-center" style="width: 32px; height: 32px;">
+                    <div class="tile-container flex items-center justify-center" style="width: 48px; height: 48px;">
                       <Tile
                         cell={cell}
                         onClick={handleClick}
@@ -146,35 +188,49 @@ export default function GameGrid() {
             )}
           </For>
         </div>
-      </div>
-      
-      {/* Game stats and history */}
-      <div class="mt-6 space-y-4">
-        {/* Current move stats */}
-        <div class="bg-gray-800/50 rounded-lg p-4">
-          <div class="text-center">
-            <div class="text-sm text-gray-300">Moves Left</div>
-            <div class="text-xl font-bold">{movesAvailable()}</div>
-          </div>
-        </div>
 
-        {/* Recent words */}
+        {/* Game Status */}
+        <Show when={isDone()}>
+          <div class="mt-6 p-4 bg-gradient-to-r from-red-500/20 to-pink-500/20 rounded-xl border border-red-500/30 text-center animate-bounce">
+            <h3 class="text-xl font-bold text-white mb-1">Game Over!</h3>
+            <p class="text-gray-200 text-sm">Final Score: {score().toLocaleString()}</p>
+            <button 
+              onClick={() => window.location.reload()}
+              class="mt-3 px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full text-sm font-medium hover:opacity-90 transition-opacity"
+            >
+              Play Again
+            </button>
+          </div>
+        </Show>
+      </main>
+
+      <div class="sticky bottom-0 bg-gray-900/80 backdrop-blur-md border-t border-gray-800/50 py-3 px-4">
         <Show when={foundWords().length > 0}>
-          <div class="mt-2">
-            <h3 class="text-sm font-semibold text-gray-300 mb-2">Recent Words</h3>
-            <div class="space-y-2">
-              <For each={foundWords()}>
-                {(item, i) => (
-                  <div class="flex justify-between items-center bg-gray-800/30 rounded px-3 py-2">
-                    <div class="font-mono text-lg">{item.word.toUpperCase()}</div>
-                    <div class="flex items-center gap-2">
-                      {item.chain > 1 && (
-                        <span class="text-xs bg-yellow-500/20 text-yellow-300 px-2 py-0.5 rounded">
-                          x{item.chain}
-                        </span>
-                      )}
-                      <span class="font-bold text-yellow-300">+{item.score}</span>
-                    </div>
+          <div class="max-w-4xl mx-auto">
+            <h3 class="text-sm font-medium text-gray-400 mb-2 flex items-center">
+              <span class="mr-2">Found Words</span>
+              <span class="text-xs bg-gray-800 px-2 py-0.5 rounded-full">{foundWords().length}</span>
+            </h3>
+            <div class="flex flex-wrap gap-2">
+              <For each={foundWords().slice(0, 6)}>
+                {(found, i) => (
+                  <div 
+                    class="px-3 py-1.5 bg-gradient-to-r from-gray-800/80 to-gray-900/80 rounded-lg text-sm font-medium text-white shadow-md backdrop-blur-sm 
+                           border border-gray-700/50 flex items-center"
+                    style={{
+                      'animation-delay': `${i() * 50}ms`,
+                      'view-transition-name': `word-${i()}`
+                    }}
+                  >
+                    <span class="text-blue-300">{found.word}</span>
+                    <span class="ml-1.5 px-1.5 py-0.5 bg-yellow-500/20 text-yellow-300 rounded text-xs">
+                      +{found.score}
+                    </span>
+                    {found.chain > 1 && (
+                      <span class="ml-1 text-xs bg-green-500/20 text-green-300 px-1.5 py-0.5 rounded">
+                        x{found.chain}
+                      </span>
+                    )}
                   </div>
                 )}
               </For>

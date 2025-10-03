@@ -1,7 +1,13 @@
 import { GRID_ROWS, GRID_COLS, WORD_LENGTH, ALL_WORDS as ALL_WORDS, LETTER_FREQUENCIES } from '../constants'
 import * as prand from 'pure-rand'
 
-export type Cell = { r: number; c: number; id: string; letter: string }
+export type Cell = { 
+  r: number; 
+  c: number; 
+  id: string; 
+  letter: string; 
+  isMatched?: boolean;
+}
 
 function seedForDate(d = new Date()): number {
   return getRandomSeed(new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())));
@@ -145,40 +151,65 @@ export function findLineMatches(grid: Cell[][]) {
       }
     }
   }
-
   return matches
 }
 
 // Remove matched coords and collapse
 export function removeAndCollapse(grid: Cell[][], matches: { coords: { r: number; c: number }[] }[]) {
-  const g = grid.map(row => row.map(cell => ({ ...cell })))
-  const rows = g.length
-  const cols = g[0].length
-  // mark
-  const removeMask: boolean[][] = Array.from({ length: rows }, () => Array(cols).fill(false))
-  for (const m of matches) {
-    for (const p of m.coords) removeMask[p.r][p.c] = true
-  }
-  // for each column, collapse
-  for (let c = 0; c < cols; c++) {
-    const colLetters: string[] = []
-    for (let r = rows - 1; r >= 0; r--) {
-      if (!removeMask[r][c]) colLetters.push(g[r][c].letter)
-    }
-    // refill from top
-    for (let r = rows - 1; r >= 0; r--) {
-      const idx = rows - 1 - r
-      if (idx < colLetters.length) {
-        g[r][c].letter = colLetters[idx]
-      } else {
-        g[r][c].letter = randomLetter(r, c)
+  // Create a deep copy of the grid and mark matched cells
+  const newGrid = grid.map(row => 
+    row.map(cell => ({
+      ...cell,
+      isMatched: false // Reset matched state for all cells
+    }))
+  );
+  
+  const matchedCoords = new Set<string>();
+
+  // Mark all matched coordinates and set isMatched to true
+  for (const match of matches) {
+    for (const coord of match.coords) {
+      const { r, c } = coord;
+      matchedCoords.add(`${r},${c}`);
+      
+      // Set isMatched to true for matched cells before they're removed
+      if (newGrid[r] && newGrid[r][c]) {
+        newGrid[r][c].isMatched = true;
       }
     }
   }
-  return g
+
+  // Process each column from bottom to top
+  for (let c = 0; c < GRID_COLS; c++) {
+    let writeRow = GRID_ROWS - 1;
+    
+    // Move non-matched cells down
+    for (let r = GRID_ROWS - 1; r >= 0; r--) {
+      const coordKey = `${r},${c}`;
+      if (!matchedCoords.has(coordKey)) {
+        if (writeRow !== r) {
+          newGrid[writeRow][c] = { ...newGrid[r][c], r: writeRow };
+        }
+        writeRow--;
+      }
+    }
+
+    // Fill the top with new cells
+    for (let r = writeRow; r >= 0; r--) {
+      newGrid[r][c] = {
+        r,
+        c,
+        id: `${r},${c},${Date.now()},${Math.random()}`,
+        letter: randomLetter(r, c),
+        isMatched: false
+      };
+    }
+  }
+
+  return newGrid;
 }
 
 // Utility: validate whether a candidate horizontal/vertical window forms a word — used for hints
 export function isValidWord(seq: string) {
-  return ALL_WORDS.has(seq)
+  return ALL_WORDS.has(seq);
 }
