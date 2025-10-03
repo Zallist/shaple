@@ -49,14 +49,22 @@ export function randomLetter(row: number, col: number): string {
 }
 
 export function makeGrid(rows = GRID_ROWS, cols = GRID_COLS): Cell[][] {
-  const g: Cell[][] = []
+  let g: Cell[][] = []
   for (let r = 0; r < rows; r++) {
-    const row: Cell[] = []
+    const row: Cell[] = [];
     for (let c = 0; c < cols; c++) {
-      row.push({ r, c, id: `${r}-${c}`, letter: randomLetter(r, c) })
+      row.push({ r, c, id: `${r}-${c}`, letter: randomLetter(r, c) });
     }
-    g.push(row)
+    g.push(row);
   }
+
+  // and now remove any generated matches
+  while (true) {
+    const matches = findLineMatches(g);
+    if (matches.length === 0) break;
+    g = removeAndCollapse(g, matches);
+  }
+
   return g
 }
 
