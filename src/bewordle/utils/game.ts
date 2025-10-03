@@ -1,13 +1,36 @@
-import { GRID_ROWS, GRID_COLS, WORD_LENGTH, LETTERS } from '../constants'
-//import AllWords from '../all-words'
+import { GRID_ROWS, GRID_COLS, WORD_LENGTH, LETTER_VALUES, LETTER_FREQUENCIES } from '../constants'
+import * as prand from 'pure-rand'
 import AllWordsRawList from '../words/5-letter-words.json'
 
 export const AllWords = new Set<string>(AllWordsRawList.map(w => w.word.toUpperCase()))
 
 export type Cell = { r: number; c: number; id: string; letter: string }
 
-export function randomLetter(): string {
-  return LETTERS.charAt(Math.floor(Math.random() * LETTERS.length))
+const LETTERS = Object.keys(LETTER_FREQUENCIES);
+const TOTAL = Object.values(LETTER_FREQUENCIES).reduce((a, b) => a + b, 0);
+const LETTER_PROBS = LETTERS.map(l => LETTER_FREQUENCIES[l] / TOTAL);
+
+function generateFloat64(rng: prand.RandomGenerator) {
+  const g1 = prand.unsafeUniformIntDistribution(0, (1 << 26) - 1, rng);
+  const g2 = prand.unsafeUniformIntDistribution(0, (1 << 27) - 1, rng);
+  const value = (g1 * Math.pow(2, 27) + g2) * Math.pow(2, -53);
+  return value;
+}
+function weightedRandom(rng: prand.RandomGenerator): string {
+  const p = generateFloat64(rng);
+  let acc = 0;
+  for (let i = 0; i < LETTERS.length; i++) {
+    acc += LETTER_PROBS[i];
+    if (p <= acc) return LETTERS[i];
+  }
+  return LETTERS[LETTERS.length - 1]; // fallback
+}
+
+const rng = prand.xoroshiro128plus(Date.now());
+
+export function randomLetter(row: number, col: number): string {
+  prand.unsafeSkipN(rng, row * GRID_COLS + col);
+  return weightedRandom(rng);
 }
 
 export function makeGrid(rows = GRID_ROWS, cols = GRID_COLS): Cell[][] {
@@ -15,7 +38,7 @@ export function makeGrid(rows = GRID_ROWS, cols = GRID_COLS): Cell[][] {
   for (let r = 0; r < rows; r++) {
     const row: Cell[] = []
     for (let c = 0; c < cols; c++) {
-      row.push({ r, c, id: `${r}-${c}`, letter: randomLetter() })
+      row.push({ r, c, id: `${r}-${c}`, letter: randomLetter(r, c) })
     }
     g.push(row)
   }
@@ -119,7 +142,7 @@ export function removeAndCollapse(grid: Cell[][], matches: { coords: { r: number
       if (idx < colLetters.length) {
         g[r][c].letter = colLetters[idx]
       } else {
-        g[r][c].letter = randomLetter()
+        g[r][c].letter = randomLetter(r, c)
       }
     }
   }
