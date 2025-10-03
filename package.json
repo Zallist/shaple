@@ -14,9 +14,11 @@
     "@tailwindcss/vite": "^4.1.13",
     "@vitejs/plugin-legacy": "^7.2.1",
     "tailwindcss": "^4.1.13",
+    "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.9.2",
     "vite": "^7.1.8",
-    "vite-plugin-solid": "^2.11.8"
+    "vite-plugin-solid": "^2.11.8",
+    "vite-plugin-tailwind-legacy": "^1.1.0"
   },
   "dependencies": {
     "animate.css": "^4.1.1",
