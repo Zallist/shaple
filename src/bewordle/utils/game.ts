@@ -1,3 +1,4 @@
+import { getCurrentSeed } from '../../utils/seed';
 import { GRID_ROWS, GRID_COLS, WORD_LENGTH, ALL_WORDS as ALL_WORDS, LETTER_FREQUENCIES } from '../constants'
 import * as prand from 'pure-rand'
 
@@ -7,18 +8,7 @@ export type Cell = {
   letter: string;
 }
 
-function seedForDate(d = new Date()): number {
-  return getRandomSeed(new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())));
-}
-
-function getRandomSeed(d: Date = new Date()): number {
-  const rng = prand.xoroshiro128plus(d.getTime());
-  rng.unsafeJump?.();
-  let seed = prand.unsafeUniformIntDistribution(0, 36 ** 8 - 1, rng); // 8 characters seed
-  return seed;
-}
-
-const rng = prand.xoroshiro128plus(seedForDate());
+const rng = prand.xoroshiro128plus(getCurrentSeed());
 
 const LETTERS = Object.keys(LETTER_FREQUENCIES);
 const VOWELS = ['A','E','I','O','U'];

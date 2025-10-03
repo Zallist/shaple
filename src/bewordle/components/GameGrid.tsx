@@ -179,7 +179,7 @@ export default function GameGrid() {
 
         {/* Game Status */}
         <Show when={isDone()}>
-          <div class="mt-6 p-4 bg-gradient-to-r from-red-500/20 to-pink-500/20 rounded-xl border border-red-500/30 text-center animate-bounce">
+          <div class="mt-6 p-4 bg-gradient-to-r from-red-500/20 to-pink-500/20 rounded-xl border border-red-500/30 text-center">
             <h3 class="text-xl font-bold text-white mb-1">Game Over!</h3>
             <p class="text-gray-200 text-sm">Final Score: {score().toLocaleString()}</p>
             <button 

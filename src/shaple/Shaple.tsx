@@ -1,9 +1,9 @@
-import { createSignal, For, Show, createMemo, createEffect, batch, onCleanup } from 'solid-js'
+import { createSignal, For, Show, createMemo, createEffect, batch, onCleanup, onMount } from 'solid-js'
 import { ShapeCode, AllShapes, ShapeDefinitions, ShapeRule } from './shape'
 import { generateShaple } from './shaple-generator'
-import prand from 'pure-rand'
 import 'animate.css'
 import { ShapeLoreComponent } from './shape-lore'
+import { numberToString, seedForDate, getRandomSeed, getCurrentSeed, saveGameState, loadGameState } from '../utils/seed'
 
 const LENGTH = 5;
 const MAX_ATTEMPTS = 5;
@@ -16,46 +16,16 @@ function shapeKey(s: ShapeCode) {
 
 type Feedback = 'exact' | 'present' | 'absent' | 'invalid_reused' | 'invalid_rule';
 
-function numberToString(n: number): string {
-  return n.toString(36).toUpperCase();
-}
-function stringToNumber(s: string): number {
-  return parseInt(s.toLowerCase(), 36);
-}
-
-function seedForDate(d = new Date()): number {
-  return getRandomSeed(new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())));
-}
-
-function getRandomSeed(d: Date = new Date()): number {
-  const rng = prand.xoroshiro128plus(d.getTime());
-  rng.unsafeJump?.();
-  let seed = prand.unsafeUniformIntDistribution(0, 36 ** 8 - 1, rng); // 8 characters seed
-  return seed;
-}
-
 function getStoredAttempts(seed: number): ShapeCode[][] {
   // Store attempts per-seed, so switching between daily/random retains distinct histories.
-  const stored = localStorage.getItem(`shaple_attempts_${seed}`);
+  const stored = loadGameState<number[][]>('shaple_attempts', seed);
 
   if (!stored)
     return [];
 
-  const parsed = JSON.parse(stored) as Array<Array<any>>;
-
-  if (!parsed) {
-    console.error('Invalid stored attempts:', stored);
-    return [];
-  }
-
   // if numeric, then use indices
-  if (parsed.every(attempt => attempt.every(index => typeof index === 'number'))) {
-    return parsed.map(attempt => attempt.map(index => AllShapes[index]));
-  }
-
-  // else if string then use names (unless doesn't exist)
-  if (parsed.every(attempt => attempt.every(shape => typeof shape === 'string'))) {
-    return parsed.map(attempt => attempt.map(shape => AllShapes.includes(shape as ShapeCode) ? shape as ShapeCode : AllShapes[0]));
+  if (stored.every(attempt => attempt.every(index => typeof index === 'number'))) {
+    return stored.map(attempt => attempt.map(index => AllShapes[index]));
   }
 
   console.error('Invalid stored attempts:', stored);
@@ -65,24 +35,7 @@ function getStoredAttempts(seed: number): ShapeCode[][] {
 function setStoredAttempts(seed: number, attempts: ShapeCode[][]) {
   // convert to the raw indices so that we don't store the text
   const rawAttempts = attempts.map(attempt => attempt.map(shape => AllShapes.indexOf(shape)));
-  localStorage.setItem(`shaple_attempts_${seed}`, JSON.stringify(rawAttempts));
-}
-
-function getCurrentSeed(): number {
-  const hash = window?.location?.hash;
-
-  if (hash) {
-    const params = hash.substring(1).split('&');
-    for (let i = 0; i < params.length; i++) {
-      const param = params[i].split('=', 2);
-      if (param[0] === 'seed' && param.length === 2) {
-        return stringToNumber(param[1]);
-      }
-    }
-  }
-
-  // Fallback to the deterministic daily seed if no usable seed is present in the URL.
-  return seedForDate();
+  saveGameState<number[][]>('shaple_attempts', seed, rawAttempts);
 }
 
 export default function App() {
@@ -159,7 +112,7 @@ export default function App() {
   });
 
   // Handle URL hash changes
-  createEffect(() => {
+  onMount(() => {
     const handleHashChange = () => {
       const newSeed = getCurrentSeed();
       if (newSeed !== seed()) {
@@ -487,7 +440,7 @@ export default function App() {
                      bg-slate-700/70 hover:bg-slate-600/70 hover:border-slate-500/70 active:scale-95 transition-all duration-200"
             >
               <span class="material-symbols-outlined mr-1">
-                {isDailySeed() ? 'shuffle' : 'calendar_month'}
+                {isDailySeed() ? 'shuffle' : 'calendar_today'}
               </span>
               {isDailySeed() ? 'Random' : 'Daily'}
             </button>

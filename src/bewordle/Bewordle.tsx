@@ -1,10 +1,52 @@
-import { createSignal, Show } from 'solid-js'
+import { createSignal, createMemo, onMount, onCleanup, Show, batch } from 'solid-js'
 import GameGrid from './components/GameGrid'
-import { GRID_ROWS, GRID_COLS } from './constants'
+import { getCurrentSeed, getRandomSeed, numberToString, seedForDate } from '../utils/seed'
 
 export default function Bewordle() {
-  const [showHelp, setShowHelp] = createSignal(false)
+  const [showHelp, setShowHelp] = createSignal(false);
+  const [seed, setSeed] = createSignal(getCurrentSeed());
+
+  const isDailySeed = createMemo(() => seed() === seedForDate());
+
+  function setSeedAndReset(s: number) {
+    batch(() => {
+      setSeed(s);
+    });
+  }
+
+  // Handle URL hash changes
+  onMount(() => {
+    const handleHashChange = () => {
+      const newSeed = getCurrentSeed();
+      if (newSeed !== seed()) {
+        setSeedAndReset(newSeed);
+      }
+    };
+
+    // Add event listener for hash changes
+    window.addEventListener('hashchange', handleHashChange);
+
+    // Clean up the event listener when the component is unmounted
+    onCleanup(() => {
+      window.removeEventListener('hashchange', handleHashChange);
+    });
+  });
   
+  function toggleDailySeed() {
+    if (isDailySeed()) {
+      // Switch to a random seed and encode it in the URL so puzzles are shareable/bookmarkable.
+      const newSeed = getRandomSeed();
+      window.location.hash = `#seed=${numberToString(newSeed)}`;
+    }
+    else {
+      // Switch to the daily seed
+      window.location.hash = '';
+    }
+    
+    // Now there's a lot of state stuff going on, so just reload the page
+    window.location.reload();
+  }
+
   return (
     <div class="text-white flex flex-col items-center p-4">
       <div class="w-full max-w-2xl">
@@ -22,11 +64,11 @@ export default function Bewordle() {
                 <span class="material-symbols-outlined">help</span>
               </button>
               <button 
-                onClick={() => window.location.reload()}
+                onClick={() => toggleDailySeed()}
                 class="p-2 rounded-full hover:bg-gray-700 transition-colors"
-                aria-label="New Game"
               >
-                <span class="material-symbols-outlined">refresh</span>
+                <span class="material-symbols-outlined">{isDailySeed() ? 'shuffle' : 'calendar_today'}</span>
+                <span class="ml-2">{isDailySeed() ? 'Random' : 'Daily'}</span>
               </button>
             </div>
           </div>
