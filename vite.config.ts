@@ -2,16 +2,15 @@ import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 import solidPlugin from 'vite-plugin-solid';
 import legacy from '@vitejs/plugin-legacy';
+import type { PluginOption } from 'vite';
 
-function remove_crossorigin() {
+function stripCrossorigin(): PluginOption {
   return {
-    name: 'remove-crossorigin',
+    name: 'strip-crossorigin',
+    enforce: 'post',
     transformIndexHtml(html: string) {
-      return html.replace(
-        'crossorigin',
-        '',
-      );
-    },
+      return html.replace(/ crossorigin(\s*=\s*["'][^"']*["'])?/g, '');
+    }
   };
 }
 
@@ -26,7 +25,7 @@ export default defineConfig(({ command, mode, isSsrBuild, isPreview }) => {
           targets: ['defaults', 'IE 11'],
           additionalLegacyPolyfills: ['regenerator-runtime/runtime']
         }),
-        remove_crossorigin()
+        stripCrossorigin()
       ],
       server: {
         port: 3000,
@@ -49,7 +48,7 @@ export default defineConfig(({ command, mode, isSsrBuild, isPreview }) => {
           targets: ['defaults', 'IE 11'],
           additionalLegacyPolyfills: ['regenerator-runtime/runtime']
         }),
-        remove_crossorigin()
+        stripCrossorigin()
       ],
       server: {
         port: 3000,
