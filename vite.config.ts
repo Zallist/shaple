@@ -3,6 +3,18 @@ import { defineConfig } from 'vite';
 import solidPlugin from 'vite-plugin-solid';
 import legacy from '@vitejs/plugin-legacy';
 
+function remove_crossorigin() {
+  return {
+    name: 'remove-crossorigin',
+    transformIndexHtml(html: string) {
+      return html.replace(
+        'crossorigin',
+        '',
+      );
+    },
+  };
+}
+
 export default defineConfig(({ command, mode, isSsrBuild, isPreview }) => {
   if (command === 'serve') {
     return {
@@ -13,7 +25,8 @@ export default defineConfig(({ command, mode, isSsrBuild, isPreview }) => {
         legacy({
           targets: ['defaults', 'IE 11'],
           additionalLegacyPolyfills: ['regenerator-runtime/runtime']
-        })
+        }),
+        remove_crossorigin()
       ],
       server: {
         port: 3000,
@@ -35,7 +48,8 @@ export default defineConfig(({ command, mode, isSsrBuild, isPreview }) => {
         legacy({
           targets: ['defaults', 'IE 11'],
           additionalLegacyPolyfills: ['regenerator-runtime/runtime']
-        })
+        }),
+        remove_crossorigin()
       ],
       server: {
         port: 3000,
