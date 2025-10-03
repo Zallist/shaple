@@ -6,7 +6,7 @@ export default function Bewordle() {
   const [showHelp, setShowHelp] = createSignal(false)
   
   return (
-    <div class="min-h-screen bg-gray-900 text-white flex flex-col items-center p-4">
+    <div class="text-white flex flex-col items-center p-4">
       <div class="w-full max-w-2xl">
         <header class="mb-6">
           <div class="flex items-center justify-between mb-2">
