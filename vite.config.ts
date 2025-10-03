@@ -6,7 +6,7 @@ import legacy from '@vitejs/plugin-legacy';
 export default defineConfig(({ command, mode, isSsrBuild, isPreview }) => {
   if (command === 'serve') {
     return {
-      base: './',
+      base: '',
       plugins: [
         solidPlugin(),
         tailwindcss(),
@@ -28,7 +28,7 @@ export default defineConfig(({ command, mode, isSsrBuild, isPreview }) => {
   } else {
     // command === 'build'
     return {
-      base: './',
+      base: '',
       plugins: [
         solidPlugin(),
         tailwindcss(),
