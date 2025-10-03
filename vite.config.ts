@@ -9,8 +9,10 @@ function stripCrossorigin(): PluginOption {
   return {
     name: 'strip-crossorigin',
     enforce: 'post',
-    transformIndexHtml(html: string) {
-      return html.replace(/ crossorigin(\s*=\s*["'][^"']*["'])?/g, '');
+    transform(code, id, options) {
+      if (id.endsWith('.html')) {
+        return code.replace(/ crossorigin(\s*=\s*["'][^"']*["'])?/g, '');
+      }
     }
   };
 }

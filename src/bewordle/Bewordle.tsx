@@ -35,10 +35,11 @@ export default function Bewordle() {
             <div class="bg-gray-800 rounded-lg p-4 mb-4 text-sm text-gray-300 animate-fade-in">
               <h3 class="font-bold text-lg mb-2">How to Play</h3>
               <ul class="list-disc pl-5 space-y-1">
-                <li>Click or drag to swap adjacent tiles</li>
-                <li>Match 3 or more tiles in a row or column to clear them</li>
-                <li>Create words to score bonus points</li>
-                <li>Chain matches for higher scores</li>
+                <li>Click and drag to swap adjacent letters</li>
+                <li>Form 5-letter English words horizontally or vertically</li>
+                <li>Score points based on letter values (Scrabble-style)</li>
+                <li>Score multiplier decreases with each move</li>
+                <li>Chain words for combo bonuses</li>
               </ul>
             </div>
           </Show>

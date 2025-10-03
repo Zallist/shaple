@@ -14,10 +14,6 @@ function calculateWordScore(word: string, moveCount: number): number {
     score += letterScore
   }
   
-  // Apply word length bonus
-  const lengthBonus = Math.max(0, word.length - 3) * 5
-  score += lengthBonus
-  
   // Apply move penalty (reduce score by 10% for each move beyond the first)
   const movePenalty = Math.max(0, moveCount - 1) * 0.1
   score = Math.max(1, Math.floor(score * (1 - movePenalty)))
