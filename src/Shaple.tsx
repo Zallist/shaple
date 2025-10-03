@@ -24,20 +24,12 @@ function stringToNumber(s: string): number {
 }
 
 function seedForDate(d = new Date()): number {
-  // Normalize to UTC midnight so all users get the same daily puzzle regardless of timezone.
-  const utc = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
-  const s = `${utc.getUTCFullYear()}${String(utc.getUTCMonth() + 1).padStart(2, '0')}${String(utc.getUTCDate()).padStart(2, '0')}`;
-
-  // simple numeric hash
-  let h = 2166136261 >>> 0;
-  for (let i = 0; i < s.length; i++) {
-    h = Math.imul(h ^ s.charCodeAt(i), 16777619) >>> 0;
-  }
-  return h >>> 0;
+  return getRandomSeed(new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())));
 }
 
-function getRandomSeed(): number {
-  const rng = prand.xorshift128plus(Date.now() ^ (Math.random() * 0x100000000));
+function getRandomSeed(d: Date = new Date()): number {
+  const rng = prand.xoroshiro128plus(d.getTime());
+  rng.unsafeJump?.();
   let seed = prand.unsafeUniformIntDistribution(0, 36 ** 8 - 1, rng); // 8 characters seed
   return seed;
 }

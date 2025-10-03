@@ -274,10 +274,11 @@ export function getRandomShapeSelection(shapeCount: number, rng: prand.RandomGen
     const result: ShapeCode[] = [];
     const shapes = [...AllShapes];
 
+    rng = rng.jump?.() ?? rng.clone();
+
     // pick a random shape then remove it
     for (let i = 0; i < shapeCount; i++) {
-        const [index, rng2] = prand.uniformIntDistribution(0, shapes.length - 1, rng);
-        rng = rng2;
+        const index = prand.unsafeUniformIntDistribution(0, shapes.length - 1, rng);
         result.push(shapes[index]);
         shapes.splice(index, 1);
     }
@@ -287,7 +288,7 @@ export function getRandomShapeSelection(shapeCount: number, rng: prand.RandomGen
 
 export function generateShaple(shapeCount: number, length: number, seed: number): { shapes: ShapeCode[], solution: ShapeCode[] } {
     const result = Array<ShapeCode>(length);
-    let rng = prand.xorshift128plus(seed);
+    let rng = prand.xoroshiro128plus(seed);
 
     let shapeAttempt = 1000;
     while (shapeAttempt-- > 0) {
@@ -297,8 +298,7 @@ export function generateShaple(shapeCount: number, length: number, seed: number)
 
         while (attempt-- > 0) {
             for (let i = 0; i < length; i++) {
-                const [shapeIndex, rng2] = prand.uniformIntDistribution(0, shapes.length - 1, rng);
-                rng = rng2;
+                const shapeIndex = prand.unsafeUniformIntDistribution(0, shapes.length - 1, rng);
                 result[i] = shapes[shapeIndex];
             }
 
@@ -321,7 +321,7 @@ export function generateShaple(shapeCount: number, length: number, seed: number)
     const validShaples = new Set<Array<ShapeCode>>();
 
     if (!shapes)
-        shapes = getRandomShapeSelection(10, prand.xorshift128plus(Date.now() ^ (Math.random() * 0x100000000)));
+        shapes = getRandomShapeSelection(10, prand.xoroshiro128plus(Date.now()));
 
     validate(0);
 
@@ -359,7 +359,7 @@ export function generateShaple(shapeCount: number, length: number, seed: number)
 };
 
 (window as any).estimatePuzzleSpace = function(trials = 100, samplesPerSubset = 500) {
-    let rng = prand.xorshift128plus(Date.now());
+    let rng = prand.xoroshiro128plus(Date.now());
     let totalValid = 0;
     let totalTried = 0;
 
@@ -368,8 +368,7 @@ export function generateShaple(shapeCount: number, length: number, seed: number)
         for (let i = 0; i < samplesPerSubset; i++) {
             const sol: ShapeCode[] = [];
             for (let j = 0; j < 5; j++) {
-                const [shapeIndex, rng2] = prand.uniformIntDistribution(0, shapes.length - 1, rng);
-                rng = rng2;
+                const shapeIndex = prand.unsafeUniformIntDistribution(0, shapes.length - 1, rng);
                 sol[j] = shapes[shapeIndex];
             }
             totalTried++;
