@@ -64,6 +64,7 @@ export default function GameGrid() {
       const matches = findLineMatches(swapped)
       
       setGrid(swapped)
+      setSelected(cell)
       processMatches(swapped, matches)
     } else {
       // Select the new cell if not adjacent
