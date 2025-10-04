@@ -274,7 +274,8 @@ export class Game {
                     for (const match of matches) {
                         if (match.word) {
                             const wordScore = this.calculateWordScore(match.word);
-                            const chainBonus = chainCount >= 1 ? Math.pow(1.5, chainCount) : 1;
+                            //const chainBonus = chainCount >= 1 ? Math.pow(1.5, chainCount) : 1;
+                            const chainBonus = chainCount >= 1 ? (chainCount * 0.5) + 1 : 1;
                             const totalScore = Math.round(wordScore * chainBonus);
                             
                             this.setScore(s => s + totalScore);

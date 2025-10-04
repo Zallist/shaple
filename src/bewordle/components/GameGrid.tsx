@@ -175,7 +175,7 @@ export default function GameGrid({ game }: { game: Game }) {
                       </span>
                       {found.chain >= 1 && (
                         <span class="ml-1 text-xs bg-green-500/20 text-green-300 px-1.5 py-0.5 rounded">
-                          x{found.chainBonus.toPrecision(2)}
+                          x{found.chainBonus}
                         </span>
                       )}
                     </div>
