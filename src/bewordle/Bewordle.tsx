@@ -1,16 +1,25 @@
-import { createSignal, createMemo, onMount, onCleanup, Show, batch } from 'solid-js'
+import { createSignal, createMemo, onMount, onCleanup, Show, batch, Suspense } from 'solid-js'
 import GameGrid from './components/GameGrid'
 import { getCurrentSeed, getRandomSeed, numberToString, seedForDate } from '../utils/seed'
+import { Game } from './bewordle-game';
 
 export default function Bewordle() {
   const [showHelp, setShowHelp] = createSignal(false);
-  const [seed, setSeed] = createSignal(getCurrentSeed());
+  const [seed, setSeed] = createSignal<number | undefined>(undefined);
+  const [game, setGame] = createSignal<Game | null>(null);
 
   const isDailySeed = createMemo(() => seed() === seedForDate());
 
-  function setSeedAndReset(s: number) {
+  async function setSeedAndReset(seed: number) {
+    let g = game() || new Game();
+
+    setGame(null);
+    await g.initialize(seed);
+    await g.loadState();
+
     batch(() => {
-      setSeed(s);
+      setSeed(seed);
+      setGame(g);
     });
   }
 
@@ -30,6 +39,8 @@ export default function Bewordle() {
     onCleanup(() => {
       window.removeEventListener('hashchange', handleHashChange);
     });
+
+    setSeedAndReset(getCurrentSeed());
   });
   
   function toggleDailySeed() {
@@ -42,9 +53,6 @@ export default function Bewordle() {
       // Switch to the daily seed
       window.location.hash = '';
     }
-    
-    // Now there's a lot of state stuff going on, so just reload the page
-    window.location.reload();
   }
 
   return (
@@ -87,7 +95,9 @@ export default function Bewordle() {
         </header>
 
         <main class="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden border border-gray-700/50 p-4">
-          <GameGrid />
+          <Show when={game()} fallback={<div>Loading...</div>}>
+            <GameGrid game={game()!} />
+          </Show>
         </main>
         
         <footer class="mt-6 text-center text-sm text-gray-500">

@@ -1,5 +1,6 @@
 /* @refresh reload */
 import "./tailwind.css";
+import "animate.css";
 import { render } from 'solid-js/web';
 
 import Bewordle from './bewordle/Bewordle';
