@@ -36,9 +36,9 @@ export default function GameGrid({ game }: { game: Game }) {
   }
 
   return (
-    <div class="flex flex-col">
+    <>
       {/* Header */}
-      <header class="sticky top-0 z-10 bg-gray-900/80 backdrop-blur-md border-b border-gray-800/50">
+      <header class="border-b border-slate-800/80 w-100 mx-auto">
         <div class="container mx-auto px-4 py-3">
           <div class="flex items-center justify-between">
             <div class="flex justify-between items-center mb-1">
@@ -116,76 +116,74 @@ export default function GameGrid({ game }: { game: Game }) {
       </main>
 
       <Show when={game.foundWords().length > 0}>
-        <div class="bg-gray-900/80 backdrop-blur-md border-t border-gray-800/50 py-3 px-4">
-          <div class="max-w-md">
-            <h3 class="text-sm font-medium text-gray-400 mb-2 flex items-center justify-center">
-              <div class="mr-2">Found Words</div>
-              <div class="text-xs bg-gray-800 px-2 py-0.5 rounded-full">{game.foundWords().length}</div>
-            </h3>
-            <div class="flex flex-wrap gap-2 justify-center">
-              <For each={game.foundWords()}>
-                {(found, i) => {
-                  const [loadedDefinition, setLoadedDefinition] = createSignal(false);
-                  const [definition, setDefinition] = createSignal<string>('');
+        <div class="bg-gradient-to-r from-slate-800/60 to-slate-800/50 backdrop-blur-md border border-gray-800/50 rounded-lg py-3 px-4">
+          <h3 class="text-sm font-medium text-gray-400 mb-2 flex items-center justify-center">
+            <div class="mr-2">Found Words</div>
+            <div class="text-xs bg-gray-800 px-2 py-0.5 rounded-full">{game.foundWords().length}</div>
+          </h3>
+          <div class="flex flex-wrap gap-2 justify-center">
+            <For each={game.foundWords()}>
+              {(found, i) => {
+                const [loadedDefinition, setLoadedDefinition] = createSignal(false);
+                const [definition, setDefinition] = createSignal<string>('');
 
-                  async function onMouseOver() {
-                    if (!loadedDefinition()) {
-                      setLoadedDefinition(true);
+                async function onMouseOver() {
+                  if (!loadedDefinition()) {
+                    setLoadedDefinition(true);
 
-                      const req = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${found.word}`);
+                    const req = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${found.word}`);
 
-                      if (!req.ok) {
-                        console.error(`Failed to fetch definition for word ${found.word}`);
-                        setDefinition(`[Definition not found for ${found.word}]`);
-                        return;
-                      }
+                    if (!req.ok) {
+                      console.error(`Failed to fetch definition for word ${found.word}`);
+                      setDefinition(`[Definition not found for ${found.word}]`);
+                      return;
+                    }
 
-                      const defList = await req.json();
-                      let result = '';
+                    const defList = await req.json();
+                    let result = '';
 
-                      for (const def of defList) {
-                        result += `${def.word}${def.origin ? ` (${def.origin})` : ''}\n`;
+                    for (const def of defList) {
+                      result += `${def.word}${def.origin ? ` (${def.origin})` : ''}\n`;
 
-                        for (const meaning of def.meanings) {
-                          result += `${meaning.partOfSpeech}:\n`;
-                          for (const definition of meaning.definitions) {
-                            result += `- ${definition.definition}${definition.example ? ` {${definition.example}}` : ''}\n`;
-                          }
+                      for (const meaning of def.meanings) {
+                        result += `${meaning.partOfSpeech}:\n`;
+                        for (const definition of meaning.definitions) {
+                          result += `- ${definition.definition}${definition.example ? ` {${definition.example}}` : ''}\n`;
                         }
                       }
-
-                      setDefinition(result);
                     }
-                  }
 
-                  return (
-                    <div 
-                      class="px-3 py-1.5 bg-gradient-to-r from-gray-800/80 to-gray-900/80 rounded-lg text-sm font-medium text-white shadow-md backdrop-blur-sm 
-                            border border-gray-700/50 flex items-center"
-                      style={{
-                        'animation-delay': `${i() * 50}ms`,
-                        'view-transition-name': `word-${i()}`
-                      }}
-                      onMouseOver={onMouseOver}
-                      title={definition()}
-                    >
-                      <span class="text-blue-300">{found.word}</span>
-                      <span class="ml-1.5 px-1.5 py-0.5 bg-yellow-500/20 text-yellow-300 rounded text-xs">
-                        +{found.score}
+                    setDefinition(result);
+                  }
+                }
+
+                return (
+                  <div 
+                    class="px-3 py-1.5 bg-gradient-to-r from-gray-800/80 to-gray-900/80 rounded-lg text-sm font-medium text-white shadow-md backdrop-blur-sm 
+                          border border-gray-700/50 flex items-center"
+                    style={{
+                      'animation-delay': `${i() * 50}ms`,
+                      'view-transition-name': `word-${i()}`
+                    }}
+                    onMouseOver={onMouseOver}
+                    title={definition()}
+                  >
+                    <span class="text-blue-300">{found.word}</span>
+                    <span class="ml-1.5 px-1.5 py-0.5 bg-yellow-500/20 text-yellow-300 rounded text-xs">
+                      +{found.score}
+                    </span>
+                    {found.chain >= 1 && (
+                      <span class="ml-1 text-xs bg-green-500/20 text-green-300 px-1.5 py-0.5 rounded">
+                        x{found.chainBonus}
                       </span>
-                      {found.chain >= 1 && (
-                        <span class="ml-1 text-xs bg-green-500/20 text-green-300 px-1.5 py-0.5 rounded">
-                          x{found.chainBonus}
-                        </span>
-                      )}
-                    </div>
-                  )
-                }}
-              </For>
-            </div>
+                    )}
+                  </div>
+                )
+              }}
+            </For>
           </div>
         </div>
       </Show>
-    </div>
+    </>
   )
 }
