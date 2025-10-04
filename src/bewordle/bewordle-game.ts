@@ -1,7 +1,8 @@
-import { createSignal, createMemo, Signal, Accessor, Setter, batch } from "solid-js";
+import { createSignal, createMemo, Accessor, Setter, batch } from "solid-js";
 import * as prand from 'pure-rand';
-import { createStore, produce, SetStoreFunction } from "solid-js/store";
+import { createStore, SetStoreFunction } from "solid-js/store";
 import { loadGameState, saveGameState } from "../utils/seed";
+import { Words4OrLonger as VALID_WORDS } from "./words";
 
 // Letter values based on Scrabble scoring
 export const LETTER_VALUES: Record<string, number> = {
@@ -75,8 +76,6 @@ export class Game {
     private seed: number = 0;
     private initialized: boolean = false;
 
-    private readonly allWords: Set<string> = new Set<string>();
-
     public readonly cells: Cell[];
     private readonly setCells: SetStoreFunction<Cell[]>;
 
@@ -98,8 +97,7 @@ export class Game {
     constructor(public readonly rowCount: number = 8,
                 public readonly colCount: number = 8,
                 public readonly initialMoveCount: number = 25,
-                public readonly chainMultiplier: number = 1.5,
-                public readonly wordLength: number = 5) {
+                public readonly chainMultiplier: number = 1.5) {
     
         [this.cells, this.setCells] = createStore<Cell[]>([]);
 
@@ -115,8 +113,6 @@ export class Game {
     public async initialize(seed: number) {
         this.initialized = false;
         this.seed = seed;
-
-        await this.loadWords(this.wordLength);
 
         this.rng = prand.xoroshiro128plus(seed);
 
@@ -158,18 +154,8 @@ export class Game {
         saveGameState('bewordle_moves', this.seed, this.storedMoves);
     }
 
-    private async loadWords(wordLength: number) {
-        const words: { word: string }[] = await fetch(`./words/${wordLength}-letter-words.json`).then(res => res.json());
-
-        this.allWords.clear();
-
-        for (const word of words) {
-            this.allWords.add(word.word.toUpperCase());
-        }
-    }
-
     public isWord(word: string): boolean {
-        return this.allWords.has(word.toUpperCase());
+        return VALID_WORDS.has(word.toUpperCase());
     }
 
     public calculateWordScore(word: string): number {
@@ -229,56 +215,48 @@ export class Game {
 
     public findLineMatches() {
         const grid = this.cellsAsGrid();
-        const matches: { coords: { r: number; c: number }[]; word: string }[] = []
-
-        // Define all 8 possible directions: right, down, down-right, down-left, up-right, up-left, up, left
+        const matches: { coords: { r: number; c: number }[]; word: string }[] = [];
+    
         const directions = [
             { dr: 0, dc: 1 },    // right
             { dr: 1, dc: 0 },    // down
-            { dr: 1, dc: 1 },   // down-right
-            { dr: 1, dc: -1 },  // down-left
-            { dr: -1, dc: 1 },  // up-right
-            { dr: -1, dc: -1 }, // up-left
+            { dr: 1, dc: 1 },    // down-right
+            { dr: 1, dc: -1 },   // down-left
+            { dr: -1, dc: 1 },   // up-right
+            { dr: -1, dc: -1 },  // up-left
             { dr: -1, dc: 0 },   // up
             { dr: 0, dc: -1 }    // left
-        ]
-
+        ];
+    
         for (const { dr, dc } of directions) {
-            // For each direction, determine the valid starting positions
             for (let r = 0; r < this.rowCount; r++) {
                 for (let c = 0; c < this.colCount; c++) {
-                    // Skip if we can't fit a word of WORD_LENGTH in this direction
-                    const endR = r + (this.wordLength - 1) * dr
-                    const endC = c + (this.wordLength - 1) * dc
-                    if (endR < 0 || endR >= this.rowCount || endC < 0 || endC >= this.colCount) continue
-
-                    // Check words of length >= WORD_LENGTH
-                    for (let L = this.wordLength; ; L++) {
-                        const endRLong = r + (L - 1) * dr
-                        const endCLong = c + (L - 1) * dc
-                        if (endRLong < 0 || endRLong >= this.rowCount || endCLong < 0 || endCLong >= this.colCount) break
-
-                        const coords: { r: number; c: number }[] = []
-                        let word = ''
-
-                        // Build the word by following the direction
-                        for (let i = 0; i < L; i++) {
-                            const checkR = r + i * dr;
-                            const checkC = c + i * dc;
-                            coords.push({ r: checkR, c: checkC });
-                            word += grid[checkR][checkC]?.letter;
+                    let coords: { r: number; c: number }[] = [];
+                    let word = '';
+    
+                    let curR = r;
+                    let curC = c;
+    
+                    while (curR >= 0 && curR < this.rowCount && curC >= 0 && curC < this.colCount) {
+                        const letter = grid[curR][curC]?.letter;
+                        if (!letter) break;
+    
+                        coords.push({ r: curR, c: curC });
+                        word += letter;
+    
+                        if (this.isWord(word)) {
+                            matches.push({ coords: [...coords], word });
                         }
-
-                        // Check if the word is in our dictionary
-                        if (this.allWords.has(word)) {
-                            matches.push({ coords, word })
-                        }
+    
+                        curR += dr;
+                        curC += dc;
                     }
                 }
             }
         }
-        return matches
+        return matches;
     }
+    
 
     public async processMatches(instant: boolean = false) {
         let chainCount = 0;

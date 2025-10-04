@@ -81,7 +81,7 @@ export default function GameGrid({ game }: { game: Game }) {
                 const isSelectedCell = createMemo(() => selected()?.id === cell.id);
 
                 return (
-                  <div class="tile-container absolute transition-all duration-240 ease-out"
+                  <div class="tile-container absolute transition-all duration-240 ease-out transform-gpu will-change-transform"
                       style={{
                         'width': `calc(${100 / game.colCount}% - 0.5rem)`,
                         'height': `calc(${100 / game.rowCount}% - 0.5rem)`,
@@ -175,7 +175,7 @@ export default function GameGrid({ game }: { game: Game }) {
                       </span>
                       {found.chain >= 1 && (
                         <span class="ml-1 text-xs bg-green-500/20 text-green-300 px-1.5 py-0.5 rounded">
-                          x{found.chainBonus}
+                          x{found.chainBonus.toPrecision(2)}
                         </span>
                       )}
                     </div>
