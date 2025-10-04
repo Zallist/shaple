@@ -116,13 +116,13 @@ export default function GameGrid({ game }: { game: Game }) {
       </main>
 
       <Show when={game.foundWords().length > 0}>
-        <div class="sticky bottom-0 bg-gray-900/80 backdrop-blur-md border-t border-gray-800/50 py-3 px-4">
-          <div class="max-w-xl mx-auto">
-            <h3 class="text-sm font-medium text-gray-400 mb-2 flex items-center">
-              <span class="mr-2">Found Words</span>
-              <span class="text-xs bg-gray-800 px-2 py-0.5 rounded-full">{game.foundWords().length}</span>
+        <div class="bg-gray-900/80 backdrop-blur-md border-t border-gray-800/50 py-3 px-4">
+          <div class="max-w-md">
+            <h3 class="text-sm font-medium text-gray-400 mb-2 flex items-center justify-center">
+              <div class="mr-2">Found Words</div>
+              <div class="text-xs bg-gray-800 px-2 py-0.5 rounded-full">{game.foundWords().length}</div>
             </h3>
-            <div class="flex flex-wrap gap-2">
+            <div class="flex flex-wrap gap-2 justify-center">
               <For each={game.foundWords()}>
                 {(found, i) => {
                   const [loadedDefinition, setLoadedDefinition] = createSignal(false);

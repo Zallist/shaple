@@ -97,7 +97,7 @@ export class Game {
 
     constructor(public readonly rowCount: number = 8,
                 public readonly colCount: number = 8,
-                public readonly initialMoveCount: number = 100,
+                public readonly initialMoveCount: number = 25,
                 public readonly chainMultiplier: number = 1.5,
                 public readonly wordLength: number = 5) {
     
