@@ -117,7 +117,8 @@ export class Game {
         this.seed = seed;
 
         if (VALID_WORDS.size === 0) {
-            VALID_WORDS = new Set((await getAllValidWords()).filter(w => w.length >= 4));
+            const wordList = await getAllValidWords();
+            VALID_WORDS = new Set(wordList.filter(w => w.length >= 4).map(w => w.toUpperCase()));
         }
 
         this.rng = prand.xoroshiro128plus(seed);
