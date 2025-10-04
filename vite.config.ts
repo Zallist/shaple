@@ -21,14 +21,14 @@ export default defineConfig(({ command, mode, isSsrBuild, isPreview }) => {
   const isBuild = command === 'build';
 
   return {
-    base: '',
+    base: isBuild ? '/shaple/' : '',
     plugins: [
       solidPlugin(),
       tailwindcss(),
       tailwindLegacy({
         tailwindConfig: 'tailwind.config.legacy.js',
         assetsDir: 'dist/assets',
-        publicPath: 'assets/',
+        publicPath: isBuild ? '/shaple/assets/' : 'assets/',
         inputCSS: 'tailwind.legacy.css',
         injectInHTML: true,
       }),
