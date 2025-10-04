@@ -17,12 +17,27 @@ function stripCrossorigin(): PluginOption {
   };
 }
 
+function buildWordList(): PluginOption {
+  return {
+    name: 'build-word-list',
+    enforce: 'pre',
+    async buildStart(options) {
+      const words = await this.fs.readFile('./scrabble-dictionaries/english/sowpods.txt').then((b) => b.toString());
+      const lines = words.split('\n');
+      
+      this.fs.mkdir('public', { recursive: true });
+      this.fs.writeFile('public/word-list.json', JSON.stringify(lines));
+    }
+  }
+}
+
 export default defineConfig(({ command, mode, isSsrBuild, isPreview }) => {
   const isBuild = command === 'build';
 
   return {
     base: isBuild ? '/shaple/' : '',
     plugins: [
+      buildWordList(),
       solidPlugin(),
       tailwindcss(),
       tailwindLegacy({

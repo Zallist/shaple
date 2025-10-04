@@ -2,7 +2,7 @@ import { createSignal, createMemo, Accessor, Setter, batch } from "solid-js";
 import * as prand from 'pure-rand';
 import { createStore, SetStoreFunction } from "solid-js/store";
 import { loadGameState, saveGameState } from "../utils/seed";
-import { Words4OrLonger as VALID_WORDS } from "./words";
+import getAllValidWords from "./words";
 
 // Letter values based on Scrabble scoring
 export const LETTER_VALUES: Record<string, number> = {
@@ -21,6 +21,8 @@ export const LETTER_FREQUENCIES: Record<string, number> = { // Rounded hard so w
     Q: 1, R: 6, S: 4, T: 6, U: 4, V: 2, W: 2, X: 1,
     Y: 2, Z: 1
 };
+
+let VALID_WORDS: Set<string> = new Set();
 
 const LETTERS = Object.keys(LETTER_FREQUENCIES);
 const VOWELS = ['A','E','I','O','U'];
@@ -113,6 +115,10 @@ export class Game {
     public async initialize(seed: number) {
         this.initialized = false;
         this.seed = seed;
+
+        if (VALID_WORDS.size === 0) {
+            VALID_WORDS = new Set((await getAllValidWords()).filter(w => w.length >= 4));
+        }
 
         this.rng = prand.xoroshiro128plus(seed);
 
