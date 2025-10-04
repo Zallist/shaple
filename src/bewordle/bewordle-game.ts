@@ -299,10 +299,8 @@ export class Game {
                             const chainBonus = chainCount >= 1 ? Math.pow(1.5, chainCount) : 1;
                             const totalScore = Math.round(wordScore * chainBonus);
                             
-                            // Update score with animation
                             this.setScore(s => s + totalScore);
                             
-                            // Add to recent words history
                             this.setFoundWords(prev => [
                                 ...prev,
                                 { word: match.word, score: totalScore, chain: chainCount, chainBonus: chainBonus }
@@ -366,15 +364,14 @@ export class Game {
                         }
                         
                         const distance = r - firstNonEmptyRow;
-                        for (let i = r; currentCellGrid[i - distance] && currentCellGrid[i - distance][c] !== undefined; i--) {
+                        for (let i = r; i >= 0 || (currentCellGrid[i - distance] && currentCellGrid[i - distance]?.[c] !== undefined); i--) {
                             const cell = currentCellGrid[i - distance][c];
-                            //if (!cell) {
-                            //    console.error('No cell found at', i - distance, c);
-                            //    continue;
-                            //}
+
                             if (cell)
                                 this.setCells(c => c.id === cell.id, { row: i });
+                            
                             currentCellGrid[i][c] = cell;
+                            currentCellGrid[i - distance][c] = null;
                         }
                     }
                 }
