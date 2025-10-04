@@ -213,7 +213,7 @@ export class Game {
         return grid;
     }
 
-    public findLineMatches() {
+    public findLineMatches(minLength: number = 1) {
         const grid = this.cellsAsGrid();
         const matches: { coords: { r: number; c: number }[]; word: string }[] = [];
     
@@ -244,7 +244,7 @@ export class Game {
                         coords.push({ r: curR, c: curC });
                         word += letter;
     
-                        if (this.isWord(word)) {
+                        if (word.length >= minLength && this.isWord(word)) {
                             matches.push({ coords: [...coords], word });
                         }
     
@@ -263,7 +263,7 @@ export class Game {
         this.setIsProcessing(true);
 
         while (true) {
-            const matches = this.findLineMatches();
+            const matches = this.findLineMatches(this.initialized ? (chainCount >= 1 ? 4 : 5) : 1);
             
             if (matches.length === 0) 
                 break;

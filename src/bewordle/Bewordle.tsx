@@ -86,9 +86,9 @@ export default function Bewordle() {
               <h3 class="font-bold text-lg mb-2">How to Play</h3>
               <ul class="list-disc pl-5 space-y-1">
                 <li>Click to swap letters with an adjacent letter (horizontally, vertically or diagonally)</li>
-                <li>Form English words 4 or more letters long in any of the 8 directions</li>
+                <li>Form English words 5 or more letters long in any of the 8 directions</li>
                 <li>Score points based on letter values</li>
-                <li>Chain words for combo bonuses</li>
+                <li>Chain falling words for combo bonuses! Falling words only need to be 4+ letters long.</li>
               </ul>
             </div>
           </Show>
