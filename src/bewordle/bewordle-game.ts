@@ -304,8 +304,8 @@ export class Game {
                             
                             // Add to recent words history
                             this.setFoundWords(prev => [
-                                { word: match.word, score: totalScore, chain: chainCount, chainBonus: chainBonus },
-                                ...prev
+                                ...prev,
+                                { word: match.word, score: totalScore, chain: chainCount, chainBonus: chainBonus }
                             ]);
                         }
                     }
