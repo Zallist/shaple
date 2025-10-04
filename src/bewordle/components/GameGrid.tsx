@@ -124,26 +124,63 @@ export default function GameGrid({ game }: { game: Game }) {
             </h3>
             <div class="flex flex-wrap gap-2">
               <For each={game.foundWords()}>
-                {(found, i) => (
-                  <div 
-                    class="px-3 py-1.5 bg-gradient-to-r from-gray-800/80 to-gray-900/80 rounded-lg text-sm font-medium text-white shadow-md backdrop-blur-sm 
-                           border border-gray-700/50 flex items-center"
-                    style={{
-                      'animation-delay': `${i() * 50}ms`,
-                      'view-transition-name': `word-${i()}`
-                    }}
-                  >
-                    <span class="text-blue-300">{found.word}</span>
-                    <span class="ml-1.5 px-1.5 py-0.5 bg-yellow-500/20 text-yellow-300 rounded text-xs">
-                      +{found.score}
-                    </span>
-                    {found.chain >= 1 && (
-                      <span class="ml-1 text-xs bg-green-500/20 text-green-300 px-1.5 py-0.5 rounded">
-                        x{found.chainBonus}
+                {(found, i) => {
+                  const [loadedDefinition, setLoadedDefinition] = createSignal(false);
+                  const [definition, setDefinition] = createSignal<string>('');
+
+                  async function onMouseOver() {
+                    if (!loadedDefinition()) {
+                      setLoadedDefinition(true);
+
+                      const req = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${found.word}`);
+
+                      if (!req.ok) {
+                        console.error(`Failed to fetch definition for word ${found.word}`);
+                        setDefinition(`[Definition not found for ${found.word}]`);
+                        return;
+                      }
+
+                      const defList = await req.json();
+                      let result = '';
+
+                      for (const def of defList) {
+                        result += `${def.word}${def.origin ? ` (${def.origin})` : ''}\n`;
+
+                        for (const meaning of def.meanings) {
+                          result += `${meaning.partOfSpeech}:\n`;
+                          for (const definition of meaning.definitions) {
+                            result += `- ${definition.definition}${definition.example ? ` {${definition.example}}` : ''}\n`;
+                          }
+                        }
+                      }
+
+                      setDefinition(result);
+                    }
+                  }
+
+                  return (
+                    <div 
+                      class="px-3 py-1.5 bg-gradient-to-r from-gray-800/80 to-gray-900/80 rounded-lg text-sm font-medium text-white shadow-md backdrop-blur-sm 
+                            border border-gray-700/50 flex items-center"
+                      style={{
+                        'animation-delay': `${i() * 50}ms`,
+                        'view-transition-name': `word-${i()}`
+                      }}
+                      onMouseOver={onMouseOver}
+                      title={definition()}
+                    >
+                      <span class="text-blue-300">{found.word}</span>
+                      <span class="ml-1.5 px-1.5 py-0.5 bg-yellow-500/20 text-yellow-300 rounded text-xs">
+                        +{found.score}
                       </span>
-                    )}
-                  </div>
-                )}
+                      {found.chain >= 1 && (
+                        <span class="ml-1 text-xs bg-green-500/20 text-green-300 px-1.5 py-0.5 rounded">
+                          x{found.chainBonus}
+                        </span>
+                      )}
+                    </div>
+                  )
+                }}
               </For>
             </div>
           </div>
