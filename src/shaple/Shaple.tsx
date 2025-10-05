@@ -343,6 +343,8 @@ export default function App() {
                       lines.push(<div>{result}</div>);
                     });
 
+                    lines.push(<div class="text-slate-400/50">Play more at <span class="text-blue-400/50">{window.location.href}</span></div>)
+
                     return lines;
                   });
 

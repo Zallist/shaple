@@ -119,13 +119,14 @@ export default function GameGrid({ game }: { game: Game }) {
                 const [shown, setShown] = createSignal(false);
 
                 const text = createMemo(() => {
-                  const lines = [<div>
-                    <a href={window.location.href} target="_blank">Droptionary</a>
-                    <span class="text-slate-400"> ({game.foundWords().length} words) </span>
-                    <span class="text-slate-400"> [{game.getSeedString()}] </span>
-                  </div>];
-
-                  lines.push(<div>Score: {game.score().toLocaleString()}</div>);
+                  const lines = [
+                    <div>
+                      <span>Droptionary</span>
+                      <span class="text-slate-400"> ({game.foundWords().length} words) </span>
+                      <span class="text-slate-400"> [{game.getSeedString()}] </span>
+                    </div>,
+                    <div>Score: {game.score().toLocaleString()}</div>
+                  ];
 
                   const wordGridCount: { anyCount: number, manualCount: number }[][] = Array.from({ length: game.rowCount }, () => Array.from({ length: game.colCount }, () => ({ anyCount: 0, manualCount: 0 })));
                   const foundWords = game.foundWords();
@@ -155,6 +156,8 @@ export default function GameGrid({ game }: { game: Game }) {
                     lines.push(<div>{line}</div>);
                   }
 
+                  lines.push(<div class="text-slate-400/50">Play more at <span class="text-blue-400/50">{window.location.href}</span></div>)
+
                   return lines;
                 });
 
@@ -182,7 +185,6 @@ export default function GameGrid({ game }: { game: Game }) {
               })()}
             </div>
           </>
-
         </Show>
       </main>
 
