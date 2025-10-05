@@ -16,7 +16,7 @@ const Tile: Component<TileProps> = (props) => {
       'flex items-center justify-center',
       'w-full h-full',
       'select-none',
-      'font-mono font-bold text-2xl',
+      'font-bold text-2xl',
       'transition-all duration-300 ease-out',
       'transform-gpu will-change-transform',
       'm-0 rounded-lg',

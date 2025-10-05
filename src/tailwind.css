@@ -1,6 +1,4 @@
-@import 'https://fonts.googleapis.com/css2?family=Roboto+Slab:ital,wght@0,100..900;1,100..900&display=swap';
-@import 'https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap';
-@import 'https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap';
+@import 'https://fonts.googleapis.com/css2?family=Winky+Sans:ital,wght@0,300..900;1,300..900&display=swap';
 @import 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200';
 @import 'tailwindcss';
 
@@ -9,14 +7,10 @@ body {
     @apply bg-slate-900;
     @apply text-slate-100;
     
-    font-family: 'Roboto Slab', 'Arial', sans-serif;
+    font-family: 'Winky Sans', 'Arial', sans-serif;
+    font-feature-settings: "calt" on, "salt" on;
 }
 
 .material-symbols-outlined {
     @apply align-middle;
 }
-
-.font-mono {
-    font-family: 'Roboto Mono', monospace;
-}
-    
