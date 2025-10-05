@@ -1,5 +1,5 @@
 import { Component, Show } from 'solid-js'
-import { Cell, LETTER_VALUES } from '../bewordle-game'
+import { Cell, LETTER_VALUES } from '../droptionary-game'
 
 interface TileProps {
   cell: Cell

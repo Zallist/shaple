@@ -137,7 +137,7 @@ export class Game {
     private storedMoves: { from: { row: number, column: number }, to: { row: number, column: number } }[] = [];
 
     public async loadState() {
-        const storedMoves = loadGameState<{ from: { row: number, column: number }, to: { row: number, column: number } }[]>('bewordle_moves', this.seed);
+        const storedMoves = loadGameState<{ from: { row: number, column: number }, to: { row: number, column: number } }[]>('droptionary_moves', this.seed);
 
         if (storedMoves && storedMoves.length > 0) {
             this.storedMoves = storedMoves;
@@ -158,7 +158,7 @@ export class Game {
 
     private recordMove(from: Cell, to: Cell) {
         this.storedMoves.push({ from: { row: from.row, column: from.column }, to: { row: to.row, column: to.column } });
-        saveGameState('bewordle_moves', this.seed, this.storedMoves);
+        saveGameState('droptionary_moves', this.seed, this.storedMoves);
     }
 
     public isWord(word: string): boolean {

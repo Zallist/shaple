@@ -65,7 +65,7 @@ export default defineConfig(({ command, mode, isSsrBuild, isPreview }) => {
         input: {
           main: 'index.html',
           shaple: 'shaple/index.html',
-          bewordle: 'bewordle/index.html',
+          droptionary: 'droptionary/index.html',
         },
       },
     },

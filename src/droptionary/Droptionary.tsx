@@ -1,9 +1,9 @@
 import { createSignal, createMemo, onMount, onCleanup, Show, batch, Suspense } from 'solid-js'
 import GameGrid from './components/GameGrid'
 import { getCurrentSeed, getRandomSeed, numberToString, seedForDate } from '../utils/seed'
-import { Game } from './bewordle-game';
+import { Game } from './droptionary-game';
 
-export default function Bewordle() {
+export default function Droptionary() {
   const [showHelp, setShowHelp] = createSignal(false);
   const [seed, setSeed] = createSignal<number | undefined>(undefined);
   const [game, setGame] = createSignal<Game | null>(null);

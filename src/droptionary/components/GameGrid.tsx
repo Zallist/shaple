@@ -1,6 +1,6 @@
 import { createSignal, createMemo, For, Show } from 'solid-js'
 import Tile from './Tile'
-import { Game, Cell } from '../bewordle-game';
+import { Game, Cell } from '../droptionary-game';
 
 export default function GameGrid({ game }: { game: Game }) {
   const [selected, setSelected] = createSignal<Cell | null>(null)
@@ -116,7 +116,7 @@ export default function GameGrid({ game }: { game: Game }) {
       </main>
 
       <Show when={game.foundWords().length > 0}>
-        <div class="bg-gradient-to-r from-slate-800/60 to-slate-800/50 backdrop-blur-md border border-gray-800/50 rounded-lg py-3 px-4">
+        <div class="mx-2 bg-gradient-to-r from-slate-800/60 to-slate-800/50 backdrop-blur-md border border-gray-800/50 rounded-lg py-3 px-4">
           <h3 class="text-sm font-medium text-gray-400 mb-2 flex items-center justify-center">
             <div class="mr-2">Found Words</div>
             <div class="text-xs bg-gray-800 px-2 py-0.5 rounded-full">{game.foundWords().length}</div>
@@ -134,7 +134,7 @@ export default function GameGrid({ game }: { game: Game }) {
                     const req = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${found.word}`);
 
                     if (!req.ok) {
-                      console.error(`Failed to fetch definition for word ${found.word}`);
+                      console.error(`Failed to fetch definition for word ${found.word}: ${req.statusText} (${req.status})`);
                       setDefinition(`[Definition not found for ${found.word}]`);
                       return;
                     }

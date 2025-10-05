@@ -17,10 +17,10 @@ export const Games: Game[] = [
         class: "bg-gradient-to-br from-indigo-700 to-indigo-600"
     },
     {
-        name: "Bewordle",
+        name: "Droptionary",
         description: "Word search crossed with Bejeweled. Find words, collapse the grid, trigger chains.",
-        path: `${import.meta.env.BASE_URL}bewordle/`,
-        icon_path: `${import.meta.env.BASE_URL}bewordle/favicon.png`,
+        path: `${import.meta.env.BASE_URL}droptionary/`,
+        icon_path: `${import.meta.env.BASE_URL}droptionary/favicon.png`,
         color: "amber",
         class: "bg-gradient-to-bl from-amber-700 to-amber-600"
     }
