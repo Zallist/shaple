@@ -125,6 +125,8 @@ export default function GameGrid({ game }: { game: Game }) {
                     <span class="text-slate-400"> [{game.getSeedString()}] </span>
                   </div>];
 
+                  lines.push(<div>Score: {game.score().toLocaleString()}</div>);
+
                   const wordGridCount: { anyCount: number, manualCount: number }[][] = Array.from({ length: game.rowCount }, () => Array.from({ length: game.colCount }, () => ({ anyCount: 0, manualCount: 0 })));
                   const foundWords = game.foundWords();
                   for (let i = 0; i < foundWords.length; i++) {
