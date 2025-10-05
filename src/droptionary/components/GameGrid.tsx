@@ -92,6 +92,7 @@ export default function GameGrid({ game }: { game: Game }) {
                     }}
                     classList={{
                       'animate__animated animate__rotateOut animate__delay-1s': cell.isMatched,
+                      'animate__animated animate__tada': cell.isMatched,
                     }}>
                     <Tile
                       cell={cell}
