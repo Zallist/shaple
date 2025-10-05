@@ -63,10 +63,11 @@ export default defineConfig(({ command, mode, isSsrBuild, isPreview }) => {
       sourcemap: !isBuild,
       rollupOptions: {
         input: {
-          index: 'index.html',
+          main: 'index.html',
+          shaple: 'shaple/index.html',
           bewordle: 'bewordle/index.html',
-        }
-      }
+        },
+      },
     },
   };
 });

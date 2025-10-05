@@ -1,9 +1,9 @@
 /* @refresh reload */
-import "./tailwind.css";
+import "../tailwind.css";
 import "animate.css";
 import { render } from 'solid-js/web';
 
-import Bewordle from './bewordle/Bewordle';
+import Bewordle from './Bewordle';
 
 const root = document.getElementById('root');
 

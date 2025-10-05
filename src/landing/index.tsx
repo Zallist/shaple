@@ -1,8 +1,7 @@
 /* @refresh reload */
-import "./tailwind.css";
 import { render } from 'solid-js/web';
-
-import Shaple from './shaple/Shaple';
+import '../tailwind.css';
+import LandingPage from './LandingPage';
 
 const root = document.getElementById('root');
 
@@ -12,4 +11,4 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
   );
 }
 
-render(() => <Shaple />, root!);
+render(() => <LandingPage />, root!);

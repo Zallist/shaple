@@ -56,52 +56,54 @@ export default function Bewordle() {
   }
 
   return (
-    <div class="text-white items-center p-4 max-w-2xl">
-      <header class="mb-6">
-        <div class="flex items-center justify-between mb-2">
-          <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
-            Bewordle
-          </h1>
-          <div class="flex gap-3">
-            <button 
-              onClick={() => setShowHelp(!showHelp())}
-              class="p-2 rounded-full hover:bg-gray-700 transition-colors"
-              aria-label="Help"
-            >
-              <span class="material-symbols-outlined">help</span>
-            </button>
-            <button 
-              onClick={() => toggleDailySeed()}
-              class="p-2 rounded-full hover:bg-gray-700 transition-colors"
-            >
-              <span class="material-symbols-outlined">{isDailySeed() ? 'shuffle' : 'calendar_today'}</span>
-              <span class="ml-2">{isDailySeed() ? 'Random' : 'Daily'}</span>
-            </button>
+    <>
+      <div class="text-white items-center p-4 max-w-2xl">
+        <header class="mb-6">
+          <div class="flex items-center justify-between mb-2">
+            <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
+              Bewordle
+            </h1>
+            <div class="flex gap-3">
+              <button 
+                onClick={() => setShowHelp(!showHelp())}
+                class="p-2 rounded-full hover:bg-gray-700 transition-colors"
+                aria-label="Help"
+              >
+                <span class="material-symbols-outlined">help</span>
+              </button>
+              <button 
+                onClick={() => toggleDailySeed()}
+                class="p-2 rounded-full hover:bg-gray-700 transition-colors"
+              >
+                <span class="material-symbols-outlined">{isDailySeed() ? 'shuffle' : 'calendar_today'}</span>
+                <span class="ml-2">{isDailySeed() ? 'Random' : 'Daily'}</span>
+              </button>
+            </div>
           </div>
-        </div>
-        
-        <Show when={showHelp()}>
-          <div class="bg-gray-800 rounded-lg p-4 mb-4 text-sm text-gray-300 animate-fade-in">
-            <h3 class="font-bold text-lg mb-2">How to Play</h3>
-            <ul class="list-disc pl-5 space-y-1">
-              <li>Click to swap letters with an adjacent letter (horizontally, vertically or diagonally)</li>
-              <li>Form English words 5 or more letters long in any of the 8 directions</li>
-              <li>Score points based on letter values</li>
-              <li>Chain falling words for combo bonuses! Falling words only need to be 4+ letters long.</li>
-            </ul>
-          </div>
-        </Show>
-      </header>
+          
+          <Show when={showHelp()}>
+            <div class="bg-gray-800 rounded-lg p-4 mb-4 text-sm text-gray-300 animate-fade-in">
+              <h3 class="font-bold text-lg mb-2">How to Play</h3>
+              <ul class="list-disc pl-5 space-y-1">
+                <li>Click to swap letters with an adjacent letter (horizontally, vertically or diagonally)</li>
+                <li>Form English words 5 or more letters long in any of the 8 directions</li>
+                <li>Score points based on letter values</li>
+                <li>Chain falling words for combo bonuses! Falling words only need to be 4+ letters long.</li>
+              </ul>
+            </div>
+          </Show>
+        </header>
 
-      <main class="justify-center items-center">
-        <Show when={game()} fallback={<div>Loading...</div>}>
-          <GameGrid game={game()!} />
-        </Show>
-      </main>
-      
-      <footer class="mt-6 text-center text-sm text-gray-500">
-        <p>Match tiles to form words and score points!</p>
-      </footer>
-    </div>
+        <main class="justify-center items-center">
+          <Show when={game()} fallback={<div>Loading...</div>}>
+            <GameGrid game={game()!} />
+          </Show>
+        </main>
+        
+        <footer class="mt-6 text-center text-sm text-gray-500">
+          <p>Match tiles to form words and score points!</p>
+        </footer>
+      </div>
+    </>
   )
 }
