@@ -1,7 +1,7 @@
 import { createSignal, createMemo, Accessor, Setter, batch } from "solid-js";
 import * as prand from 'pure-rand';
 import { createStore, SetStoreFunction } from "solid-js/store";
-import { loadGameState, saveGameState } from "../utils/seed";
+import { loadGameState, numberToString, saveGameState } from "../utils/seed";
 import getAllValidWords from "./words";
 
 // Letter values based on Scrabble scoring
@@ -61,7 +61,15 @@ export type Cell = {
     column: number;
     letter: string;
     isMatched: boolean;
-}
+};
+
+export type FoundWord = {
+    word: string;
+    score: number;
+    chain: number;
+    chainBonus: number;
+    coords: { row: number, column: number }[];
+};
 
 function createCell(row: number, column: number, letter: string): Cell {
     return {
@@ -90,8 +98,8 @@ export class Game {
     public readonly score: Accessor<number>;
     private readonly setScore: Setter<number>;
 
-    public readonly foundWords: Accessor<Array<{word: string, score: number, chain: number, chainBonus: number}>>;
-    private readonly setFoundWords: Setter<Array<{word: string, score: number, chain: number, chainBonus: number}>>;
+    public readonly foundWords: Accessor<FoundWord[]>;
+    private readonly setFoundWords: Setter<FoundWord[]>;
 
     public readonly cellsAsGrid: Accessor<Record<number, Record<number, (Cell | null)>>>;
     public readonly isDone: Accessor<boolean>;
@@ -106,7 +114,7 @@ export class Game {
         [this.movesRemaining, this.setMovesRemaining] = createSignal(initialMoveCount);
         [this.isProcessing, this.setIsProcessing] = createSignal(false);
         [this.score, this.setScore] = createSignal(0);
-        [this.foundWords, this.setFoundWords] = createSignal<Array<{word: string, score: number, chain: number, chainBonus: number}>>([]);
+        [this.foundWords, this.setFoundWords] = createSignal<FoundWord[]>([]);
 
         this.cellsAsGrid = createMemo(() => this.convertCellsToGrid(this.cells));
         this.isDone = createMemo(() => this.movesRemaining() <= 0);
@@ -132,6 +140,10 @@ export class Game {
         await this.setupGrid();
 
         this.initialized = true;
+    }
+
+    public getSeedString(): string {
+        return numberToString(this.seed);
     }
 
     private storedMoves: { from: { row: number, column: number }, to: { row: number, column: number } }[] = [];
@@ -289,7 +301,13 @@ export class Game {
                             
                             this.setFoundWords(prev => [
                                 ...prev,
-                                { word: match.word, score: totalScore, chain: chainCount, chainBonus: chainBonus }
+                                { 
+                                    word: match.word, 
+                                    score: totalScore, 
+                                    chain: chainCount, 
+                                    chainBonus: chainBonus, 
+                                    coords: match.coords.map(c => ({ row: c.r, column: c.c })) 
+                                }
                             ]);
                         }
                     }

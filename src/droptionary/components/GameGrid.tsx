@@ -13,18 +13,18 @@ export default function GameGrid({ game }: { game: Game }) {
     }
 
     const prev = selected();
-    
+
     if (!prev) {
       setSelected(cell);
       return
     }
-    
+
     // Clicking the same cell deselects it
     if (prev.id === cell.id) {
       setSelected(null);
       return;
     }
-    
+
     // Check if cells are adjacent
     if (!game.isAdjacent(prev, cell)) {
       setSelected(cell);
@@ -48,15 +48,15 @@ export default function GameGrid({ game }: { game: Game }) {
               </span>
             </div>
             <div class="flex items-center space-x-4">
-                <div class="text-2xl font-bold text-white">
-                  {game.score().toLocaleString()}
-                  <span class="text-xs uppercase text-gray-400 ml-2">Score</span>
-                </div>
+              <div class="text-2xl font-bold text-white">
+                {game.score().toLocaleString()}
+                <span class="text-xs uppercase text-gray-400 ml-2">Score</span>
+              </div>
             </div>
           </div>
-          
+
           <div class="h-2 bg-gray-800 rounded-full overflow-hidden">
-            <div 
+            <div
               class="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transition-all duration-500 ease-out"
               style={{
                 width: `${(game.movesRemaining() / game.initialMoveCount) * 100}%`,
@@ -69,9 +69,9 @@ export default function GameGrid({ game }: { game: Game }) {
 
       {/* Main Game Area */}
       <main class="flex-1 flex flex-col items-center justify-center py-4">
-        <div 
+        <div
           class="p-1 w-100 h-100 bg-gray-800/30 rounded-2xl backdrop-blur-sm border border-gray-700/50 shadow-2xl"
-          style={{ 
+          style={{
             'box-shadow': '0 8px 32px rgba(0, 0, 0, 0.2)'
           }}
         >
@@ -82,17 +82,17 @@ export default function GameGrid({ game }: { game: Game }) {
 
                 return (
                   <div class="tile-container absolute transition-all duration-240 ease-out transform-gpu will-change-transform"
-                      style={{
-                        'width': `calc(${100 / game.colCount}% - 0.5rem)`,
-                        'height': `calc(${100 / game.rowCount}% - 0.5rem)`,
-                        'left': `calc(${cell.column * (100 / game.colCount)}% + 0.25rem)`,
-                        'top': `calc(${cell.row * (100 / game.rowCount)}% + 0.25rem)`,
-                        '--animate-delay': '0.3s',
-                        '--animate-duration': '0.7s',
-                      }}
-                      classList={{
-                        'animate__animated animate__rotateOut animate__delay-1s': cell.isMatched,
-                      }}>
+                    style={{
+                      'width': `calc(${100 / game.colCount}% - 0.5rem)`,
+                      'height': `calc(${100 / game.rowCount}% - 0.5rem)`,
+                      'left': `calc(${cell.column * (100 / game.colCount)}% + 0.25rem)`,
+                      'top': `calc(${cell.row * (100 / game.rowCount)}% + 0.25rem)`,
+                      '--animate-delay': '0.3s',
+                      '--animate-duration': '0.7s',
+                    }}
+                    classList={{
+                      'animate__animated animate__rotateOut animate__delay-1s': cell.isMatched,
+                    }}>
                     <Tile
                       cell={cell}
                       onClick={handleClick}
@@ -108,10 +108,79 @@ export default function GameGrid({ game }: { game: Game }) {
 
         {/* Game Status */}
         <Show when={game.isDone()}>
-          <div class="mt-6 p-4 bg-gradient-to-r from-red-500/20 to-pink-500/20 rounded-xl border border-red-500/30 text-center">
-            <h3 class="text-xl font-bold text-white mb-1">Finished!</h3>
-            <p class="text-gray-200 text-sm">Final Score: {game.score().toLocaleString()}</p>
-          </div>
+          <>
+            <div class="mt-6 p-4 bg-gradient-to-r from-red-500/20 to-pink-500/20 rounded-xl border border-red-500/30 text-center">
+              <h3 class="text-xl font-bold text-white mb-1">Finished!</h3>
+              <p class="text-gray-200 text-sm">Final Score: {game.score().toLocaleString()}</p>
+            </div>
+
+            <div class="mt-4">
+              {(() => {
+                const [shown, setShown] = createSignal(false);
+
+                const text = createMemo(() => {
+                  const lines = [<div>
+                    <a href={window.location.href} target="_blank">Droptionary</a>
+                    <span class="text-slate-400"> ({game.foundWords().length} words) </span>
+                    <span class="text-slate-400"> [{game.getSeedString()}] </span>
+                  </div>];
+
+                  const wordGridCount: { anyCount: number, manualCount: number }[][] = Array.from({ length: game.rowCount }, () => Array.from({ length: game.colCount }, () => ({ anyCount: 0, manualCount: 0 })));
+                  const foundWords = game.foundWords();
+                  for (let i = 0; i < foundWords.length; i++) {
+                    const word = foundWords[i];
+                    for (let j = 0; j < word.coords.length; j++) {
+                      const coord = word.coords[j];
+                      wordGridCount[coord.row][coord.column].anyCount++;
+                      if (word.chain === 0)
+                        wordGridCount[coord.row][coord.column].manualCount++;
+                    }
+                  }
+
+                  for (let r = 0; r < game.rowCount; r++) {
+                    const line = [];
+
+                    for (let c = 0; c < game.colCount; c++) {
+                      const count = wordGridCount[r][c];
+                      if (count.manualCount > 0)
+                        line.push(<span title={`Manually matched a word`}>🟩</span>);
+                      else if (count.anyCount > 0)
+                        line.push(<span title={`Matched a word`}>🟨</span>);
+                      else
+                        line.push(<span title={`Never matched a word`}>⬛</span>);
+                    }
+
+                    lines.push(<div>{line}</div>);
+                  }
+
+                  return lines;
+                });
+
+                return (
+                  <>
+                    <Show when={!shown()}>
+                      <button class="w-full h-12 px-4 rounded-lg border-2 items-center justify-center font-semibold text-sm transition-all duration-200
+                                    active:scale-95 disabled:active:scale-100
+                                    bg-blue-700/70 border-blue-600/50 hover:bg-blue-600/70 hover:border-blue-500/70
+                                    disabled:bg-blue-900/20 disabled:border-blue-400/20 disabled:text-blue-400
+                                    animate__animated animate__bounceIn"
+                        onClick={() => { setShown(true); }}>
+                        <span class="material-symbols-outlined text-blue-400 mr-1">share</span>
+                        Share
+                      </button>
+                    </Show>
+                    <Show when={shown()}>
+                      <div class="w-full rounded-lg border-2 items-center justify-center font-semibold text-sm transition-all duration-200
+                                  bg-slate-700/70 border-slate-600/50 hover:bg-slate-600/70 hover:border-slate-500/70 p-2
+                                  whitespace-nowrap overflow-hidden select-all
+                                  flex flex-col gap-0">{text()}</div>
+                    </Show>
+                  </>
+                )
+              })()}
+            </div>
+          </>
+
         </Show>
       </main>
 
@@ -158,7 +227,7 @@ export default function GameGrid({ game }: { game: Game }) {
                 }
 
                 return (
-                  <div 
+                  <div
                     class="px-3 py-1.5 bg-gradient-to-r from-gray-800/80 to-gray-900/80 rounded-lg text-sm font-medium text-white shadow-md backdrop-blur-sm 
                           border border-gray-700/50 flex items-center"
                     style={{
