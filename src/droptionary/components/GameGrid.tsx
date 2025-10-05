@@ -121,7 +121,7 @@ export default function GameGrid({ game }: { game: Game }) {
                 const text = createMemo(() => {
                   const lines = [
                     <div>
-                      <span>Droptionary</span>
+                      <a href={window.location.href} target="_blank">Droptionary</a> 
                       <span class="text-slate-400"> ({game.foundWords().length} words) </span>
                       <span class="text-slate-400"> [{game.getSeedString()}] </span>
                     </div>,
@@ -155,8 +155,6 @@ export default function GameGrid({ game }: { game: Game }) {
 
                     lines.push(<div>{line}</div>);
                   }
-
-                  lines.push(<div class="text-slate-400/50">Play more at <span class="text-blue-400/50">{window.location.href}</span></div>)
 
                   return lines;
                 });
