@@ -25,8 +25,8 @@ function buildWordList(): PluginOption {
       const words = await this.fs.readFile('./scrabble-dictionaries/english/sowpods.txt').then((b) => b.toString());
       const lines = words.split('\n');
       
-      this.fs.mkdir('public', { recursive: true });
-      this.fs.writeFile('public/word-list.json', JSON.stringify(lines));
+      this.fs.mkdir('src/public', { recursive: true });
+      this.fs.writeFile('src/public/word-list.json', JSON.stringify(lines));
     }
   }
 }
@@ -56,6 +56,7 @@ export default defineConfig(({ command, mode, isSsrBuild, isPreview }) => {
     server: {
       port: 3000,
     },
+    root: 'src',
     build: {
       outDir: 'dist',
       target: 'es2015',

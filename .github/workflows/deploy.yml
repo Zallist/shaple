@@ -47,8 +47,9 @@ jobs:
           EOF
           )
           
-          awk -v tag="$GA_TAG" '/<\/head>/{print tag}1' dist/index.html > dist/index.tmp && mv dist/index.tmp dist/index.html
-          awk -v tag="$GA_TAG" '/<\/head>/{print tag}1' dist/bewordle/index.html > dist/bewordle/index.tmp && mv dist/bewordle/index.tmp dist/bewordle/index.html
+          for file in $(find dist -type f -name '*.html'); do
+            awk -v tag="$GA_TAG" '/<\/head>/{print tag}1' "$file" > "$file.tmp" && mv "$file.tmp" "$file"
+          done
 
       - name: Upload production build
         uses: actions/upload-pages-artifact@v3
