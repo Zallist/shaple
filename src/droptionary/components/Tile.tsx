@@ -18,7 +18,6 @@ const Tile: Component<TileProps> = (props) => {
       'select-none',
       'font-bold text-2xl',
       'transition-all duration-300 ease-out',
-      'transform-gpu will-change-transform',
       'm-0 rounded-lg',
       'shadow-sm hover:shadow-md',
       'overflow-hidden',

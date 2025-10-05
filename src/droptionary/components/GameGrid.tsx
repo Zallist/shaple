@@ -83,7 +83,7 @@ export default function GameGrid({ game }: { game: Game }) {
                 const isSelectedCell = createMemo(() => selected()?.id === cell.id);
 
                 return (
-                  <div class="tile-container absolute transition-all duration-240 ease-out transform-gpu will-change-transform"
+                  <div class="tile-container absolute transition-all duration-240 ease-out"
                     style={{
                       'width': `calc(${100 / game.colCount}% - 0.5rem)`,
                       'height': `calc(${100 / game.rowCount}% - 0.5rem)`,
