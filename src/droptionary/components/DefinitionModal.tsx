@@ -1,43 +1,37 @@
-import { createSignal, Show, onCleanup, createEffect, createMemo, For } from 'solid-js';
+import { createSignal, Show, onCleanup, createEffect, createMemo, For, onMount } from 'solid-js';
 
 interface DefinitionModalProps {
   word: string;
   isOpen: boolean;
   onClose: () => void;
 }
-interface Phonetic {
+
+type DictionaryApiPhonetic = {
   text?: string;
   audio?: string;
   sourceUrl?: string;
-  license?: {
-    name: string;
-    url: string;
-  };
 }
 
-interface Definition {
+type DictionaryApiDefinition = {
   definition: string;
   example?: string;
   synonyms?: string[];
   antonyms?: string[];
 }
 
-interface Meaning {
+type DictionaryApiMeaning = {
   partOfSpeech: string;
-  definitions: Definition[];
+  definitions: DictionaryApiDefinition[];
 }
 
-export interface DictionaryApiEntry {
-  word: string;
-  phonetic?: string;
-  phonetics?: Phonetic[];
+export type DictionaryApiEntry = {
+  //word: string;
+  //phonetic?: string;
+  phonetics?: DictionaryApiPhonetic[];
   origin?: string;
-  meanings: Meaning[];
-  license?: {
-    name: string;
-    url: string;
-  };
+  meanings: DictionaryApiMeaning[];
   sourceUrls?: string[];
+  iframe?: string;
 }
 
 // The full response is an array of these entries
@@ -89,30 +83,50 @@ export default function DefinitionModal(props: DefinitionModalProps) {
     }
   });
 
-  const fetchDefinition = async (wordToFetch: string) => {
+  async function fetchFromDictionaryApi(term: string): Promise<DictionaryApiResponse> {
+    const req = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${term}`);
+
+    if (!req.ok) {
+      throw new Error('Failed to fetch definition');
+    }
+
+    const defList = await req.json();
+    return defList;
+  }
+
+  async function fetchFromWiktionary(term: string): Promise<DictionaryApiResponse> {
+    // this could be so much more, but it's not worth it, the format is almost always wrong
+    return [{ 
+      phonetics: [], 
+      origin: undefined, 
+      meanings: [],
+      sourceUrls: ["https://en.wiktionary.org/wiki/" + term.toLowerCase()],
+      iframe: "https://en.wiktionary.org/wiki/" + term.toLowerCase()
+    }];
+  }
+
+  async function fetchDefinition(wordToFetch: string) {
     if (!wordToFetch) {
       setDefinition(null);
       return;
     }
 
+    wordToFetch = wordToFetch.toLowerCase();
+
     setIsLoading(true);
     setDefinition(null);
 
     try {
-      const req = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${wordToFetch}`);
-
-      if (!req.ok) {
-        setDefinition(null);
-        return;
-      }
-
-      const defList = await req.json();
-      setDefinition(defList);
+      setDefinition(await fetchFromDictionaryApi(wordToFetch));
     } catch (error) {
-      setDefinition(null);
-    } finally {
-      setIsLoading(false);
+      try {
+        setDefinition(await fetchFromWiktionary(wordToFetch));
+      } catch (error) {
+        setDefinition(null);
+      }
     }
+    
+    setIsLoading(false);
   };
 
   return (
@@ -122,7 +136,8 @@ export default function DefinitionModal(props: DefinitionModalProps) {
         onClick={handleBackdropClick}
       >
         <div
-          class="flex flex-col bg-gradient-to-br from-slate-800 to-slate-900 border border-gray-700/50 rounded-xl shadow-2xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-hidden"
+          class="flex flex-col bg-gradient-to-br from-slate-800 to-slate-900 border border-gray-700/50 rounded-xl 
+                 shadow-2xl max-w-7xl w-full mx-4 max-h-[80vh] overflow-hidden"
           style="z-index: 10000; background-color: rgb(30, 41, 59);"
           onClick={(e) => e.stopPropagation()}
         >
@@ -143,7 +158,7 @@ export default function DefinitionModal(props: DefinitionModalProps) {
           </div>
 
           {/* Content */}
-          <div class="p-6 grow-1 overflow-y-auto">
+          <div class="grow-1 overflow-y-auto">
             <Show when={isLoading()}>
               <div class="flex items-center justify-center py-8">
                 <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400"></div>
@@ -155,138 +170,156 @@ export default function DefinitionModal(props: DefinitionModalProps) {
               <div class="prose prose-invert max-w-none">
                 <div class="space-y-6">
                   <For each={definition()!}>{(def) => (
-                    <div class="space-y-6">
-                      {/* Word header with phonetic and origin */}
-                      <div class="border-b border-gray-700/50 pb-4">
-                        <div class="flex flex-col space-y-2">
-                          <div class="flex items-center justify-between">
-                            <h3 class="text-2xl font-bold text-white capitalize">{def.word}</h3>
-                            <Show when={def.phonetic}>
-                              <span class="text-sm text-gray-400 bg-gray-800/50 px-2 py-1 rounded">
-                                {def.phonetic}
-                              </span>
-                            </Show>
-                          </div>
+                    <>
+                      <Show when={!def.iframe}>
+                        <div class="m-6 space-y-6 border-t border-gray-700/50 nth-1:border-none">
                           <Show when={def.origin}>
-                            <p class="text-sm text-blue-300 italic">Origin: {def.origin}</p>
+                            <div class="border-b border-gray-700/50 pb-4">
+                              <div class="flex flex-col space-y-2">
+                                  <p class="text-sm text-blue-300 italic">Origin: {def.origin}</p>
+                              </div>
+                            </div>
                           </Show>
-                        </div>
-                      </div>
 
-                      {/* Phonetics */}
-                      <Show when={def.phonetics && def.phonetics.length > 0}>
-                        <div class="space-y-2">
-                          <h4 class="text-sm font-semibold text-gray-300 uppercase tracking-wide">Pronunciation</h4>
-                          <div class="space-y-2">
-                            <For each={def.phonetics}>{(phonetic) => (
-                              <div class="flex items-center space-x-3 p-3 bg-gray-800/30 rounded-lg">
-                                <Show when={phonetic.text}>
-                                  <span class="text-gray-200 font-mono">{phonetic.text}</span>
-                                </Show>
-                                <Show when={phonetic.audio}>
-                                  <button
-                                    class="text-blue-400 hover:text-blue-300 transition-colors p-1 rounded"
-                                    onClick={() => {
-                                      const audio = new Audio(phonetic.audio);
-                                      audio.play().catch(e => console.log('Audio play failed:', e));
-                                    }}
-                                    title="Play pronunciation"
-                                  >
-                                    <span class="material-symbols-outlined text-lg">volume_up</span>
-                                  </button>
-                                </Show>
-                                <Show when={phonetic.sourceUrl}>
+                          {/* Meanings */}
+                          <For each={def.meanings}>{(meaning) => (
+                            <div class="space-y-4">
+                              <div class="flex items-center space-x-2">
+                                <div class="w-2 h-2 bg-blue-400 rounded-full"></div>
+                                <h4 class="text-lg font-semibold text-blue-300 capitalize">
+                                  {meaning.partOfSpeech}
+                                </h4>
+                              </div>
+
+                              <div class="space-y-4 pl-4">
+                                <For each={meaning.definitions}>{(definitionItem, index) => (
+                                  <div class="border-l-2 border-gray-700/50 pl-4 space-y-3">
+                                    <div class="flex items-start space-x-2">
+                                      <span class="text-blue-400 font-bold text-sm w-6 h-6 bg-blue-400/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                        {index() + 1}
+                                      </span>
+                                      <p class="text-gray-200 leading-relaxed flex-1">
+                                        {definitionItem.definition}
+                                      </p>
+                                    </div>
+
+                                    <Show when={definitionItem.example}>
+                                      <div class="ml-8 p-3 bg-gray-800/20 rounded-lg border-l-4 border-green-400/50">
+                                        <p class="text-green-300 italic text-sm">
+                                          "{definitionItem.example}"
+                                        </p>
+                                      </div>
+                                    </Show>
+
+                                    <Show when={definitionItem.synonyms && definitionItem.synonyms.length > 0}>
+                                      <div class="ml-8 flex flex-wrap gap-1">
+                                        <span class="text-xs text-purple-300 font-medium">Synonyms:</span>
+                                        <For each={definitionItem.synonyms}>{(synonym) => (
+                                          <span class="text-xs bg-purple-400/20 text-purple-300 px-2 py-1 rounded-full">
+                                            {synonym}
+                                          </span>
+                                        )}</For>
+                                      </div>
+                                    </Show>
+
+                                    <Show when={definitionItem.antonyms && definitionItem.antonyms.length > 0}>
+                                      <div class="ml-8 flex flex-wrap gap-1">
+                                        <span class="text-xs text-orange-300 font-medium">Antonyms:</span>
+                                        <For each={definitionItem.antonyms}>{(antonym) => (
+                                          <span class="text-xs bg-orange-400/20 text-orange-300 px-2 py-1 rounded-full">
+                                            {antonym}
+                                          </span>
+                                        )}</For>
+                                      </div>
+                                    </Show>
+                                  </div>
+                                )}</For>
+                              </div>
+                            </div>
+                          )}</For>
+                          
+                          {/* Phonetics */}
+                          <Show when={def.phonetics && def.phonetics.length > 0}>
+                            <div class="space-y-2">
+                              <h4 class="text-sm font-semibold text-gray-300 uppercase tracking-wide">Pronunciation</h4>
+                              <div class="space-y-2">
+                                <For each={def.phonetics}>{(phonetic) => (
+                                  <div class="flex items-center space-x-3 p-3 bg-gray-800/30 rounded-lg">
+                                    <Show when={phonetic.text}>
+                                      <span class="text-gray-200 font-mono">{phonetic.text}</span>
+                                    </Show>
+                                    <Show when={phonetic.audio}>
+                                      <button
+                                        class="text-blue-400 hover:text-blue-300 transition-colors p-1 rounded"
+                                        onClick={() => {
+                                          const audio = new Audio(phonetic.audio);
+                                          audio.play().catch(e => console.log('Audio play failed:', e));
+                                        }}
+                                        title="Play pronunciation"
+                                      >
+                                        <span class="material-symbols-outlined text-lg">volume_up</span>
+                                      </button>
+                                    </Show>
+                                    <Show when={phonetic.sourceUrl}>
+                                      <a
+                                        href={phonetic.sourceUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="text-xs text-gray-400 hover:text-gray-300 transition-colors"
+                                      >
+                                        Source
+                                      </a>
+                                    </Show>
+                                  </div>
+                                )}</For>
+                              </div>
+                            </div>
+                          </Show>
+
+                          {/* Source URLs */}
+                          <Show when={def.sourceUrls && def.sourceUrls.length > 0}>
+                            <div class="border-t border-gray-700/50 pt-4">
+                              <div class="space-y-1">
+                                <h5 class="text-xs font-medium text-gray-400 uppercase tracking-wide">Sources</h5>
+                                <For each={def.sourceUrls}>{(url) => (
                                   <a
-                                    href={phonetic.sourceUrl}
+                                    href={url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    class="text-xs text-gray-400 hover:text-gray-300 transition-colors"
+                                    class="block text-sm text-blue-400 hover:text-blue-300 transition-colors break-all"
                                   >
-                                    Source
+                                    {url}
                                   </a>
-                                </Show>
+                                )}</For>
                               </div>
-                            )}</For>
-                          </div>
+                            </div>
+                          </Show>
                         </div>
                       </Show>
+                      <Show when={def.iframe}>
+                        {(() => {
+                          const [loading, setLoading] = createSignal(true);
+                          let iframe!: HTMLIFrameElement;
 
-                      {/* Meanings */}
-                      <For each={def.meanings}>{(meaning) => (
-                        <div class="space-y-4">
-                          <div class="flex items-center space-x-2">
-                            <div class="w-2 h-2 bg-blue-400 rounded-full"></div>
-                            <h4 class="text-lg font-semibold text-blue-300 capitalize">
-                              {meaning.partOfSpeech}
-                            </h4>
-                          </div>
+                          onMount(() => {
+                            iframe.onload = () => {
+                              setLoading(false);
+                            };
+                          });
 
-                          <div class="space-y-4 pl-4">
-                            <For each={meaning.definitions}>{(definitionItem, index) => (
-                              <div class="border-l-2 border-gray-700/50 pl-4 space-y-3">
-                                <div class="flex items-start space-x-2">
-                                  <span class="text-blue-400 font-bold text-sm w-6 h-6 bg-blue-400/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    {index() + 1}
-                                  </span>
-                                  <p class="text-gray-200 leading-relaxed flex-1">
-                                    {definitionItem.definition}
-                                  </p>
+                          return (
+                            <div class="relative">
+                              <Show when={loading()}>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                  <div class="rounded-full size-16 animate-spin border-4 border-dashed border-gray-700"></div>
                                 </div>
-
-                                <Show when={definitionItem.example}>
-                                  <div class="ml-8 p-3 bg-gray-800/20 rounded-lg border-l-4 border-green-400/50">
-                                    <p class="text-green-300 italic text-sm">
-                                      "{definitionItem.example}"
-                                    </p>
-                                  </div>
-                                </Show>
-
-                                <Show when={definitionItem.synonyms && definitionItem.synonyms.length > 0}>
-                                  <div class="ml-8 flex flex-wrap gap-1">
-                                    <span class="text-xs text-purple-300 font-medium">Synonyms:</span>
-                                    <For each={definitionItem.synonyms}>{(synonym) => (
-                                      <span class="text-xs bg-purple-400/20 text-purple-300 px-2 py-1 rounded-full">
-                                        {synonym}
-                                      </span>
-                                    )}</For>
-                                  </div>
-                                </Show>
-
-                                <Show when={definitionItem.antonyms && definitionItem.antonyms.length > 0}>
-                                  <div class="ml-8 flex flex-wrap gap-1">
-                                    <span class="text-xs text-orange-300 font-medium">Antonyms:</span>
-                                    <For each={definitionItem.antonyms}>{(antonym) => (
-                                      <span class="text-xs bg-orange-400/20 text-orange-300 px-2 py-1 rounded-full">
-                                        {antonym}
-                                      </span>
-                                    )}</For>
-                                  </div>
-                                </Show>
-                              </div>
-                            )}</For>
-                          </div>
-                        </div>
-                      )}</For>
-
-                      {/* Source URLs */}
-                      <Show when={def.sourceUrls && def.sourceUrls.length > 0}>
-                        <div class="border-t border-gray-700/50 pt-4">
-                          <div class="space-y-1">
-                            <h5 class="text-xs font-medium text-gray-400 uppercase tracking-wide">Sources</h5>
-                            <For each={def.sourceUrls}>{(url) => (
-                              <a
-                                href={url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="block text-sm text-blue-400 hover:text-blue-300 transition-colors break-all"
-                              >
-                                {url}
-                              </a>
-                            )}</For>
-                          </div>
-                        </div>
+                              </Show>
+                              <iframe ref={iframe} src={def.iframe} class="w-full min-h-64 h-[calc(80vh-10rem)] border-0" />
+                            </div>
+                          )
+                        })()}
                       </Show>
-                    </div>
+                    </>
                   )}</For>
                 </div>
               </div>
