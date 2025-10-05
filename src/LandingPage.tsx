@@ -1,5 +1,5 @@
 import { Component, For } from 'solid-js';
-import { Games } from '../games';
+import { Games } from './games';
 
 const LandingPage: Component = () => {
   return (
@@ -9,7 +9,7 @@ const LandingPage: Component = () => {
           <img src="favicon.png" class="h-16 aspect-square mr-2 inline" />
           Games
         </h1>
-        <p class="text-xl text-gray-400">Work your brain out</p>
+        <p class="text-xl text-gray-400">Work your brain out every day! Come back tomorrow for a different puzzle.</p>
       </header>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">

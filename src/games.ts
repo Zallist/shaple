@@ -10,18 +10,18 @@ export type Game = {
 export const Games: Game[] = [
     {
         name: "Shaple",
-        description: "A word game where you guess words based on their shapes",
+        description: "Wordle with shapes. Arrange symbols under adjacency rules to reveal the hidden pattern.",
         path: `${import.meta.env.BASE_URL}shaple/`,
         icon_path: `${import.meta.env.BASE_URL}shaple/favicon.png`,
-        color: "blue",
-        class: "bg-gradient-to-br from-blue-700 to-blue-600"
+        color: "indigo",
+        class: "bg-gradient-to-br from-indigo-700 to-indigo-600"
     },
     {
         name: "Bewordle",
-        description: "A word guessing game inspired by Wordle",
+        description: "Word search crossed with Bejeweled. Find words, collapse the grid, trigger chains.",
         path: `${import.meta.env.BASE_URL}bewordle/`,
         icon_path: `${import.meta.env.BASE_URL}bewordle/favicon.png`,
-        color: "green",
-        class: "bg-gradient-to-bl from-green-700 to-green-600"
+        color: "amber",
+        class: "bg-gradient-to-bl from-amber-700 to-amber-600"
     }
 ];
