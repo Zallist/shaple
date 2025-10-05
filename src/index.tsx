@@ -1,7 +1,7 @@
 /* @refresh reload */
 import { render } from 'solid-js/web';
 import '../tailwind.css';
-import LandingPage from './LandingPage';
+import LandingPage from './landing/LandingPage';
 
 const root = document.getElementById('root');
 
