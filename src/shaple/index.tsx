@@ -1,7 +1,7 @@
 /* @refresh reload */
 import "../tailwind.css";
 import { render } from 'solid-js/web';
-
+import Navbar from '../components/Navbar';
 import Shaple from './Shaple';
 
 const root = document.getElementById('root');
@@ -12,4 +12,9 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
   );
 }
 
-render(() => <Shaple />, root!);
+render(() => (
+  <>
+    <Navbar currentPath={window.location.pathname} />
+    <Shaple />
+  </>
+), root!);

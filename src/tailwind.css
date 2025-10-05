@@ -5,7 +5,7 @@
 @import 'tailwindcss';
 
 body {
-    @apply flex items-center justify-center p-4;
+    @apply items-center justify-center;
     @apply bg-slate-900;
     @apply text-slate-100;
     

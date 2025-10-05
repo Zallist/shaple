@@ -210,7 +210,7 @@ export default function App() {
         <div class="bg-slate-800/80 backdrop-blur-sm p-6 rounded-xl shadow-2xl border border-slate-700/50 transition-all duration-300 hover:shadow-xl hover:shadow-slate-900/20">
           <div class="flex items-center justify-between mb-4">
             <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-              Shaple - {isDailySeed() ? 'Daily' : 'Seeded'}
+              {isDailySeed() ? 'Daily' : 'Seeded'}
             </h1>
 
             <span class="max-w-24 text-slate-400 text-sm bg-slate-700/50 px-2 py-1 rounded-md">
@@ -437,7 +437,7 @@ export default function App() {
             <button
               onClick={toggleDailySeed}
               class="flex-1 h-12 rounded-lg border-2 border-slate-600/50 flex items-center justify-center font-semibold text-sm
-                     bg-slate-700/70 hover:bg-slate-600/70 hover:border-slate-500/70 active:scale-95 transition-all duration-200"
+                      bg-slate-700/70 hover:bg-slate-600/70 hover:border-slate-500/70 active:scale-95 transition-all duration-200"
             >
               <span class="material-symbols-outlined mr-1">
                 {isDailySeed() ? 'shuffle' : 'calendar_today'}
@@ -500,7 +500,7 @@ export default function App() {
               <button
                 onClick={() => setRulesAreVisible(!areRulesVisible())}
                 class="w-full px-6 h-12 rounded-lg border-2 border-slate-600/50 flex items-center justify-center font-semibold
-                       bg-slate-700/70 hover:bg-slate-600/70 hover:border-slate-500/70 active:scale-95 transition-all duration-200"
+                        bg-slate-700/70 hover:bg-slate-600/70 hover:border-slate-500/70 active:scale-95 transition-all duration-200"
               >
                 <span class="material-symbols-outlined mr-2 transition-transform duration-300"
                   style={`transform: rotate(${areRulesVisible() ? '180deg' : '0'})`}>

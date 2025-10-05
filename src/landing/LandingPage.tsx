@@ -3,7 +3,7 @@ import { Games } from '../games';
 
 const LandingPage: Component = () => {
   return (
-    <div class="max-w-4xl mx-auto">
+    <div class="max-w-4xl mx-auto py-4">
       <header class="bg-gradient-to-br from-slate-800 to-slate-900 py-12 px-4 rounded-lg shadow-lg text-center mb-12">
         <h1 class="text-4xl font-extrabold text-gray-200 mb-4">
           <img src="favicon.png" class="h-16 aspect-square mr-2 inline" />

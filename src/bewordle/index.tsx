@@ -4,6 +4,7 @@ import "animate.css";
 import { render } from 'solid-js/web';
 
 import Bewordle from './Bewordle';
+import Navbar from "../components/Navbar";
 
 const root = document.getElementById('root');
 
@@ -13,4 +14,9 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
   );
 }
 
-render(() => <Bewordle />, root!);
+render(() => (
+  <>
+    <Navbar currentPath={window.location.pathname} />
+    <Bewordle />
+  </>
+), root!);
