@@ -1,9 +1,11 @@
 import { createSignal, createMemo, For, Show } from 'solid-js'
 import Tile from './Tile'
+import DefinitionModal from './DefinitionModal'
 import { Game, Cell } from '../droptionary-game';
 
 export default function GameGrid({ game }: { game: Game }) {
   const [selected, setSelected] = createSignal<Cell | null>(null)
+  const [viewingWord, setViewingWord] = createSignal<string | null>(null);
 
   const handleClick = async (cell: Cell) => {
 
@@ -192,53 +194,22 @@ export default function GameGrid({ game }: { game: Game }) {
           <h3 class="text-sm font-medium text-gray-400 mb-2 flex items-center justify-center">
             <div class="mr-2">Found Words</div>
             <div class="text-xs bg-gray-800 px-2 py-0.5 rounded-full">{game.foundWords().length}</div>
+            <div class="ml-2" title="Click words to view definitions">
+              <span class="material-symbols-outlined text-xs">info</span>
+            </div>
           </h3>
           <div class="flex flex-wrap gap-2 justify-center">
             <For each={game.foundWords()}>
               {(found, i) => {
-                const [loadedDefinition, setLoadedDefinition] = createSignal(false);
-                const [definition, setDefinition] = createSignal<string>('');
-
-                async function onMouseOver() {
-                  if (!loadedDefinition()) {
-                    setLoadedDefinition(true);
-
-                    const req = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${found.word}`);
-
-                    if (!req.ok) {
-                      console.error(`Failed to fetch definition for word ${found.word}: ${req.statusText} (${req.status})`);
-                      setDefinition(`[Definition not found for ${found.word}]`);
-                      return;
-                    }
-
-                    const defList = await req.json();
-                    let result = '';
-
-                    for (const def of defList) {
-                      result += `${def.word}${def.origin ? ` (${def.origin})` : ''}\n`;
-
-                      for (const meaning of def.meanings) {
-                        result += `${meaning.partOfSpeech}:\n`;
-                        for (const definition of meaning.definitions) {
-                          result += `- ${definition.definition}${definition.example ? ` {${definition.example}}` : ''}\n`;
-                        }
-                      }
-                    }
-
-                    setDefinition(result);
-                  }
-                }
-
                 return (
                   <div
                     class="px-3 py-1.5 bg-gradient-to-r from-gray-800/80 to-gray-900/80 rounded-lg text-sm font-medium text-white shadow-md backdrop-blur-sm 
-                          border border-gray-700/50 flex items-center"
+                          border border-gray-700/50 flex items-center cursor-pointer hover:from-gray-700/80 hover:to-gray-800/80 transition-all duration-200 group"
                     style={{
                       'animation-delay': `${i() * 50}ms`,
                       'view-transition-name': `word-${i()}`
                     }}
-                    onMouseOver={onMouseOver}
-                    title={definition()}
+                    onClick={() => setViewingWord(found.word)}
                   >
                     <span class="text-blue-300">{found.word}</span>
                     <span class="ml-1.5 px-1.5 py-0.5 bg-yellow-500/20 text-yellow-300 rounded text-xs">
@@ -256,6 +227,13 @@ export default function GameGrid({ game }: { game: Game }) {
           </div>
         </div>
       </Show>
+
+      {/* Definition Modal */}
+      <DefinitionModal
+        word={viewingWord()!}
+        isOpen={!!viewingWord()}
+        onClose={() => setViewingWord(null)}
+      />
     </>
   )
 }
