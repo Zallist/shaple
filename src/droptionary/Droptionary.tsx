@@ -85,7 +85,7 @@ export default function Droptionary() {
               <li>Form English words 5 or more letters long in any of the 8 directions.</li>
               <li>Score points based on the letters you use!</li>
               <li>Chain falling words for combo bonuses during the cascade stage! Falling words only need to be 4+ letters long.</li>
-              <li style="text-slate-400">If a chained word uses a letter generated from a cascade, it's not worth as many points.</li>
+              <li class="text-slate-400/80">If a chained word uses a letter generated from a cascade, it's not worth as many points.</li>
             </ul>
           </div>
         </Show>
