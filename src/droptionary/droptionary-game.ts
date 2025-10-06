@@ -309,16 +309,15 @@ export class Game {
                         if (match.word) {
                             let totalScore;
                             let chainBonus = 1;
+                            const wordScore = this.calculateWordScore(match.word);
 
                             if (!match.anyCellCreatedThisTurn) {
-                                const wordScore = this.calculateWordScore(match.word);
-
                                 chainBonus = chainCount >= 1 ? (chainCount * 0.5) + 1 : 1;
                                 totalScore = Math.round(wordScore * chainBonus);
                             }
                             else {
                                 // Word score is irrelevant, we just award the number of the chain
-                                totalScore = chainCount;
+                                totalScore = Math.min(chainCount, wordScore);
                             }
                             
                             this.setScore(s => s + totalScore);
