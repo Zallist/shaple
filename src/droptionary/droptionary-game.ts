@@ -73,17 +73,6 @@ export type FoundWord = {
     coords: { row: number, column: number }[];
 };
 
-function createCell(row: number, column: number, letter: string, createdTurn: number | null): Cell {
-    return {
-        id: cell_id_count++,
-        row,
-        column,
-        letter,
-        createdTurn,
-        isMatched: false
-    };
-};
-
 export class Game {
     private rng: prand.RandomGenerator = {} as prand.RandomGenerator;
     private seed: number = 0;
@@ -223,12 +212,23 @@ export class Game {
         return pickLetterFromGroup(pickVowel ? 'vowel' : 'consonant', this.rng);
     }
 
+    private createCell(row: number, column: number, letter: string): Cell {
+        return {
+            id: cell_id_count++,
+            row,
+            column,
+            letter,
+            createdTurn: this.initialized ? this.movesRemaining() : null,
+            isMatched: false
+        };
+    };
+    
     private async setupGrid() {
         let grid: Cell[] = [];
 
         for (let r = 0; r < this.rowCount; r++) {
             for (let c = 0; c < this.colCount; c++) {
-                grid.push(createCell(r, c, this.getRandomLetter(r, c), null));
+                grid.push(this.createCell(r, c, this.getRandomLetter(r, c)));
             }
         }
 
@@ -303,6 +303,7 @@ export class Game {
                         }
     
                         if (word.length >= minLength && this.isWord(word)) {
+                            debugger;
                             matches.push({ coords: [...coords], word, anyCellCreatedThisTurn });
                         }
     
@@ -391,7 +392,7 @@ export class Game {
             const newCells: Cell[] = [];
             for (let c = 0; c < addPerColumn.length; c++) {
                 for (let r = -1; r >= -addPerColumn[c]; r--) {
-                    newCells.push(createCell(r, c, this.getRandomLetter(r, c), this.movesRemaining()));
+                    newCells.push(this.createCell(r, c, this.getRandomLetter(r, c)));
                 }
             }
             this.setCells([...this.cells, ...newCells]);
