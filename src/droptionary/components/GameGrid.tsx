@@ -40,7 +40,7 @@ export default function GameGrid({ game }: { game: Game }) {
   return (
     <>
       {/* Header */}
-      <header class="border-b border-slate-800/80 w-100 mx-auto">
+      <header class="w-100 mx-auto">
         <div class="container mx-auto px-4 py-3">
           <div class="flex items-center justify-between">
             <div class="flex justify-between items-center mb-1">

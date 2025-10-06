@@ -57,47 +57,43 @@ export default function Droptionary() {
 
   return (
     <div class="flex flex-col justify-center items-center">
-      <header>
-        <div class="bg-slate-800/80 backdrop-blur-sm p-4 rounded-xl shadow-xl border border-slate-700/50 transition-all duration-300 hover:shadow-xl hover:shadow-slate-900/20 w-100 mx-auto">
-          <div class="flex items-center justify-between">
-            <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-              {isDailySeed() ? 'Daily' : 'Seeded'}
-            </h1>
+      <header class="bg-slate-800/80 backdrop-blur-sm p-4 rounded-xl shadow-xl border border-slate-700/50 transition-all duration-300 hover:shadow-xl hover:shadow-slate-900/20 w-100 mx-auto">
+        <div class="flex items-center justify-between">
+          <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+            {isDailySeed() ? 'Daily' : 'Seeded'}
+          </h1>
 
-            <div class="flex items-center gap-3">
-              <span class="max-w-28 text-slate-400 text-sm bg-slate-700/50 px-3 py-1 rounded-md">
-                <input class="text-right w-full select-all"
-                  type="text" title="Seed"
-                  value={numberToString(seed() ?? 0)}
-                  onChange={(v) => {
-                    if (!v.target.validity.valid)
-                      v.target.value = v.target.value.replace(/[^0-9A-Za-z]/g, '');
-                    window.location.hash = `#seed=${v.target.value}`;
-                  }}
-                  maxLength={12}
-                  pattern="[0-9A-Za-z]*" />
+          <div class="flex items-center gap-3">
+            <span class="max-w-28 text-slate-400 text-sm bg-slate-700/50 px-3 py-1 rounded-md">
+              <input class="text-right w-full select-all"
+                type="text" title="Seed"
+                value={numberToString(seed() ?? 0)}
+                onChange={(v) => {
+                  if (!v.target.validity.valid)
+                    v.target.value = v.target.value.replace(/[^0-9A-Za-z]/g, '');
+                  window.location.hash = `#seed=${v.target.value}`;
+                }}
+                maxLength={12}
+                pattern="[0-9A-Za-z]*" />
+            </span>
+
+            <button
+              onClick={() => toggleDailySeed()}
+              class="h-10 w-10 rounded-lg border-2 border-slate-600/50 flex items-center justify-center font-semibold text-sm
+                      bg-slate-700/70 hover:bg-slate-600/70 hover:border-slate-500/70 active:scale-95 transition-all duration-200"
+              title={isDailySeed() ? 'Switch to Random' : 'Switch to Daily'}
+            >
+              <span class="material-icon text-lg">
+                {isDailySeed() ? 'shuffle' : 'calendar_today'}
               </span>
-
-              <button
-                onClick={() => toggleDailySeed()}
-                class="h-10 w-10 rounded-lg border-2 border-slate-600/50 flex items-center justify-center font-semibold text-sm
-                        bg-slate-700/70 hover:bg-slate-600/70 hover:border-slate-500/70 active:scale-95 transition-all duration-200"
-                title={isDailySeed() ? 'Switch to Random' : 'Switch to Daily'}
-              >
-                <span class="material-icon text-lg">
-                  {isDailySeed() ? 'shuffle' : 'calendar_today'}
-                </span>
-              </button>
-            </div>
+            </button>
           </div>
         </div>
       </header>
 
-      <main class="justify-center items-center mt-6">
-        <Show when={game()} fallback={<div>Loading...</div>}>
-          <GameGrid game={game()!} />
-        </Show>
-      </main>
+      <Show when={game()} fallback={<div>Loading...</div>}>
+        <GameGrid game={game()!} />
+      </Show>
       
       <footer class="mt-6 text-center">
         <div class="flex justify-center mb-4">
@@ -107,7 +103,10 @@ export default function Droptionary() {
                     bg-slate-700/70 hover:bg-slate-600/70 hover:border-slate-500/70 active:scale-95 transition-all duration-200"
             aria-label="Help"
           >
-            <span class="material-icon mr-2">help</span>
+            <span class="material-icon mr-2 transition-transform duration-300"
+              style={`transform: rotate(${showHelp() ? '180deg' : '0'})`}>
+              expand_more
+            </span>
             Help
           </button>
         </div>

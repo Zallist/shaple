@@ -47,7 +47,7 @@ export default function App() {
   const [attempts, setAttempts] = createSignal<ShapeCode[][]>(getStoredAttempts(seed()));
   const [currentGuess, setCurrentGuess] = createSignal<ShapeCode[]>([]);
 
-  function calculateFeedback(doRuleCheck: boolean = false) : Feedback[][] {
+  function calculateFeedback(doRuleCheck: boolean = false): Feedback[][] {
     const feedbacks: Feedback[][] = [];
     const allAttempts = attempts();
     const sol = solution();
@@ -82,7 +82,7 @@ export default function App() {
         if (solutionShapeCounts[shape] > 0) {
           attemptFeedback[j] = 'present';
           solutionShapeCounts[shape]--;
-          
+
           // check if reused in a previous feedback
           if (feedbacks.some((feedback, index) => allAttempts[index][j] === shape && (feedback[j] === 'exact' || feedback[j] === 'present')))
             attemptFeedback[j] = 'invalid_reused';
@@ -163,7 +163,7 @@ export default function App() {
       if (attemptsOfShape.length > 0) {
         if (attemptsOfShape.filter(item => isOkayFeedback(item.feedback)).length > 0)
           return true;
-        
+
         return false;
       }
     }
@@ -207,26 +207,41 @@ export default function App() {
   return (
     <div class="flex flex-col justify-center items-center">
       <div>
-        <div class="bg-slate-800/80 backdrop-blur-sm p-6 rounded-xl shadow-2xl border border-slate-700/50 transition-all duration-300 hover:shadow-xl hover:shadow-slate-900/20">
-          <div class="flex items-center justify-between mb-4">
+        <header class="bg-slate-800/80 backdrop-blur-sm p-4 rounded-xl shadow-xl border border-slate-700/50 transition-all duration-300 hover:shadow-xl hover:shadow-slate-900/20 w-100 mx-auto">
+          <div class="flex items-center justify-between">
             <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
               {isDailySeed() ? 'Daily' : 'Seeded'}
             </h1>
 
-            <span class="max-w-24 text-slate-400 text-sm bg-slate-700/50 px-2 py-1 rounded-md">
-              <input class="text-right w-full select-all"
-                type="text" title="Seed"
-                value={numberToString(seed())}
-                onChange={(v) => {
-                  if (!v.target.validity.valid)
-                    v.target.value = v.target.value.replace(/[^0-9A-Za-z]/g, '');
-                  window.location.hash = `#seed=${v.target.value}`;
-                }}
-                maxLength={12}
-                pattern="[0-9A-Za-z]*" />
-            </span>
-          </div>
+            <div class="flex items-center gap-3">
+              <span class="max-w-28 text-slate-400 text-sm bg-slate-700/50 px-3 py-1 rounded-md">
+                <input class="text-right w-full select-all"
+                  type="text" title="Seed"
+                  value={numberToString(seed())}
+                  onChange={(v) => {
+                    if (!v.target.validity.valid)
+                      v.target.value = v.target.value.replace(/[^0-9A-Za-z]/g, '');
+                    window.location.hash = `#seed=${v.target.value}`;
+                  }}
+                  maxLength={12}
+                  pattern="[0-9A-Za-z]*" />
+              </span>
 
+              <button
+                onClick={toggleDailySeed}
+                class="h-10 w-10 rounded-lg border-2 border-slate-600/50 flex items-center justify-center font-semibold text-sm
+                        bg-slate-700/70 hover:bg-slate-600/70 hover:border-slate-500/70 active:scale-95 transition-all duration-200"
+                title={isDailySeed() ? 'Switch to Random' : 'Switch to Daily'}
+              >
+                <span class="material-icon text-lg">
+                  {isDailySeed() ? 'shuffle' : 'calendar_today'}
+                </span>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <div class="bg-slate-800/80 backdrop-blur-sm p-4 rounded-xl shadow-xl border border-slate-700/50 transition-all duration-300 hover:shadow-xl hover:shadow-slate-900/20 mt-6">
           <div class="space-y-2">
             <For each={attempts()}>
               {(guess, idx) => {
@@ -317,7 +332,7 @@ export default function App() {
                   const [shown, setShown] = createSignal(false);
                   const text = createMemo(() => {
                     const lines = [<div>
-                      <a href={window.location.href} target="_blank">Shaple</a> 
+                      <a href={window.location.href} target="_blank">Shaple</a>
                       <span class="text-slate-400"> ({attempts().length}/{LENGTH}) </span>
                       <span class="text-slate-400"> [{numberToString(seed())}] </span>
                     </div>];
@@ -355,7 +370,7 @@ export default function App() {
                                       bg-blue-700/70 border-blue-600/50 hover:bg-blue-600/70 hover:border-blue-500/70
                                       disabled:bg-blue-900/20 disabled:border-blue-400/20 disabled:text-blue-400
                                       animate__animated animate__bounceIn"
-                                      onClick={() => setShown(true)}>
+                          onClick={() => setShown(true)}>
                           <span class="material-icon text-blue-400 mr-1">share</span>
                           Share
                         </button>
@@ -374,8 +389,8 @@ export default function App() {
           </Show>
         </div>
 
-        <div class="bg-slate-800/80 backdrop-blur-sm p-6 rounded-xl shadow-xl border border-slate-700/50 mt-6 transition-all duration-300 hover:shadow-2xl hover:shadow-slate-900/30">
-          <Show when={!isDone()}>
+        <Show when={!isDone()}>
+          <div class="bg-slate-800/80 backdrop-blur-sm p-6 rounded-xl shadow-xl border border-slate-700/50 mt-6 transition-all duration-300 hover:shadow-2xl hover:shadow-slate-900/30">
             <div class="mb-3 grid grid-cols-5 gap-2">
               <For each={availableShapes()}>{(s, i) => {
                 const isSelected = createMemo(() => currentGuess().includes(s));
@@ -385,12 +400,12 @@ export default function App() {
                       pickShape(s);
                     }}
                     class={`flex-1 min-w-10 h-10 rounded-lg border-2 flex items-center justify-center font-semibold
-                      transform transition-all duration-200 
-                      active:scale-90 disabled:active:scale-100
-                      bg-slate-700/70 border-slate-600/50 
-                      hover:bg-slate-600/70 hover:border-slate-500/70
-                      disabled:bg-neutral-900/50 disabled:border-neutral-800/50 disabled:text-neutral-600
-                      animate__animated`}
+                        transform transition-all duration-200 
+                        active:scale-90 disabled:active:scale-100
+                        bg-slate-700/70 border-slate-600/50 
+                        hover:bg-slate-600/70 hover:border-slate-500/70
+                        disabled:bg-neutral-900/50 disabled:border-neutral-800/50 disabled:text-neutral-600
+                        animate__animated`}
                     disabled={!isPotentialShape(s)}
                   >
                     <div class={`text-2xl ${isSelected() ? 'animate__animated animate__bounceIn' : ''}`}>
@@ -400,10 +415,8 @@ export default function App() {
                 );
               }}</For>
             </div>
-          </Show>
 
-          <div class="flex gap-3">
-            <Show when={!isDone()}>
+            <div class="flex gap-3">
               <button
                 onClick={() => {
                   if (currentGuess().length > 0) {
@@ -433,20 +446,9 @@ export default function App() {
                 <span class="material-icon mr-1">send</span>
                 Submit
               </button>
-            </Show>
-
-            <button
-              onClick={toggleDailySeed}
-              class="flex-1 h-12 rounded-lg border-2 border-slate-600/50 flex items-center justify-center font-semibold text-sm
-                      bg-slate-700/70 hover:bg-slate-600/70 hover:border-slate-500/70 active:scale-95 transition-all duration-200"
-            >
-              <span class="material-icon mr-1">
-                {isDailySeed() ? 'shuffle' : 'calendar_today'}
-              </span>
-              {isDailySeed() ? 'Random' : 'Daily'}
-            </button>
+            </div>
           </div>
-        </div>
+        </Show>
       </div>
 
       <div class="max-w-4xl mt-8">
@@ -487,9 +489,9 @@ export default function App() {
               });
 
               if (rules.length > 0)
-                result.push({ 
-                  shape: shape.code, 
-                  rules: rules.map(rule => ({ rule, isPotential: potentialShapes.some(shape => rule.isRelevant(shape)) })) 
+                result.push({
+                  shape: shape.code,
+                  rules: rules.map(rule => ({ rule, isPotential: potentialShapes.some(shape => rule.isRelevant(shape)) }))
                 });
             }
 
@@ -507,7 +509,7 @@ export default function App() {
                   style={`transform: rotate(${areRulesVisible() ? '180deg' : '0'})`}>
                   expand_more
                 </span>
-                {areRulesVisible() ? 'Hide' : 'Show'} Help
+                Help
               </button>
 
               <div class={`overflow-hidden transition-all duration-500 ease-in-out ${areRulesVisible() ? 'max-h-auto opacity-100' : 'max-h-0 opacity-0'}`}>
