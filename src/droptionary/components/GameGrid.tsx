@@ -1,4 +1,4 @@
-import { createSignal, createMemo, For, Show } from 'solid-js'
+import { createSignal, createMemo, For, Show, Switch, Match, createEffect } from 'solid-js'
 import Tile from './Tile'
 import DefinitionModal from './DefinitionModal'
 import { Game, Cell } from '../droptionary-game';
@@ -108,89 +108,143 @@ export default function GameGrid({ game }: { game: Game }) {
             </For>
           </div>
         </div>
-
-        {/* Game Status */}
-        <Show when={game.isDone()}>
-          <>
-            <div class="mt-6 p-4 bg-gradient-to-r from-red-500/20 to-pink-500/20 rounded-xl border border-red-500/30 text-center">
-              <h3 class="text-xl font-bold text-white mb-1">Finished!</h3>
-              <p class="text-gray-200 text-sm">Final Score: {game.score().toLocaleString()}</p>
-            </div>
-
-            <div class="mt-4">
-              {(() => {
-                const [shown, setShown] = createSignal(false);
-
-                const text = createMemo(() => {
-                  const lines = [
-                    <div>
-                      <a href={window.location.href} target="_blank">Droptionary</a> 
-                      <span class="text-slate-400"> ({game.foundWords().length} words) </span>
-                      <span class="text-slate-400"> [{game.getSeedString()}] </span>
-                    </div>,
-                    <div>Score: {game.score().toLocaleString()}</div>
-                  ];
-
-                  const wordGridCount: { anyCount: number, manualCount: number }[][] = Array.from({ length: game.rowCount }, () => Array.from({ length: game.colCount }, () => ({ anyCount: 0, manualCount: 0 })));
-                  const foundWords = game.foundWords();
-                  for (let i = 0; i < foundWords.length; i++) {
-                    const word = foundWords[i];
-                    for (let j = 0; j < word.coords.length; j++) {
-                      const coord = word.coords[j];
-                      wordGridCount[coord.row][coord.column].anyCount++;
-                      if (word.manuallyFound)
-                        wordGridCount[coord.row][coord.column].manualCount++;
-                    }
-                  }
-
-                  for (let r = 0; r < game.rowCount; r++) {
-                    const line = [];
-
-                    for (let c = 0; c < game.colCount; c++) {
-                      const count = wordGridCount[r][c];
-                      if (count.manualCount > 0)
-                        line.push(<span title={`Manually matched a word`}>🟩</span>);
-                      else if (count.anyCount > 0)
-                        line.push(<span title={`Matched a word`}>🟨</span>);
-                      else
-                        line.push(<span title={`Never matched a word`}>⬛</span>);
-                    }
-
-                    lines.push(<div>{line}</div>);
-                  }
-
-                  return lines;
-                });
-
-                return (
-                  <>
-                    <Show when={!shown()}>
-                      <button class="w-full h-12 px-4 rounded-lg border-2 items-center justify-center font-semibold text-sm transition-all duration-200
-                                    active:scale-95 disabled:active:scale-100
-                                    bg-blue-700/70 border-blue-600/50 hover:bg-blue-600/70 hover:border-blue-500/70
-                                    disabled:bg-blue-900/20 disabled:border-blue-400/20 disabled:text-blue-400
-                                    animate__animated animate__bounceIn"
-                        onClick={() => { setShown(true); }}>
-                        <span class="material-icon text-blue-400 mr-1">share</span>
-                        Share
-                      </button>
-                    </Show>
-                    <Show when={shown()}>
-                      <div class="w-full rounded-lg border-2 items-center justify-center font-semibold text-sm transition-all duration-200
-                                  bg-slate-700/70 border-slate-600/50 hover:bg-slate-600/70 hover:border-slate-500/70 p-2
-                                  whitespace-nowrap overflow-hidden select-all
-                                  flex flex-col gap-0">{text()}</div>
-                    </Show>
-                  </>
-                )
-              })()}
-            </div>
-          </>
-        </Show>
       </main>
+      
+      {/* Game Status */}
+      <Show when={game.isDone()}>
+        <>
+          <div class="mt-4 p-4 bg-gradient-to-r from-red-500/20 to-pink-500/20 rounded-xl border border-red-500/30 text-center">
+            <h3 class="text-xl font-bold text-white mb-1">Finished!</h3>
+            <p class="text-gray-200 text-sm">Final Score: {game.score().toLocaleString()}</p>
+          </div>
+
+          <div class="mt-4">
+            {(() => {
+              const [shown, setShown] = createSignal(false);
+
+              const text = createMemo(() => {
+                const lines = [
+                  <div>
+                    <a href={window.location.href} target="_blank">Droptionary</a> 
+                    <span class="text-slate-400"> ({game.foundWords().length} words) </span>
+                    <span class="text-slate-400"> [{game.getSeedString()}] </span>
+                  </div>,
+                  <div>Score: {game.score().toLocaleString()}</div>
+                ];
+
+                const wordGridCount: { anyCount: number, manualCount: number }[][] = Array.from({ length: game.rowCount }, () => Array.from({ length: game.colCount }, () => ({ anyCount: 0, manualCount: 0 })));
+                const foundWords = game.foundWords();
+                for (let i = 0; i < foundWords.length; i++) {
+                  const word = foundWords[i];
+                  for (let j = 0; j < word.coords.length; j++) {
+                    const coord = word.coords[j];
+                    wordGridCount[coord.row][coord.column].anyCount++;
+                    if (word.manuallyFound)
+                      wordGridCount[coord.row][coord.column].manualCount++;
+                  }
+                }
+
+                for (let r = 0; r < game.rowCount; r++) {
+                  const line = [];
+
+                  for (let c = 0; c < game.colCount; c++) {
+                    const count = wordGridCount[r][c];
+                    if (count.manualCount > 0)
+                      line.push(<span title={`Manually matched a word`}>🟩</span>);
+                    else if (count.anyCount > 0)
+                      line.push(<span title={`Matched a word`}>🟨</span>);
+                    else
+                      line.push(<span title={`Never matched a word`}>⬛</span>);
+                  }
+
+                  lines.push(<div>{line}</div>);
+                }
+
+                return lines;
+              });
+
+              return (
+                <>
+                  <Show when={!shown()}>
+                    <button class="w-full h-12 px-4 rounded-lg border-2 items-center justify-center font-semibold text-sm transition-all duration-200
+                                  active:scale-95 disabled:active:scale-100
+                                  bg-blue-700/70 border-blue-600/50 hover:bg-blue-600/70 hover:border-blue-500/70
+                                  disabled:bg-blue-900/20 disabled:border-blue-400/20 disabled:text-blue-400
+                                  animate__animated animate__bounceIn"
+                      onClick={() => { setShown(true); }}>
+                      <span class="material-icon text-blue-400 mr-1">share</span>
+                      Share
+                    </button>
+                  </Show>
+                  <Show when={shown()}>
+                    <div class="w-full rounded-lg border-2 items-center justify-center font-semibold text-sm transition-all duration-200
+                                bg-slate-700/70 border-slate-600/50 hover:bg-slate-600/70 hover:border-slate-500/70 p-2
+                                whitespace-nowrap overflow-hidden select-all
+                                flex flex-col gap-0">{text()}</div>
+                  </Show>
+                </>
+              )
+            })()}
+          </div>
+        </>
+      </Show>
+
+      {/* Undo Button */}
+      <div class="mt-4 flex justify-center">
+        {(() => {
+          const [clickCount, setClickCount__impl] = createSignal<number>(parseInt(localStorage.getItem(`droptionary_undo_click_count_${game.getSeedString()}`) || '0'));
+
+          if (isNaN(clickCount()))
+            setClickCount__impl(0);
+
+          function setClickCount(count: number) {
+            localStorage.setItem(`droptionary_undo_click_count_${game.getSeedString()}`, count.toString());
+            setClickCount__impl(count);
+          }
+
+          const clickClass = createMemo(() => {
+            if (clickCount() >= 18) return "bg-red-800 border-red-700 animate__animated animate__headShake";
+            if (clickCount() >= 15) return "bg-red-700 border-red-600";
+            if (clickCount() >= 12) return "bg-orange-700 border-orange-600";
+            if (clickCount() >= 9) return "bg-yellow-600 border-yellow-500";
+            if (clickCount() >= 6) return "bg-blue-700/70 border-blue-600/50 hover:bg-blue-600/70 hover:border-blue-500/70";
+            return "bg-blue-700/70 border-blue-600/50 hover:bg-blue-600/70 hover:border-blue-500/70";
+          });
+
+          return (
+            <button
+              onClick={() => {
+                if (clickCount() >= 20) return;
+                game.undoLastMove();
+                setClickCount(clickCount() + 1);
+              }}
+              disabled={!game.canUndo() || clickCount() >= 20}
+              class={`relative px-6 py-2 rounded-lg border-2 flex items-center justify-center font-semibold text-sm
+                      transition-all duration-200 active:scale-95 disabled:active:scale-100
+                      disabled:bg-slate-800/50 disabled:border-slate-700/50 disabled:text-slate-600
+                      ${clickClass()}`}
+              title="Undo your last move if it didn't do anything! Don't abuse it or else it'll be mad!"
+            >
+              <Switch>
+                <Match when={clickCount() < 2}> <span class="material-icon mr-2">undo</span>Undo </Match>
+                <Match when={clickCount() < 4}> 😐 Undo </Match>
+                <Match when={clickCount() < 6}> 😑 Undo? </Match>
+                <Match when={clickCount() < 8}> 😒 Seriously? </Match>
+                <Match when={clickCount() < 10}> 😤 Stop. </Match>
+                <Match when={clickCount() < 12}> 😠 Enough. </Match>
+                <Match when={clickCount() < 14}> 🤬 QUIT IT. </Match>
+                <Match when={clickCount() < 16}> 🔥 YOU LIKE THIS BUTTON? </Match>
+                <Match when={clickCount() < 18}> 💢 I SWEAR— </Match>
+                <Match when={clickCount() < 20}> ☠️ FINAL WARNING </Match>
+                <Match when={clickCount() >= 20}> 💀 NO MORE UNDO. </Match>
+              </Switch>
+            </button>
+          )
+        })()}
+      </div>
 
       <Show when={game.foundWords().length > 0}>
-        <div class="mx-2 bg-gradient-to-r from-slate-800/60 to-slate-800/50 backdrop-blur-md border border-gray-800/50 rounded-lg py-3 px-4">
+        <div class="mt-4 mx-2 bg-gradient-to-r from-slate-800/60 to-slate-800/50 backdrop-blur-md border border-gray-800/50 rounded-lg py-3 px-4">
           <h3 class="text-sm font-medium text-gray-400 mb-2 flex items-center justify-center">
             <div class="mr-2">Found Words</div>
             <div class="text-xs bg-gray-800 px-2 py-0.5 rounded-full">{game.foundWords().length}</div>

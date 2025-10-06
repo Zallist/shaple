@@ -107,6 +107,9 @@ export class Game {
     public readonly cellsAsGrid: Accessor<Record<number, Record<number, (Cell | null)>>>;
     public readonly isDone: Accessor<boolean>;
 
+    public readonly lastMoveCausedMatches: Accessor<boolean>;
+    private readonly setLastMoveCausedMatches: Setter<boolean>;
+
     constructor(public readonly rowCount: number = 8,
                 public readonly colCount: number = 8,
                 public readonly initialMoveCount: number = 25,
@@ -118,6 +121,7 @@ export class Game {
         [this.isProcessing, this.setIsProcessing] = createSignal(false);
         [this.score, this.setScore] = createSignal(0);
         [this.foundWords, this.setFoundWords] = createSignal<FoundWord[]>([]);
+        [this.lastMoveCausedMatches, this.setLastMoveCausedMatches] = createSignal(false);
 
         this.cellsAsGrid = createMemo(() => this.convertCellsToGrid(this.cells));
         this.isDone = createMemo(() => this.movesRemaining() <= 0);
@@ -139,6 +143,7 @@ export class Game {
         this.setIsProcessing(false);
         this.setScore(0);
         this.setFoundWords([]);
+        this.setLastMoveCausedMatches(false);
 
         await this.setupGrid();
 
@@ -174,6 +179,25 @@ export class Game {
     private recordMove(from: Cell, to: Cell) {
         this.storedMoves.push({ from: { row: from.row, column: from.column }, to: { row: to.row, column: to.column } });
         saveGameState('droptionary_moves', this.seed, this.storedMoves);
+    }
+
+    public canUndo() {
+        return this.storedMoves.length > 0 && 
+            !this.isProcessing() &&
+            !this.lastMoveCausedMatches();
+    };
+
+    public async undoLastMove(): Promise<boolean> {
+        if (!this.canUndo()) return false;
+
+        // Remove the last move
+        this.storedMoves.pop();
+        saveGameState('droptionary_moves', this.seed, this.storedMoves);
+
+        await this.initialize(this.seed);
+        await this.loadState();
+
+        return true;
     }
 
     public isWord(word: string): boolean {
@@ -292,7 +316,8 @@ export class Game {
     }
     
 
-    public async processMatches(instant: boolean = false) {
+    public async processMatches(instant: boolean = false): Promise<number> {
+        let matchCount = 0;
         let chainCount = 0;
         this.setIsProcessing(true);
 
@@ -301,6 +326,8 @@ export class Game {
             
             if (matches.length === 0) 
                 break;
+
+            matchCount += matches.length;
 
             // Step 0 : Add score
             if (this.initialized) {
@@ -414,6 +441,8 @@ export class Game {
         }
 
         this.setIsProcessing(false);
+
+        return matchCount;
     }
 
     public isAdjacent(a: Cell, b: Cell): boolean {
@@ -442,7 +471,9 @@ export class Game {
             this.recordMove(a, b);
         }
 
-        await this.processMatches(loadingState);
+        const matchCount = await this.processMatches(loadingState);
+
+        this.setLastMoveCausedMatches(matchCount > 0);
 
         this.setMovesRemaining(c => c - 1);
         return true;
