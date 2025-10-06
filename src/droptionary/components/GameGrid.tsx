@@ -122,7 +122,7 @@ export default function GameGrid({ game }: { game: Game }) {
             {(() => {
               const [shown, setShown] = createSignal(false);
 
-              const text = createMemo(() => {
+              const text = () => {
                 const lines = [
                   <div>
                     <a href={window.location.href} target="_blank">Droptionary</a> 
@@ -160,8 +160,10 @@ export default function GameGrid({ game }: { game: Game }) {
                   lines.push(<div>{line}</div>);
                 }
 
+                lines.push(<div>⏱️ {game.getGameState().formattedDuration}</div>);
+
                 return lines;
-              });
+              };
 
               return (
                 <>

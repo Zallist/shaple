@@ -13,9 +13,11 @@ export default function Droptionary() {
   async function setSeedAndReset(seed: number) {
     let g = game() || new Game();
 
+    setSeed(seed);
     setGame(null);
+    
     await g.initialize(seed);
-    await g.loadState();
+    await g.playStoredMoves();
 
     batch(() => {
       setSeed(seed);

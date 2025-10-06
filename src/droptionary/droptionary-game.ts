@@ -1,8 +1,16 @@
 import { createSignal, createMemo, Accessor, Setter, batch } from "solid-js";
 import * as prand from 'pure-rand';
 import { createStore, SetStoreFunction } from "solid-js/store";
-import { loadGameState, numberToString, saveGameState } from "../utils/seed";
+import { numberToString } from "../utils/seed";
 import getAllValidWords from "./words";
+import GameState from "../utils/game-state";
+
+export class DroptionaryState {
+    public storedMoves: { from: { row: number, column: number }, to: { row: number, column: number } }[];
+    constructor() {
+        this.storedMoves = [];
+    }
+}
 
 // Letter values based on Scrabble scoring
 export const LETTER_VALUES: Record<string, number> = {
@@ -77,6 +85,7 @@ export class Game {
     private rng: prand.RandomGenerator = {} as prand.RandomGenerator;
     private seed: number = 0;
     private initialized: boolean = false;
+    private gameState: GameState<DroptionaryState> = {} as GameState<DroptionaryState>;
 
     public readonly cells: Cell[];
     private readonly setCells: SetStoreFunction<Cell[]>;
@@ -99,6 +108,8 @@ export class Game {
     public readonly lastMoveCausedMatches: Accessor<boolean>;
     private readonly setLastMoveCausedMatches: Setter<boolean>;
 
+    public getGameState(): GameState<DroptionaryState> { return this.gameState; }
+
     constructor(public readonly rowCount: number = 8,
                 public readonly colCount: number = 8,
                 public readonly initialMoveCount: number = 25,
@@ -119,6 +130,7 @@ export class Game {
     public async initialize(seed: number) {
         this.initialized = false;
         this.seed = seed;
+        this.gameState = GameState.Get(seed, 'droptionary', DroptionaryState);
 
         if (VALID_WORDS.size === 0) {
             const wordList = await getAllValidWords();
@@ -143,13 +155,24 @@ export class Game {
         return numberToString(this.seed);
     }
 
-    private storedMoves: { from: { row: number, column: number }, to: { row: number, column: number } }[] = [];
+    public async playStoredMoves() {
+        if (!this.gameState.getData() || this.gameState.getData().storedMoves.length === 0) {
+            try {
+                // see if we can load it from old data
+                const storedMoves = JSON.parse(localStorage.getItem(`droptionary_moves_${this.seed}`) || '[]');
+                if (storedMoves && storedMoves.length > 0)
+                    this.gameState.updateData((data) => {
+                        data.storedMoves = storedMoves;
+                    });
+            }
+            catch (ex) {
+                console.error('Failed to load stored moves:', ex);
+            }
+        }
 
-    public async loadState() {
-        const storedMoves = loadGameState<{ from: { row: number, column: number }, to: { row: number, column: number } }[]>('droptionary_moves', this.seed);
-
-        if (storedMoves && storedMoves.length > 0) {
-            this.storedMoves = storedMoves;
+        const storedMoves = this.gameState.getData().storedMoves || [];
+        
+        if (storedMoves.length > 0) {
             for (const move of storedMoves) {
                 const cellGrid = this.cellsAsGrid();
                 const fromCell = cellGrid[move.from.row]?.[move.from.column];
@@ -166,12 +189,15 @@ export class Game {
     }
 
     private recordMove(from: Cell, to: Cell) {
-        this.storedMoves.push({ from: { row: from.row, column: from.column }, to: { row: to.row, column: to.column } });
-        saveGameState('droptionary_moves', this.seed, this.storedMoves);
+        this.gameState.startGame();
+        this.gameState.updateData((data) => {
+            data.storedMoves.push({ from: { row: from.row, column: from.column }, to: { row: to.row, column: to.column } });
+        });
     }
 
     public canUndo() {
-        return this.storedMoves.length > 0 && 
+        return this.gameState.getData().storedMoves && 
+            this.gameState.getData().storedMoves.length > 0 &&
             !this.isProcessing() &&
             !this.lastMoveCausedMatches();
     };
@@ -180,11 +206,12 @@ export class Game {
         if (!this.canUndo()) return false;
 
         // Remove the last move
-        this.storedMoves.pop();
-        saveGameState('droptionary_moves', this.seed, this.storedMoves);
+        this.gameState.updateData((data) => {
+            data.storedMoves.pop();
+        });
 
         await this.initialize(this.seed);
-        await this.loadState();
+        await this.playStoredMoves();
 
         return true;
     }
@@ -303,7 +330,6 @@ export class Game {
                         }
     
                         if (word.length >= minLength && this.isWord(word)) {
-                            debugger;
                             matches.push({ coords: [...coords], word, anyCellCreatedThisTurn });
                         }
     
@@ -475,8 +501,11 @@ export class Game {
         const matchCount = await this.processMatches(loadingState);
 
         this.setLastMoveCausedMatches(matchCount > 0);
-
         this.setMovesRemaining(c => c - 1);
+
+        if (this.movesRemaining() <= 0)
+            this.gameState.endGame();
+
         return true;
     }
 };

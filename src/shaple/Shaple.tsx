@@ -3,7 +3,15 @@ import { ShapeCode, AllShapes, ShapeDefinitions, ShapeRule } from './shape'
 import { generateShaple } from './shaple-generator'
 import 'animate.css'
 import { ShapeLoreComponent } from './shape-lore'
-import { numberToString, seedForDate, getRandomSeed, getCurrentSeed, saveGameState, loadGameState } from '../utils/seed'
+import { numberToString, seedForDate, getRandomSeed, getCurrentSeed } from '../utils/seed'
+import GameState from '../utils/game-state'
+
+export class ShapleState {
+  public storedAttempts: number[][];
+  constructor() {
+    this.storedAttempts = [];
+  }
+}
 
 const LENGTH = 5;
 const MAX_ATTEMPTS = 5;
@@ -16,37 +24,54 @@ function shapeKey(s: ShapeCode) {
 
 type Feedback = 'exact' | 'present' | 'absent' | 'invalid_reused' | 'invalid_rule';
 
-function getStoredAttempts(seed: number): ShapeCode[][] {
-  // Store attempts per-seed, so switching between daily/random retains distinct histories.
-  const stored = loadGameState<number[][]>('shaple_attempts', seed);
-
-  if (!stored)
-    return [];
-
-  // if numeric, then use indices
-  if (stored.every(attempt => attempt.every(index => typeof index === 'number'))) {
-    return stored.map(attempt => attempt.map(index => AllShapes[index]));
-  }
-
-  console.error('Invalid stored attempts:', stored);
-  return [];
-}
-
-function setStoredAttempts(seed: number, attempts: ShapeCode[][]) {
-  // convert to the raw indices so that we don't store the text
-  const rawAttempts = attempts.map(attempt => attempt.map(shape => AllShapes.indexOf(shape)));
-  saveGameState<number[][]>('shaple_attempts', seed, rawAttempts);
-}
-
 export default function App() {
+  let gameState: GameState<ShapleState> = GameState.Get(getCurrentSeed(), 'shaple', ShapleState);
+
   const [seed, setSeed] = createSignal(getCurrentSeed());
   const generationResult = createMemo(() => generateShaple(MINIMUM_SHAPE_COUNT, LENGTH, seed()));
   const availableShapes = createMemo(() => generationResult().shapes);
   const solution = createMemo(() => generationResult().solution);
 
-  const [attempts, setAttempts] = createSignal<ShapeCode[][]>(getStoredAttempts(seed()));
+  const [attempts, setAttempts] = createSignal<ShapeCode[][]>(getStoredAttempts());
   const [currentGuess, setCurrentGuess] = createSignal<ShapeCode[]>([]);
 
+  function getStoredAttempts(): ShapeCode[][] {
+    if (!gameState.getData() || gameState.getData().storedAttempts.length === 0) {
+      try {
+        const stored = JSON.parse(localStorage.getItem(`shaple_attempts_${seed()}`) || '[]');
+        if (stored && stored.length > 0)
+          gameState.updateData((data) => {
+            data.storedAttempts = stored;
+          });
+      }
+      catch (ex) {
+        console.error('Failed to load stored attempts:', ex);
+      }
+    }
+
+    // Store attempts per-seed, so switching between daily/random retains distinct histories.
+    const stored = gameState.getData().storedAttempts;
+  
+    if (!stored)
+      return [];
+  
+    // if numeric, then use indices
+    if (stored.every(attempt => attempt.every(index => typeof index === 'number'))) {
+      return stored.map(attempt => attempt.map(index => AllShapes[index]));
+    }
+  
+    console.error('Invalid stored attempts:', stored);
+    return [];
+  }
+  
+  function setStoredAttempts(attempts: ShapeCode[][]) {
+    // convert to the raw indices so that we don't store the text
+    const rawAttempts = attempts.map(attempt => attempt.map(shape => AllShapes.indexOf(shape)));
+    gameState.updateData((data) => {
+      data.storedAttempts = rawAttempts;
+    });
+  }
+  
   function calculateFeedback(doRuleCheck: boolean = false): Feedback[][] {
     const feedbacks: Feedback[][] = [];
     const allAttempts = attempts();
@@ -106,11 +131,6 @@ export default function App() {
   // Game ends either when max attempts are used or the latest attempt is all 'exact'.
   const isDone = createMemo(() => attempts().length >= MAX_ATTEMPTS || isCorrect());
 
-  createEffect(() => {
-    // Persist attempts for the current seed whenever attempts change.
-    setStoredAttempts(seed(), attempts());
-  });
-
   // Handle URL hash changes
   onMount(() => {
     const handleHashChange = () => {
@@ -130,11 +150,11 @@ export default function App() {
   });
 
   function setSeedAndReset(s: number) {
-    var newAttempts = getStoredAttempts(s);
+    gameState = GameState.Get(s, 'shaple', ShapleState);
 
     batch(() => {
       setSeed(s);
-      setAttempts(newAttempts);
+      setAttempts(getStoredAttempts());
       setCurrentGuess([]);
     });
   }
@@ -144,6 +164,7 @@ export default function App() {
     if (currentGuess().length >= LENGTH) return;
 
     setCurrentGuess([...currentGuess(), s]);
+    gameState.startGame();
   }
 
   function isPotentialShape(s: ShapeCode) {
@@ -189,6 +210,12 @@ export default function App() {
       setAttempts([...attempts(), g]);
       setCurrentGuess([]);
     });
+
+    // Persist attempts for the current seed whenever attempts change.
+    setStoredAttempts(attempts());
+
+    if (isDone())
+      gameState.endGame();
   }
 
   function toggleDailySeed() {
@@ -330,7 +357,7 @@ export default function App() {
               <div class="mt-4">
                 {(() => {
                   const [shown, setShown] = createSignal(false);
-                  const text = createMemo(() => {
+                  const text = () => {
                     const lines = [<div>
                       <a href={window.location.href} target="_blank">Shaple</a>
                       <span class="text-slate-400"> ({attempts().length}/{LENGTH}) </span>
@@ -359,8 +386,10 @@ export default function App() {
                       lines.push(<div>{result}</div>);
                     });
 
+                    lines.push(<div>⏱️ {gameState.formattedDuration}</div>);
+
                     return lines;
-                  });
+                  };
 
                   return (
                     <>

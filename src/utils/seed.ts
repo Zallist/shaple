@@ -34,16 +34,3 @@ export function getCurrentSeed(): number {
   // Fallback to the deterministic daily seed if no usable seed is present in the URL.
   return seedForDate();
 }
-
-export function saveGameState<T>(key: string, seed: number, state: T) {
-  localStorage.setItem(`${key}_${seed}`, JSON.stringify(state));
-}
-
-export function loadGameState<T>(key: string, seed: number): T | null {
-  const saved = localStorage.getItem(`${key}_${seed}`);
-  return saved ? JSON.parse(saved) : null;
-}
-
-export function clearGameState(key: string, seed: number) {
-  localStorage.removeItem(`${key}_${seed}`);
-}
