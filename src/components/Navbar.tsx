@@ -39,7 +39,7 @@ export default function Navbar({ currentPath }: NavbarProps) {
           class="md:hidden p-1.5"
           onClick={() => setOpen(!open())}
         >
-          <span class="material-symbols-outlined">menu</span>
+          <span class="material-icon">menu</span>
         </button>
       </div>
 

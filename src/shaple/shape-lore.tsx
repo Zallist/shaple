@@ -175,7 +175,7 @@ function ShapeLoreDetail(shape: ShapeCode) {
   return (
     <div>
       <div class="flex items-center gap-3 mb-4">
-        <span class="material-symbols-outlined text-4xl text-blue-400">{def.icon_name}</span>
+        <span class="material-icon text-4xl text-blue-400">{def.icon_name}</span>
         <h3 class="text-xl font-bold text-slate-100">{def.displayName}</h3>
       </div>
 
@@ -223,7 +223,7 @@ export function ShapeLoreComponent() {
         aria-expanded={isOpen()}
         aria-controls="lore-panel"
       >
-        <span class="material-symbols-outlined">{isOpen() ? "expand_less" : "expand_more"}</span>
+        <span class="material-icon">{isOpen() ? "expand_less" : "expand_more"}</span>
         {isOpen() ? "Hide Shaple Lore" : "Show Shaple Lore"}
       </button>
 
@@ -246,7 +246,7 @@ export function ShapeLoreComponent() {
                               : "bg-slate-700/50 hover:bg-slate-600/50 text-slate-200 hover:scale-[1.02]"
                             }`}
                         >
-                          <span class="material-symbols-outlined text-xl">{def.icon_name}</span>
+                          <span class="material-icon text-xl">{def.icon_name}</span>
                           <span class="truncate">{def.displayName}</span>
                         </button>
                       );
@@ -265,27 +265,27 @@ export function ShapeLoreComponent() {
                   <h3 class="text-xl font-bold text-slate-200 mb-4 text-center">The Realm of Shapes</h3>
                   <div class="text-slate-300 mb-6 max-w-2xl text-justify">
                     <p class="mb-4">
-                      At the center of the fractured realm stands <span class="material-symbols-outlined">{ShapeDefinitions.circle.icon_name}</span>, the Beacon, a rare and radiantly unstable locus of sacred power. Around it, sects gather like moths to flame-<span class="material-symbols-outlined">{ShapeDefinitions.star.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.hexagon.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.heart.icon_name}</span>, and <span class="material-symbols-outlined">{ShapeDefinitions.crown.icon_name}</span>-each devoted yet mutually venomous, enforcing rivalries across invisible distances with rituals of spacing that no casual observer could fathom.
+                      At the center of the fractured realm stands <span class="material-icon">{ShapeDefinitions.circle.icon_name}</span>, the Beacon, a rare and radiantly unstable locus of sacred power. Around it, sects gather like moths to flame-<span class="material-icon">{ShapeDefinitions.star.icon_name}</span>, <span class="material-icon">{ShapeDefinitions.hexagon.icon_name}</span>, <span class="material-icon">{ShapeDefinitions.heart.icon_name}</span>, and <span class="material-icon">{ShapeDefinitions.crown.icon_name}</span>-each devoted yet mutually venomous, enforcing rivalries across invisible distances with rituals of spacing that no casual observer could fathom.
                     </p>
 
                     <p class="mb-4">
-                      <span class="material-symbols-outlined">{ShapeDefinitions.triangle.icon_name}</span>, the Herald, threads through these rivalries, announcing messages and decrees, yet it neither claims allegiance nor succumbs to the siren call of chaos or machinery. High above, the chaotic elements-<span class="material-symbols-outlined">{ShapeDefinitions.lightning.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.flame.icon_name}</span>, and <span class="material-symbols-outlined">{ShapeDefinitions.spiral.icon_name}</span>-rage and twist, ever repelled by the Beacon's radiant insistence, leaving scorched air and impossible rotations in their wake.
+                      <span class="material-icon">{ShapeDefinitions.triangle.icon_name}</span>, the Herald, threads through these rivalries, announcing messages and decrees, yet it neither claims allegiance nor succumbs to the siren call of chaos or machinery. High above, the chaotic elements-<span class="material-icon">{ShapeDefinitions.lightning.icon_name}</span>, <span class="material-icon">{ShapeDefinitions.flame.icon_name}</span>, and <span class="material-icon">{ShapeDefinitions.spiral.icon_name}</span>-rage and twist, ever repelled by the Beacon's radiant insistence, leaving scorched air and impossible rotations in their wake.
                     </p>
 
                     <p class="mb-4">
-                      The mutable skies and waters-<span class="material-symbols-outlined">{ShapeDefinitions.cloud.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.wave.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.droplet.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.leaf.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.paw.icon_name}</span>-cluster in erratic patterns, following tribal edicts and secret pacts with hidden currents and roots, honoring the Beacon's gravity only as far as prudence allows. Some beasts bow at distance; others leap in defiance, scattering water, leaf, and shadow.
+                      The mutable skies and waters-<span class="material-icon">{ShapeDefinitions.cloud.icon_name}</span>, <span class="material-icon">{ShapeDefinitions.wave.icon_name}</span>, <span class="material-icon">{ShapeDefinitions.droplet.icon_name}</span>, <span class="material-icon">{ShapeDefinitions.leaf.icon_name}</span>, <span class="material-icon">{ShapeDefinitions.paw.icon_name}</span>-cluster in erratic patterns, following tribal edicts and secret pacts with hidden currents and roots, honoring the Beacon's gravity only as far as prudence allows. Some beasts bow at distance; others leap in defiance, scattering water, leaf, and shadow.
                     </p>
 
                     <p class="mb-4">
-                      Industrial forms-<span class="material-symbols-outlined">{ShapeDefinitions.square.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.gear.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.shield.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.clock.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.lock.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.key.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.anchor.icon_name}</span>-weave lattices of restriction and stability, enforcing mechanical laws that sometimes contradict natural instinct. These lattices creak under the weight of unseen edicts, bending reality along rules known only to themselves, creating corridors, dead-ends, and forbidden couplings where none could naturally exist.
+                      Industrial forms-<span class="material-icon">{ShapeDefinitions.square.icon_name}</span>, <span class="material-icon">{ShapeDefinitions.gear.icon_name}</span>, <span class="material-icon">{ShapeDefinitions.shield.icon_name}</span>, <span class="material-icon">{ShapeDefinitions.clock.icon_name}</span>, <span class="material-icon">{ShapeDefinitions.lock.icon_name}</span>, <span class="material-icon">{ShapeDefinitions.key.icon_name}</span>, <span class="material-icon">{ShapeDefinitions.anchor.icon_name}</span>-weave lattices of restriction and stability, enforcing mechanical laws that sometimes contradict natural instinct. These lattices creak under the weight of unseen edicts, bending reality along rules known only to themselves, creating corridors, dead-ends, and forbidden couplings where none could naturally exist.
                     </p>
 
                     <p class="mb-4">
-                      Celestial and symbolic actors-<span class="material-symbols-outlined">{ShapeDefinitions.crescent.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.diamond.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.sun.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.hourglass.icon_name}</span>, <span class="material-symbols-outlined">{ShapeDefinitions.eye.icon_name}</span>-mark cycles, wealth, observation, and the passage of impossible time. They intervene in patterns invisible to mortal eyes, nudging nature, chaos, and sectarian zeal, maintaining a delicate lattice of influence that only the most devout scholars could chart.
+                      Celestial and symbolic actors-<span class="material-icon">{ShapeDefinitions.crescent.icon_name}</span>, <span class="material-icon">{ShapeDefinitions.diamond.icon_name}</span>, <span class="material-icon">{ShapeDefinitions.sun.icon_name}</span>, <span class="material-icon">{ShapeDefinitions.hourglass.icon_name}</span>, <span class="material-icon">{ShapeDefinitions.eye.icon_name}</span>-mark cycles, wealth, observation, and the passage of impossible time. They intervene in patterns invisible to mortal eyes, nudging nature, chaos, and sectarian zeal, maintaining a delicate lattice of influence that only the most devout scholars could chart.
                     </p>
 
                     <p class="mb-4">
-                      The <span class="material-symbols-outlined">{ShapeDefinitions.skull.icon_name}</span>, cursed and dead, hover on the periphery, universally shunned but entwined with the Spiral, whispering secrets of decay and chaos into cracks in reality itself. In this world, alliances, distances, and adjacency dictate fate more than loyalty or reason; every placement is a story, every empty space a consequence, and every absurd juxtaposition a reminder that the rules of geometry are also the rules of belief.
+                      The <span class="material-icon">{ShapeDefinitions.skull.icon_name}</span>, cursed and dead, hover on the periphery, universally shunned but entwined with the Spiral, whispering secrets of decay and chaos into cracks in reality itself. In this world, alliances, distances, and adjacency dictate fate more than loyalty or reason; every placement is a story, every empty space a consequence, and every absurd juxtaposition a reminder that the rules of geometry are also the rules of belief.
                     </p>
                   </div>
                 </div>

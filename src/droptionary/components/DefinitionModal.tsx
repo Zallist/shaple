@@ -145,7 +145,7 @@ export default function DefinitionModal(props: DefinitionModalProps) {
           <div class="flex items-center justify-between p-6 border-b border-gray-700/50">
             <div class="flex items-center space-x-3">
               <div class="w-8 h-8 bg-blue-500/20 rounded-full flex items-center justify-center">
-                <span class="material-symbols-outlined text-blue-400 text-lg">info</span>
+                <span class="material-icon text-blue-400 text-lg">info</span>
               </div>
               <h2 class="text-xl font-bold text-white capitalize">{word()}</h2>
             </div>
@@ -153,7 +153,7 @@ export default function DefinitionModal(props: DefinitionModalProps) {
               class="w-8 h-8 bg-gray-700/50 hover:bg-gray-600/50 rounded-full flex items-center justify-center transition-colors duration-200"
               onClick={onClose}
             >
-              <span class="material-symbols-outlined text-gray-400 hover:text-white text-lg">close</span>
+              <span class="material-icon text-gray-400 hover:text-white text-lg">close</span>
             </button>
           </div>
 
@@ -257,7 +257,7 @@ export default function DefinitionModal(props: DefinitionModalProps) {
                                         }}
                                         title="Play pronunciation"
                                       >
-                                        <span class="material-symbols-outlined text-lg">volume_up</span>
+                                        <span class="material-icon text-lg">volume_up</span>
                                       </button>
                                     </Show>
                                     <Show when={phonetic.sourceUrl}>
@@ -328,7 +328,7 @@ export default function DefinitionModal(props: DefinitionModalProps) {
             <Show when={!isLoading() && (!definition() || definition()?.length === 0)}>
               <div class="text-center py-8">
                 <div class="w-16 h-16 bg-gray-700/50 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span class="material-symbols-outlined text-gray-400 text-2xl">error</span>
+                  <span class="material-icon text-gray-400 text-2xl">error</span>
                 </div>
                 <p class="text-gray-400">Definition not found for "{word()}"</p>
               </div>

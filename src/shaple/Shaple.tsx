@@ -11,7 +11,7 @@ const MINIMUM_SHAPE_COUNT = 10;
 
 function shapeKey(s: ShapeCode) {
   let shapeDefinition = ShapeDefinitions[s];
-  return <span class="material-symbols-outlined">{shapeDefinition.icon_name}</span>;
+  return <span class="material-icon">{shapeDefinition.icon_name}</span>;
 }
 
 type Feedback = 'exact' | 'present' | 'absent' | 'invalid_reused' | 'invalid_rule';
@@ -237,8 +237,9 @@ export default function App() {
                     <For each={feedbackRow}>{(feedback, j) => (
                       <div
                         class='flex-1 min-w-14 h-14 rounded-lg border-2 flex items-center justify-center font-semibold 
-                                transform transition-all duration-300 hover:scale-105
-                                animate__animated animate__bounceIn'
+                               transform transition-all duration-300 hover:scale-105
+                               text-2xl
+                               animate__animated animate__bounceIn'
                         classList={{
                           'bg-green-600/90 border-green-400 shadow-lg shadow-green-900/30': feedback === 'exact',
                           'bg-yellow-500/90 border-yellow-400/90 shadow-lg shadow-yellow-900/30': feedback === 'present',
@@ -268,7 +269,7 @@ export default function App() {
                         transform transition-all duration-300 hover:scale-105`}
                     >
                       {currentGuess()[j()] ? (
-                        <div class="animate__animated animate__bounceIn">
+                        <div class="text-2xl animate__animated animate__bounceIn">
                           {shapeKey(currentGuess()[j()])}
                         </div>
                       ) : (
@@ -286,12 +287,12 @@ export default function App() {
               <div class="text-sm text-slate-300 font-semibold mb-2 flex items-center">
                 {isCorrect() ? (
                   <span>
-                    <span class="material-symbols-outlined text-yellow-400 mr-1">emoji_events</span>
+                    <span class="material-icon text-yellow-400 mr-1">emoji_events</span>
                     Puzzle Solved!
                   </span>
                 ) : (
                   <span>
-                    <span class="material-symbols-outlined text-red-400 mr-1">emoji_events</span>
+                    <span class="material-icon text-red-400 mr-1">emoji_events</span>
                     Solution
                   </span>
                 )}
@@ -304,7 +305,7 @@ export default function App() {
                             bg-gradient-to-br from-slate-700 to-slate-800 border-slate-600 shadow-lg
                             transform transition-all duration-500 hover:scale-110 hover:rotate-6 hover:z-10`}
                   >
-                    <div class="animate__animated animate__bounceIn">
+                    <div class="text-2xl animate__animated animate__bounceIn">
                       {shapeKey(s)}
                     </div>
                   </div>
@@ -355,7 +356,7 @@ export default function App() {
                                       disabled:bg-blue-900/20 disabled:border-blue-400/20 disabled:text-blue-400
                                       animate__animated animate__bounceIn"
                                       onClick={() => setShown(true)}>
-                          <span class="material-symbols-outlined text-blue-400 mr-1">share</span>
+                          <span class="material-icon text-blue-400 mr-1">share</span>
                           Share
                         </button>
                       </Show>
@@ -392,7 +393,7 @@ export default function App() {
                       animate__animated`}
                     disabled={!isPotentialShape(s)}
                   >
-                    <div class={isSelected() ? 'animate__animated animate__bounceIn' : ''}>
+                    <div class={`text-2xl ${isSelected() ? 'animate__animated animate__bounceIn' : ''}`}>
                       {shapeKey(s)}
                     </div>
                   </button>
@@ -416,7 +417,7 @@ export default function App() {
                     disabled:bg-slate-900/20 disabled:border-slate-400/20 disabled:text-slate-400
                     animate__animated`}
               >
-                <span class="material-symbols-outlined mr-1">backspace</span>
+                <span class="material-icon mr-1">backspace</span>
                 Remove
               </button>
 
@@ -429,7 +430,7 @@ export default function App() {
                     disabled:bg-blue-900/20 disabled:border-blue-400/20 disabled:text-blue-400
                     animate__animated`}
               >
-                <span class="material-symbols-outlined mr-1">send</span>
+                <span class="material-icon mr-1">send</span>
                 Submit
               </button>
             </Show>
@@ -439,7 +440,7 @@ export default function App() {
               class="flex-1 h-12 rounded-lg border-2 border-slate-600/50 flex items-center justify-center font-semibold text-sm
                       bg-slate-700/70 hover:bg-slate-600/70 hover:border-slate-500/70 active:scale-95 transition-all duration-200"
             >
-              <span class="material-symbols-outlined mr-1">
+              <span class="material-icon mr-1">
                 {isDailySeed() ? 'shuffle' : 'calendar_today'}
               </span>
               {isDailySeed() ? 'Random' : 'Daily'}
@@ -502,7 +503,7 @@ export default function App() {
                 class="w-full px-6 h-12 rounded-lg border-2 border-slate-600/50 flex items-center justify-center font-semibold
                         bg-slate-700/70 hover:bg-slate-600/70 hover:border-slate-500/70 active:scale-95 transition-all duration-200"
               >
-                <span class="material-symbols-outlined mr-2 transition-transform duration-300"
+                <span class="material-icon mr-2 transition-transform duration-300"
                   style={`transform: rotate(${areRulesVisible() ? '180deg' : '0'})`}>
                   expand_more
                 </span>
@@ -512,7 +513,7 @@ export default function App() {
               <div class={`overflow-hidden transition-all duration-500 ease-in-out ${areRulesVisible() ? 'max-h-auto opacity-100' : 'max-h-0 opacity-0'}`}>
                 <div class="bg-slate-800 rounded-lg shadow-lg mt-4 p-6">
                   <p class="font-semibold text-lg mb-3 text-slate-200 flex items-center">
-                    <span class="material-symbols-outlined mr-2 text-blue-400">info</span>
+                    <span class="material-icon mr-2 text-blue-400">info</span>
                     Pattern Generator Rules
                   </p>
                   <ul class="list-disc list-outside pl-5 space-y-2 text-slate-300">

@@ -138,7 +138,7 @@ export default function GameGrid({ game }: { game: Game }) {
                     for (let j = 0; j < word.coords.length; j++) {
                       const coord = word.coords[j];
                       wordGridCount[coord.row][coord.column].anyCount++;
-                      if (word.chain === 0)
+                      if (word.manuallyFound)
                         wordGridCount[coord.row][coord.column].manualCount++;
                     }
                   }
@@ -171,7 +171,7 @@ export default function GameGrid({ game }: { game: Game }) {
                                     disabled:bg-blue-900/20 disabled:border-blue-400/20 disabled:text-blue-400
                                     animate__animated animate__bounceIn"
                         onClick={() => { setShown(true); }}>
-                        <span class="material-symbols-outlined text-blue-400 mr-1">share</span>
+                        <span class="material-icon text-blue-400 mr-1">share</span>
                         Share
                       </button>
                     </Show>
@@ -195,7 +195,7 @@ export default function GameGrid({ game }: { game: Game }) {
             <div class="mr-2">Found Words</div>
             <div class="text-xs bg-gray-800 px-2 py-0.5 rounded-full">{game.foundWords().length}</div>
             <div class="ml-2" title="Click words to view definitions">
-              <span class="material-symbols-outlined text-xs">info</span>
+              <span class="material-icon text-xs">info</span>
             </div>
           </h3>
           <div class="flex flex-wrap gap-2 justify-center">
@@ -215,11 +215,14 @@ export default function GameGrid({ game }: { game: Game }) {
                     <span class="ml-1.5 px-1.5 py-0.5 bg-yellow-500/20 text-yellow-300 rounded text-xs">
                       +{found.score}
                     </span>
-                    {found.chain >= 1 && (
-                      <span class="ml-1 text-xs bg-green-500/20 text-green-300 px-1.5 py-0.5 rounded">
-                        x{found.chainBonus}
-                      </span>
-                    )}
+
+                    <Show when={found.chain >= 1}>
+                      <Show when={found.manuallyFound} fallback={<span class="ml-1 bg-green-500/20 text-green-300 px-1.5 py-0.5 rounded material-icon" title="Found during cascade stage">link</span>}>
+                        <span class="ml-1 text-xs bg-green-500/20 text-green-300 px-1.5 py-0.5 rounded">
+                          x{found.chainBonus}
+                        </span>
+                      </Show>
+                    </Show>
                   </div>
                 )
               }}

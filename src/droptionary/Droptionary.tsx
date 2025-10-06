@@ -65,13 +65,13 @@ export default function Droptionary() {
               class="p-2 rounded-full hover:bg-gray-700 transition-colors"
               aria-label="Help"
             >
-              <span class="material-symbols-outlined">help</span>
+              <span class="text-2xl material-icon">help</span>
             </button>
             <button 
               onClick={() => toggleDailySeed()}
               class="p-2 rounded-full hover:bg-gray-700 transition-colors"
             >
-              <span class="material-symbols-outlined">{isDailySeed() ? 'shuffle' : 'calendar_today'}</span>
+              <span class="text-2xl material-icon">{isDailySeed() ? 'shuffle' : 'calendar_today'}</span>
               <span class="ml-2">{isDailySeed() ? 'Random' : 'Daily'}</span>
             </button>
           </div>
@@ -81,10 +81,11 @@ export default function Droptionary() {
           <div class="bg-gray-800 rounded-lg p-4 mb-4 text-sm text-gray-300 animate-fade-in">
             <h3 class="font-bold text-lg mb-2">How to Play</h3>
             <ul class="list-disc pl-5 space-y-1">
-              <li>Click to swap letters with an adjacent letter (horizontally, vertically or diagonally)</li>
-              <li>Form English words 5 or more letters long in any of the 8 directions</li>
-              <li>Score points based on letter values</li>
-              <li>Chain falling words for combo bonuses! Falling words only need to be 4+ letters long.</li>
+              <li>Swap letters with an adjacent letter (horizontally, vertically or diagonally).</li>
+              <li>Form English words 5 or more letters long in any of the 8 directions.</li>
+              <li>Score points based on the letters you use!</li>
+              <li>Chain falling words for combo bonuses during the cascade stage! Falling words only need to be 4+ letters long.</li>
+              <li style="text-slate-400">If a chained word uses a letter generated from a cascade, it's not worth as many points.</li>
             </ul>
           </div>
         </Show>

@@ -57,6 +57,7 @@ let cell_id_count: number = 0;
 
 export type Cell = {
     readonly id: number;
+    readonly createdTurn: number | null;
     row: number;
     column: number;
     letter: string;
@@ -68,15 +69,17 @@ export type FoundWord = {
     score: number;
     chain: number;
     chainBonus: number;
+    manuallyFound: boolean;
     coords: { row: number, column: number }[];
 };
 
-function createCell(row: number, column: number, letter: string): Cell {
+function createCell(row: number, column: number, letter: string, createdTurn: number | null): Cell {
     return {
         id: cell_id_count++,
         row,
         column,
         letter,
+        createdTurn,
         isMatched: false
     };
 };
@@ -201,7 +204,7 @@ export class Game {
 
         for (let r = 0; r < this.rowCount; r++) {
             for (let c = 0; c < this.colCount; c++) {
-                grid.push(createCell(r, c, this.getRandomLetter(r, c)));
+                grid.push(createCell(r, c, this.getRandomLetter(r, c), null));
             }
         }
 
@@ -234,7 +237,13 @@ export class Game {
 
     public findLineMatches(minLength: number = 1) {
         const grid = this.cellsAsGrid();
-        const matches: { coords: { r: number; c: number }[]; word: string }[] = [];
+        const matches: { 
+            coords: { 
+            r: number; 
+            c: number }[]; 
+            word: string;
+            anyCellCreatedThisTurn: boolean;
+        }[] = [];
     
         const directions = [
             { dr: 0, dc: 1 },    // right
@@ -250,6 +259,7 @@ export class Game {
         for (const { dr, dc } of directions) {
             for (let r = 0; r < this.rowCount; r++) {
                 for (let c = 0; c < this.colCount; c++) {
+                    let anyCellCreatedThisTurn = false;
                     let coords: { r: number; c: number }[] = [];
                     let word = '';
     
@@ -257,14 +267,19 @@ export class Game {
                     let curC = c;
     
                     while (curR >= 0 && curR < this.rowCount && curC >= 0 && curC < this.colCount) {
-                        const letter = grid[curR][curC]?.letter;
+                        const cell = grid[curR][curC];
+                        const letter = cell?.letter;
                         if (!letter) break;
     
                         coords.push({ r: curR, c: curC });
                         word += letter;
     
+                        if (cell.createdTurn === this.movesRemaining()) {
+                            anyCellCreatedThisTurn = true;
+                        }
+    
                         if (word.length >= minLength && this.isWord(word)) {
-                            matches.push({ coords: [...coords], word });
+                            matches.push({ coords: [...coords], word, anyCellCreatedThisTurn });
                         }
     
                         curR += dr;
@@ -292,10 +307,19 @@ export class Game {
                 batch(() => {
                     for (const match of matches) {
                         if (match.word) {
-                            const wordScore = this.calculateWordScore(match.word);
-                            //const chainBonus = chainCount >= 1 ? Math.pow(1.5, chainCount) : 1;
-                            const chainBonus = chainCount >= 1 ? (chainCount * 0.5) + 1 : 1;
-                            const totalScore = Math.round(wordScore * chainBonus);
+                            let totalScore;
+                            let chainBonus = 1;
+
+                            if (!match.anyCellCreatedThisTurn) {
+                                const wordScore = this.calculateWordScore(match.word);
+
+                                chainBonus = chainCount >= 1 ? (chainCount * 0.5) + 1 : 1;
+                                totalScore = Math.round(wordScore * chainBonus);
+                            }
+                            else {
+                                // Word score is irrelevant, we just award the number of the chain
+                                totalScore = chainCount;
+                            }
                             
                             this.setScore(s => s + totalScore);
                             
@@ -306,6 +330,7 @@ export class Game {
                                     score: totalScore, 
                                     chain: chainCount, 
                                     chainBonus: chainBonus, 
+                                    manuallyFound: !match.anyCellCreatedThisTurn,
                                     coords: match.coords.map(c => ({ row: c.r, column: c.c })) 
                                 }
                             ]);
@@ -340,7 +365,7 @@ export class Game {
             const newCells: Cell[] = [];
             for (let c = 0; c < addPerColumn.length; c++) {
                 for (let r = -1; r >= -addPerColumn[c]; r--) {
-                    newCells.push(createCell(r, c, this.getRandomLetter(r, c)));
+                    newCells.push(createCell(r, c, this.getRandomLetter(r, c), this.movesRemaining()));
                 }
             }
             this.setCells([...this.cells, ...newCells]);
