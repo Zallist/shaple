@@ -256,15 +256,6 @@ export default function GameGrid({ game }: { game: Game }) {
             setClickCount__impl(count);
           }
 
-          const clickClass = createMemo(() => {
-            if (clickCount() >= 18) return "bg-red-800 border-red-700 animate__animated animate__headShake";
-            if (clickCount() >= 15) return "bg-red-700 border-red-600";
-            if (clickCount() >= 12) return "bg-orange-700 border-orange-600";
-            if (clickCount() >= 9) return "bg-yellow-600 border-yellow-500";
-            if (clickCount() >= 6) return "bg-blue-700/70 border-blue-600/50 hover:bg-blue-600/70 hover:border-blue-500/70";
-            return "bg-blue-700/70 border-blue-600/50 hover:bg-blue-600/70 hover:border-blue-500/70";
-          });
-
           function canUndo() {
             return clickCount() < 20 && game.canUndo();
           }
@@ -280,7 +271,12 @@ export default function GameGrid({ game }: { game: Game }) {
               class={`relative px-6 py-2 rounded-lg border-2 flex items-center justify-center font-semibold text-sm
                       transition-all duration-200 active:scale-95 disabled:active:scale-100
                       disabled:bg-slate-800/50 disabled:border-slate-700/50 disabled:text-slate-600
-                      ${clickClass()}`}
+                      ${clickCount() >= 18 ? 'bg-red-800 border-red-700 animate__animated animate__headShake hover:bg-red-700 hover:border-red-600' : 
+                        clickCount() >= 15 ? 'bg-red-700 border-red-600 hover:bg-red-600 hover:border-red-500' : 
+                        clickCount() >= 12 ? 'bg-orange-700 border-orange-600 hover:bg-orange-600 hover:border-orange-500' : 
+                        clickCount() >= 9 ? 'bg-yellow-600 border-yellow-500 hover:bg-yellow-500 hover:border-yellow-400' : 
+                        clickCount() >= 6 ? 'bg-blue-700/70 border-blue-600/50 hover:bg-blue-600/70 hover:border-blue-500/70' : 
+                        'bg-blue-700/70 border-blue-600/50 hover:bg-blue-600/70 hover:border-blue-500/70'}`}
               title="Undo your last move if it didn't do anything! Don't abuse it or else it'll be mad!"
             >
               <Switch>
