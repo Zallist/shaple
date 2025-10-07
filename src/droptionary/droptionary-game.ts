@@ -239,10 +239,10 @@ export class Game {
     }
 
     public canUndo() {
-        return this.gameState.getData().storedMoves && 
-            this.gameState.getData().storedMoves.length > 0 &&
+        return !this.lastMoveCausedMatches() &&
             !this.isProcessing() &&
-            !this.lastMoveCausedMatches();
+            this.gameState.getData().storedMoves && 
+            this.gameState.getData().storedMoves.length > 0;
     };
 
     public async undoLastMove(): Promise<boolean> {

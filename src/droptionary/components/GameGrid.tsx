@@ -265,14 +265,18 @@ export default function GameGrid({ game }: { game: Game }) {
             return "bg-blue-700/70 border-blue-600/50 hover:bg-blue-600/70 hover:border-blue-500/70";
           });
 
+          function canUndo() {
+            return clickCount() < 20 && game.canUndo();
+          }
+
           return (
             <button
               onClick={() => {
-                if (clickCount() >= 20) return;
+                if (!canUndo()) return;
                 game.undoLastMove();
                 setClickCount(clickCount() + 1);
               }}
-              disabled={!game.canUndo() || clickCount() >= 20}
+              disabled={!canUndo()}
               class={`relative px-6 py-2 rounded-lg border-2 flex items-center justify-center font-semibold text-sm
                       transition-all duration-200 active:scale-95 disabled:active:scale-100
                       disabled:bg-slate-800/50 disabled:border-slate-700/50 disabled:text-slate-600
