@@ -22,44 +22,86 @@ export const LETTER_VALUES: Record<string, number> = {
     'J': 8, 'X': 8,
     'Q': 10, 'Z': 10
 }
-  
-export const LETTER_FREQUENCIES: Record<string, number> = { // Rounded hard so we get the lower numbers too
-    A: 9, B: 2, C: 2, D: 4, E: 12, F: 2, G: 3, H: 2,
-    I: 9, J: 1, K: 1, L: 4, M: 2, N: 6, O: 8, P: 2,
-    Q: 1, R: 6, S: 4, T: 6, U: 4, V: 2, W: 2, X: 1,
-    Y: 2, Z: 1
-};
+
+export type CELL_MODIFIER = '2x word' | '3x word' | '4x word' | '5x word' | 
+                            '2x letter' | '3x letter' | '4x letter' | '5x letter' | 
+                            '+1' | '+2' | '+5' | '+10' |
+                            'none';
 
 let VALID_WORDS: Set<string> = new Set();
 
-const LETTERS = Object.keys(LETTER_FREQUENCIES);
-const VOWELS = ['A','E','I','O','U'];
-const CONSONANTS = LETTERS.filter(l => !VOWELS.includes(l));
+class CONSTANTS {
+    static LETTER_WEIGHTS: Record<string, number> = { // Rounded hard so we get the lower numbers too
+        A: 9, B: 2, C: 2, D: 4, E: 12, F: 2, G: 3, H: 2,
+        I: 9, J: 1, K: 1, L: 4, M: 2, N: 6, O: 8, P: 2,
+        Q: 1, R: 6, S: 4, T: 6, U: 4, V: 2, W: 2, X: 1,
+        Y: 2, Z: 1
+    };
 
-const VOWEL_PROBS = VOWELS.map(v => LETTER_FREQUENCIES[v] / VOWELS.reduce((acc, l) => acc + LETTER_FREQUENCIES[l], 0));
-const CONSONANT_PROBS = CONSONANTS.map(c => LETTER_FREQUENCIES[c] / CONSONANTS.reduce((acc, l) => acc + LETTER_FREQUENCIES[l], 0));
+    static MODIFIER_WEIGHTS: Record<CELL_MODIFIER, number> = {
+        '5x word': 0.5,
+        '4x word': 2,
+        '3x word': 6,
+        '2x word': 14,
+        '5x letter': 4,
+        '4x letter': 9,
+        '3x letter': 18,
+        '2x letter': 32,
+        '+10': 4,
+        '+5': 9,
+        '+2': 18,
+        '+1': 32,
+        // slightly higher chance of nothing than something
+        'none': 200
+    };
 
-function generateFloat64(rng: prand.RandomGenerator) {
-    const g1 = prand.unsafeUniformIntDistribution(0, (1 << 26) - 1, rng);
-    const g2 = prand.unsafeUniformIntDistribution(0, (1 << 27) - 1, rng);
-    const value = (g1 * Math.pow(2, 27) + g2) * Math.pow(2, -53);
-    return value;
-}
+    static LETTERS = Object.keys(CONSTANTS.LETTER_WEIGHTS);
+    static VOWELS = ['A','E','I','O','U'];
+    static CONSONANTS = CONSTANTS.LETTERS.filter(l => !CONSTANTS.VOWELS.includes(l));
 
-function pickLetterFromGroup(from: 'vowel' | 'consonant', rng: prand.RandomGenerator): string {
-    const group = from === 'vowel' ? VOWELS : CONSONANTS;
-    const probs = from === 'vowel' ? VOWEL_PROBS : CONSONANT_PROBS;
-    const p = generateFloat64(rng);
+    static MODIFIERS = Object.keys(CONSTANTS.MODIFIER_WEIGHTS) as CELL_MODIFIER[];
 
-    let acc = 0;
+    static VOWEL_TOTAL = CONSTANTS.VOWELS.reduce((acc, l) => acc + CONSTANTS.LETTER_WEIGHTS[l], 0);
+    static CONSONANT_TOTAL = CONSTANTS.CONSONANTS.reduce((acc, l) => acc + CONSTANTS.LETTER_WEIGHTS[l], 0);
 
-    for (let i = 0; i < group.length; i++) {
-        acc += probs[i];
-        if (p <= acc) return group[i];
+    static VOWEL_PROBS = CONSTANTS.VOWELS.map(v => CONSTANTS.LETTER_WEIGHTS[v] / CONSTANTS.VOWEL_TOTAL);
+    static CONSONANT_PROBS = CONSTANTS.CONSONANTS.map(c => CONSTANTS.LETTER_WEIGHTS[c] / CONSTANTS.CONSONANT_TOTAL);
+
+    static MODIFIER_TOTAL = CONSTANTS.MODIFIERS.reduce((acc, w) => acc + CONSTANTS.MODIFIER_WEIGHTS[w], 0);
+    static MODIFIER_PROBS = CONSTANTS.MODIFIERS.map(w => CONSTANTS.MODIFIER_WEIGHTS[w] / CONSTANTS.MODIFIER_TOTAL);
+
+    static generateFloat64(rng: prand.RandomGenerator) {
+        const g1 = prand.unsafeUniformIntDistribution(0, (1 << 26) - 1, rng);
+        const g2 = prand.unsafeUniformIntDistribution(0, (1 << 27) - 1, rng);
+        const value = (g1 * Math.pow(2, 27) + g2) * Math.pow(2, -53);
+        return value;
     }
 
-    return group[group.length - 1];
-}
+    static pickLetterFromGroup(from: 'vowel' | 'consonant', rng: prand.RandomGenerator): string {
+        const group = from === 'vowel' ? CONSTANTS.VOWELS : CONSTANTS.CONSONANTS;
+        const probs = from === 'vowel' ? CONSTANTS.VOWEL_PROBS : CONSTANTS.CONSONANT_PROBS;
+        const p = CONSTANTS.generateFloat64(rng);
+    
+        let acc = 0;
+    
+        for (let i = 0; i < group.length; i++) {
+            acc += probs[i];
+            if (p <= acc) return group[i];
+        }
+    
+        return 'A';
+    }
+
+    static pickModifier(rng: prand.RandomGenerator): CELL_MODIFIER {
+        const p = CONSTANTS.generateFloat64(rng);
+        let acc = 0;
+        for (let i = 0; i < CONSTANTS.MODIFIERS.length; i++) {
+            acc += CONSTANTS.MODIFIER_PROBS[i];
+            if (p <= acc) return CONSTANTS.MODIFIERS[i];
+        }
+        return 'none';
+    }
+};
 
 let cell_id_count: number = 0;
 
@@ -70,6 +112,7 @@ export type Cell = {
     column: number;
     letter: string;
     isMatched: boolean;
+    modifier: CELL_MODIFIER;
 };
 
 export type FoundWord = {
@@ -220,33 +263,21 @@ export class Game {
         return VALID_WORDS.has(word.toUpperCase());
     }
 
-    public calculateWordScore(word: string): number {
-        let score = 0;
-        
-        // Calculate base score from letter values
-        for (const letter of word) {
-            const letterScore = LETTER_VALUES[letter] || 1;
-            score += letterScore;
-        }
-        
-        return score
-    }
+    private createCell(row: number, column: number): Cell {
+        prand.unsafeSkipN(this.rng, Math.abs(row) * this.colCount + Math.abs(column));
 
-    private getRandomLetter(row: number, col: number): string {
-        prand.unsafeSkipN(this.rng, Math.abs(row) * this.colCount + Math.abs(col));
+        const pickVowel = CONSTANTS.generateFloat64(this.rng) < 0.45; // 45% chance vowel
+        const letter = CONSTANTS.pickLetterFromGroup(pickVowel ? 'vowel' : 'consonant', this.rng);
+        const modifier = CONSTANTS.pickModifier(this.rng);
 
-        const pickVowel = generateFloat64(this.rng) < 0.45; // 45% chance vowel
-        return pickLetterFromGroup(pickVowel ? 'vowel' : 'consonant', this.rng);
-    }
-
-    private createCell(row: number, column: number, letter: string): Cell {
         return {
             id: cell_id_count++,
             row,
             column,
             letter,
             createdTurn: this.initialized ? this.movesRemaining() : null,
-            isMatched: false
+            isMatched: false,
+            modifier: modifier
         };
     };
     
@@ -255,7 +286,7 @@ export class Game {
 
         for (let r = 0; r < this.rowCount; r++) {
             for (let c = 0; c < this.colCount; c++) {
-                grid.push(this.createCell(r, c, this.getRandomLetter(r, c)));
+                grid.push(this.createCell(r, c));
             }
         }
 
@@ -288,13 +319,7 @@ export class Game {
 
     public findLineMatches(minLength: number = 1) {
         const grid = this.cellsAsGrid();
-        const matches: { 
-            coords: { 
-            r: number; 
-            c: number }[]; 
-            word: string;
-            anyCellCreatedThisTurn: boolean;
-        }[] = [];
+        const matches: Cell[][] = [];
     
         const directions = [
             { dr: 0, dc: 1 },    // right
@@ -310,8 +335,7 @@ export class Game {
         for (const { dr, dc } of directions) {
             for (let r = 0; r < this.rowCount; r++) {
                 for (let c = 0; c < this.colCount; c++) {
-                    let anyCellCreatedThisTurn = false;
-                    let coords: { r: number; c: number }[] = [];
+                    let cells: Cell[] = [];
                     let word = '';
     
                     let curR = r;
@@ -322,15 +346,11 @@ export class Game {
                         const letter = cell?.letter;
                         if (!letter) break;
     
-                        coords.push({ r: curR, c: curC });
+                        cells.push(cell);
                         word += letter;
     
-                        if (cell.createdTurn === this.movesRemaining()) {
-                            anyCellCreatedThisTurn = true;
-                        }
-    
                         if (word.length >= minLength && this.isWord(word)) {
-                            matches.push({ coords: [...coords], word, anyCellCreatedThisTurn });
+                            matches.push([...cells]);
                         }
     
                         curR += dr;
@@ -360,34 +380,70 @@ export class Game {
             if (this.initialized) {
                 batch(() => {
                     for (const match of matches) {
-                        if (match.word) {
-                            let totalScore;
-                            let chainBonus = 1;
-                            const wordScore = this.calculateWordScore(match.word);
+                        const manuallyFound = !match.every(c => c.createdTurn === this.movesRemaining());
+                        const modifiers: CELL_MODIFIER[] = [];
 
-                            if (!match.anyCellCreatedThisTurn) {
-                                chainBonus = chainCount >= 1 ? (chainCount * 0.5) + 1 : 1;
-                                totalScore = Math.round(wordScore * chainBonus);
-                            }
-                            else {
-                                // Word score is irrelevant, we just award the number of the chain
-                                totalScore = Math.min(chainCount, wordScore);
-                            }
-                            
-                            this.setScore(s => s + totalScore);
-                            
-                            this.setFoundWords(prev => [
-                                ...prev,
-                                { 
-                                    word: match.word, 
-                                    score: totalScore, 
-                                    chain: chainCount, 
-                                    chainBonus: chainBonus, 
-                                    manuallyFound: !match.anyCellCreatedThisTurn,
-                                    coords: match.coords.map(c => ({ row: c.r, column: c.c })) 
+                        let wordScore = 0;
+                        let word = '';
+                        
+                        // Calculate base score from letter values, including modifiers
+                        for (const cell of match) {
+                            const letter = cell.letter;
+                            let letterScore = LETTER_VALUES[letter] || 0;
+
+                            if (manuallyFound) {
+                                modifiers.push(cell.modifier);
+
+                                switch (cell.modifier) {
+                                    case '+1': letterScore += 1; break;
+                                    case '+2': letterScore += 2; break;
+                                    case '+5': letterScore += 5; break;
+                                    case '+10': letterScore += 10; break;
+                                    case '2x letter': letterScore *= 2; break;
+                                    case '3x letter': letterScore *= 3; break;
+                                    case '4x letter': letterScore *= 4; break;
+                                    case '5x letter': letterScore *= 5; break;
                                 }
-                            ]);
+                            }
+
+                            word += letter;
+                            wordScore += letterScore;
                         }
+
+                        // And now any word bonuses
+                        for (const modifier of modifiers) {
+                            switch (modifier) {
+                                case '2x word': wordScore *= 2; break;
+                                case '3x word': wordScore *= 3; break;
+                                case '4x word': wordScore *= 4; break;
+                                case '5x word': wordScore *= 5; break;
+                            }
+                        }
+
+                        let chainBonus: number = 1;
+
+                        if (manuallyFound) {
+                            chainBonus = chainCount >= 1 ? (chainCount * 0.5) + 1 : 1;
+                            wordScore = Math.round(wordScore * chainBonus);
+                        }
+                        else {
+                            // Word score is irrelevant, we just award the number of the chain
+                            wordScore = Math.min(chainCount, wordScore);
+                        }
+                        
+                        this.setScore(s => s + wordScore);
+                        
+                        this.setFoundWords(prev => [
+                            ...prev,
+                            { 
+                                word: word, 
+                                score: wordScore, 
+                                chain: chainCount, 
+                                chainBonus: chainBonus, 
+                                manuallyFound: manuallyFound,
+                                coords: match.map(c => ({ row: c.row, column: c.column })) 
+                            }
+                        ]);
                     }
                 });
             }
@@ -397,14 +453,9 @@ export class Game {
             const matchedCoords: Set<[r: number, c: number]> = new Set();
 
             for (const match of matches) {
-                for (let cellIndex = 0; cellIndex < this.cells.length; cellIndex++) {
-                    if (match.coords.some(coord => coord.r === this.cells[cellIndex].row && coord.c === this.cells[cellIndex].column)) {
-                        this.setCells(cellIndex, { isMatched: true });
-                    }
-                }
-
-                for (const coord of match.coords) {
-                    matchedCoords.add([coord.r, coord.c]);
+                for (const cell of match) {
+                    this.setCells(c => c.id === cell.id, { isMatched: true });
+                    matchedCoords.add([cell.row, cell.column]);
                 }
             }
 
@@ -418,7 +469,7 @@ export class Game {
             const newCells: Cell[] = [];
             for (let c = 0; c < addPerColumn.length; c++) {
                 for (let r = -1; r >= -addPerColumn[c]; r--) {
-                    newCells.push(this.createCell(r, c, this.getRandomLetter(r, c)));
+                    newCells.push(this.createCell(r, c));
                 }
             }
             this.setCells([...this.cells, ...newCells]);

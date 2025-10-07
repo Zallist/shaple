@@ -59,7 +59,7 @@ export default function Droptionary() {
 
   return (
     <div class="flex flex-col justify-center items-center">
-      <header class="bg-slate-800/80 backdrop-blur-sm p-4 rounded-xl shadow-xl border border-slate-700/50 transition-all duration-300 hover:shadow-xl hover:shadow-slate-900/20 w-100 mx-auto">
+      <header class="bg-slate-800/80 p-4 rounded-xl shadow-xl border border-slate-700/50 transition-all duration-300 hover:shadow-xl hover:shadow-slate-900/20 w-100 mx-auto">
         <div class="flex items-center justify-between">
           <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
             {isDailySeed() ? 'Daily' : 'Seeded'}

@@ -228,7 +228,7 @@ export function ShapeLoreComponent() {
       </button>
 
       <Show when={isOpen()}>
-        <div id="lore-panel" class="mt-3 bg-slate-800/80 backdrop-blur-sm p-4 rounded-xl shadow-xl border border-slate-700/50">
+        <div id="lore-panel" class="mt-3 bg-slate-800/80 p-4 rounded-xl shadow-xl border border-slate-700/50">
           <div class="flex flex-col md:flex-row gap-4">
             <div class="w-full md:w-64 flex-shrink-0">
               <div class="mt-3 max-h-96 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-600/50 scrollbar-track-slate-800/50 rounded">

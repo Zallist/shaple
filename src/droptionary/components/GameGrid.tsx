@@ -1,4 +1,4 @@
-import { createSignal, createMemo, For, Show, Switch, Match, createEffect } from 'solid-js'
+import { createSignal, createMemo, For, Show, Switch, Match, createEffect, onMount, onCleanup } from 'solid-js'
 import Tile from './Tile'
 import DefinitionModal from './DefinitionModal'
 import { Game, Cell } from '../droptionary-game';
@@ -6,9 +6,11 @@ import { Game, Cell } from '../droptionary-game';
 export default function GameGrid({ game }: { game: Game }) {
   const [selected, setSelected] = createSignal<Cell | null>(null)
   const [viewingWord, setViewingWord] = createSignal<string | null>(null);
+  const [maxGridSize, setMaxGridSize] = createSignal<{ width: number, height: number }>({ width: 0, height: 0 });
+  let gridTopRef!: HTMLDivElement;
+  let gridRef!: HTMLDivElement;
 
   const handleClick = async (cell: Cell) => {
-
     if (game.isDone() || game.isProcessing()) {
       setSelected(null);
       return;
@@ -36,6 +38,49 @@ export default function GameGrid({ game }: { game: Game }) {
     setSelected(null);
     await game.moveCell(prev, cell);
   }
+
+  function calculateAvailableGridSize() {
+    if (!gridTopRef) {
+      setMaxGridSize({ width: 0, height: 0 });
+      return;
+    }
+
+    const rect = gridTopRef.getBoundingClientRect();
+    const documentRect = document.documentElement.getBoundingClientRect();
+
+    const realTop = rect.top - documentRect.top;
+    
+    setMaxGridSize({ width: window.innerWidth - 20, height: window.innerHeight - realTop - 20 }); // 20 = padding
+  }
+
+  const getGridScale = createMemo<number>(() => {
+    const maxSize = maxGridSize();
+
+    if (maxSize.height <= 0 || maxSize.width <= 0 || !gridRef)
+      return 1;
+
+    const currentTransform = gridRef.style.transform;
+    const scaleMatch = currentTransform.match(/scale\((\d+\.?\d*)\)/);
+    const currentScaleValue = scaleMatch ? parseFloat(scaleMatch[1]) : 1;
+
+    const currentRect = gridRef.getBoundingClientRect();
+    const currentSize = {
+      width: currentRect.width / currentScaleValue,
+      height: currentRect.height / currentScaleValue
+    }
+
+    return Math.max(1, Math.min(maxSize.width / currentSize.width, maxSize.height / currentSize.height));
+  });
+
+  onMount(() => {
+    window.addEventListener('resize', calculateAvailableGridSize);
+
+    calculateAvailableGridSize();
+
+    onCleanup(() => {
+      window.removeEventListener('resize', calculateAvailableGridSize);
+    });
+  })
 
   return (
     <>
@@ -72,11 +117,18 @@ export default function GameGrid({ game }: { game: Game }) {
       {/* Main Game Area */}
       <main class="flex-1 flex flex-col items-center justify-center py-4">
         <div
-          class="p-1 w-100 h-100 bg-gray-800/30 rounded-2xl backdrop-blur-sm border border-gray-700/50 shadow-2xl"
+          class="relative p-1 h-100 w-100 bg-gray-800/30 rounded-2xl border border-gray-700/50 shadow-2xl"
           style={{
-            'box-shadow': '0 8px 32px rgba(0, 0, 0, 0.2)'
+            'box-shadow': '0 8px 32px rgba(0, 0, 0, 0.2)',
+            'transform-origin': 'top center',
+            'transform': `scale(${getGridScale()})`,
+            'margin-bottom': ((getGridScale() - 1) * 100) + "%"
           }}
+          ref={gridRef}
         >
+          <div class="absolute top-0 left-0 right-0"
+               ref={gridTopRef}></div>
+
           <div class="relative w-full h-full overflow-hidden">
             <For each={game.cells}>
               {(cell) => {
@@ -246,7 +298,7 @@ export default function GameGrid({ game }: { game: Game }) {
       </div>
 
       <Show when={game.foundWords().length > 0}>
-        <div class="mt-4 mx-2 bg-gradient-to-r from-slate-800/60 to-slate-800/50 backdrop-blur-md border border-gray-800/50 rounded-lg py-3 px-4">
+        <div class="mt-4 mx-2 bg-gradient-to-r from-slate-800/60 to-slate-800/50 border border-gray-800/50 rounded-lg py-3 px-4">
           <h3 class="text-sm font-medium text-gray-400 mb-2 flex items-center justify-center">
             <div class="mr-2">Found Words</div>
             <div class="text-xs bg-gray-800 px-2 py-0.5 rounded-full">{game.foundWords().length}</div>
@@ -259,7 +311,7 @@ export default function GameGrid({ game }: { game: Game }) {
               {(found, i) => {
                 return (
                   <div
-                    class="px-3 py-1.5 bg-gradient-to-r from-gray-800/80 to-gray-900/80 rounded-lg text-sm font-medium text-white shadow-md backdrop-blur-sm 
+                    class="px-3 py-1.5 bg-gradient-to-r from-gray-800/80 to-gray-900/80 rounded-lg text-sm font-medium text-white shadow-md 
                           border border-gray-700/50 flex items-center cursor-pointer hover:from-gray-700/80 hover:to-gray-800/80 transition-all duration-200 group"
                     style={{
                       'animation-delay': `${i() * 50}ms`,

@@ -1,4 +1,4 @@
-import { Component, Show } from 'solid-js'
+import { Component, Match, Show, Switch } from 'solid-js'
 import { Cell, LETTER_VALUES } from '../droptionary-game'
 
 interface TileProps {
@@ -16,18 +16,20 @@ const Tile: Component<TileProps> = (props) => {
       'flex items-center justify-center',
       'w-full h-full',
       'select-none',
-      'font-bold text-2xl',
+      'text-2xl',
       'transition-all duration-300 ease-out',
       'm-0 rounded-lg',
-      'shadow-sm hover:shadow-md',
       'overflow-hidden',
-      props.isSelected ? 'ring-2 ring-blue-400 ring-offset-2 ring-offset-gray-900 shadow-lg shadow-blue-500/30 scale-105' : ''
+      'ring-offset-gray-900',
+      !props.isSelected ? 'ring-1 ring-blue-400/50 ring-offset-1' : '',
+      props.isSelected ? 'ring-2 ring-blue-400 ring-offset-2 scale-105' : ''
     ]
 
     // Gradient background based on position and state
     if (props.isMatched) {
       baseClasses.push('bg-gradient-to-br from-green-500/90 to-emerald-600/90 text-white')
-    } else {
+    } 
+    else {
       const isEvenRow = props.cell.row % 2 === 0
       const isEvenCol = props.cell.column % 2 === 0
       const isDark = (isEvenRow && isEvenCol) || (!isEvenRow && !isEvenCol)
@@ -44,28 +46,55 @@ const Tile: Component<TileProps> = (props) => {
 
     return baseClasses.join(' ')
   }
-
   return (
     <div
       class={getTileClasses()}
       onClick={(e) => { e.stopPropagation(); props.onClick?.(props.cell) }}
       aria-label={`Tile ${props.cell.letter}`}
     >
-      {/* Tile background */}
-      <div class={`absolute inset-0 bg-gradient-to-br 
-        rounded-md pointer-events-none transition-all duration-300
-        ${props.isMatched ? 'from-green-500/20 to-emerald-600/20' : 'from-white/5 to-white/10'}`} />
-      
-      {/* Tile content */}
       <div class="relative z-10 flex flex-col items-center justify-center w-full h-full">
-        <span class={`relative z-10 transition-all duration-200 ${props.isMatched ? 'scale-110 text-white' : 'text-gray-100'}`}>
-          {props.cell.letter}
-        </span>
+        <Show when={props.cell.modifier !== 'none'}>
+          <div class={`absolute inset-0 pointer-events-none bg-radial via-40%
+            ${props.cell.modifier === '2x word' &&    'from-purple-500/0 via-purple-500/10 to-purple-600/50'}
+            ${props.cell.modifier === '3x word' &&    'from-purple-500/0 via-purple-500/10 to-purple-600/60'}
+            ${props.cell.modifier === '4x word' &&    'from-purple-500/0 via-purple-500/10 to-purple-600/70'}
+            ${props.cell.modifier === '5x word' &&    'from-purple-500/0 via-purple-500/10 to-pink-600/80'}
+            ${props.cell.modifier === '2x letter' &&  'from-green-500/0 via-green-500/10 to-green-600/50'}
+            ${props.cell.modifier === '3x letter' &&  'from-green-500/0 via-green-500/10 to-green-600/60'}
+            ${props.cell.modifier === '4x letter' &&  'from-green-500/0 via-green-500/10 to-green-600/70'}
+            ${props.cell.modifier === '5x letter' &&  'from-green-500/0 via-green-500/10 to-emerald-600/80'}
+            ${props.cell.modifier === '+1' &&         'from-blue-500/0 via-blue-500/10 to-blue-600/50'}
+            ${props.cell.modifier === '+2' &&         'from-blue-500/0 via-blue-500/10 to-blue-600/60'}
+            ${props.cell.modifier === '+5' &&         'from-blue-500/0 via-blue-500/10 to-blue-600/70'}
+            ${props.cell.modifier === '+10' &&        'from-blue-500/0 via-blue-500/10 to-indigo-600/80'}`}
+            ></div>
+
+          {/* Full modifier text label */}
+          <span class="absolute top-0.5 left-1 right-1 text-right text-[8px] font-bold text-white/60 leading-none">
+            {props.cell.modifier === '5x word' &&     '5x word'}
+            {props.cell.modifier === '4x word' &&     '4x word'}
+            {props.cell.modifier === '3x word' &&     '3x word'}
+            {props.cell.modifier === '2x word' &&     '2x word'}
+            {props.cell.modifier === '5x letter' &&   '5x'}
+            {props.cell.modifier === '4x letter' &&   '4x'}
+            {props.cell.modifier === '3x letter' &&   '3x'}
+            {props.cell.modifier === '2x letter' &&   '2x'}
+            {props.cell.modifier === '+1' &&          '+1'}
+            {props.cell.modifier === '+2' &&          '+2'}
+            {props.cell.modifier === '+5' &&          '+5'}
+            {props.cell.modifier === '+10' &&         '+10'}
+          </span>
+        </Show>
+
         <Show when={LETTER_VALUES[props.cell.letter] > 1}>
           <span class="absolute bottom-0.5 right-1 text-[10px] font-bold text-white/60">
             {LETTER_VALUES[props.cell.letter]}
           </span>
         </Show>
+
+        <span class={`relative z-10 transition-all duration-200 ${props.isMatched ? 'scale-110 text-white' : 'text-gray-100'}`}>
+          {props.cell.letter}
+        </span>
       </div>
 
       {/* Selection indicator */}

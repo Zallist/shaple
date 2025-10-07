@@ -234,7 +234,7 @@ export default function App() {
   return (
     <div class="flex flex-col justify-center items-center">
       <div>
-        <header class="bg-slate-800/80 backdrop-blur-sm p-4 rounded-xl shadow-xl border border-slate-700/50 transition-all duration-300 hover:shadow-xl hover:shadow-slate-900/20 w-100 mx-auto">
+        <header class="bg-slate-800/80 p-4 rounded-xl shadow-xl border border-slate-700/50 transition-all duration-300 hover:shadow-xl hover:shadow-slate-900/20 w-100 mx-auto">
           <div class="flex items-center justify-between">
             <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
               {isDailySeed() ? 'Daily' : 'Seeded'}
@@ -268,7 +268,7 @@ export default function App() {
           </div>
         </header>
 
-        <div class="bg-slate-800/80 backdrop-blur-sm p-4 rounded-xl shadow-xl border border-slate-700/50 transition-all duration-300 hover:shadow-xl hover:shadow-slate-900/20 mt-6">
+        <div class="bg-slate-800/80 p-4 rounded-xl shadow-xl border border-slate-700/50 transition-all duration-300 hover:shadow-xl hover:shadow-slate-900/20 mt-6">
           <div class="space-y-2">
             <For each={attempts()}>
               {(guess, idx) => {
@@ -419,7 +419,7 @@ export default function App() {
         </div>
 
         <Show when={!isDone()}>
-          <div class="bg-slate-800/80 backdrop-blur-sm p-6 rounded-xl shadow-xl border border-slate-700/50 mt-6 transition-all duration-300 hover:shadow-2xl hover:shadow-slate-900/30">
+          <div class="bg-slate-800/80 p-6 rounded-xl shadow-xl border border-slate-700/50 mt-6 transition-all duration-300 hover:shadow-2xl hover:shadow-slate-900/30">
             <div class="mb-3 grid grid-cols-5 gap-2">
               <For each={availableShapes()}>{(s, i) => {
                 const isSelected = createMemo(() => currentGuess().includes(s));
