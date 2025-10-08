@@ -369,7 +369,7 @@ export class Game {
         this.setIsProcessing(true);
 
         while (true) {
-            const matches = this.findLineMatches(this.initialized ? (chainCount >= 1 ? 4 : 5) : 1);
+            const matches = this.findLineMatches(this.initialized ? (chainCount >= 1 ? 4 : 5) : 5);
             
             if (matches.length === 0) 
                 break;
